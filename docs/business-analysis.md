@@ -237,9 +237,6 @@ A note on method: all of this research comes from public sources, company market
 
 A feature by feature competitive matrix is a simple, standard tool. It lines up direct competitors against the same set of dimensions, so differences and gaps become easy to see instead of staying buried in narrative comparisons. To keep this document consistent, this matrix covers the same five companies profiled in Market Players, section 1.4: Creator Ads, Squid, Sandwiche, CreatorIQ, and BR Media Group. It compares them across eleven dimensions: follower focus, discovery and matching, campaign management, brand safety, payment, usage rights, pricing model, creator education, creator base size, customization, and how international each platform is. Where a source did not disclose a detail for a given company, the cell says so directly instead of guessing.
 
-#### Aurora Application
-
-![competitive_matrix](./images/business-analysis/CompetitiveMatrix-selection.png)
 
 #### Detailed Analysis
 
@@ -387,7 +384,7 @@ The resulting thesis, in one sentence:
 
 ## 2. Customer Understanding
 
-### 2.1 Personas
+### 2.1 Personas [still in development]
 
 These are the initial personas for the tool that connects large brands to micro and nano influencers, based on the market pains and gaps identified in the sections above.
 
@@ -591,21 +588,3 @@ The 2% of Brazil's roughly R$80 billion media budget going to creators, cited in
 ### A.4 Porter's Five Forces (section 1.6) and Gap Analysis (section 1.7)
 
 These two sections do not introduce new external sources. Every figure and claim in them is drawn from the company and market data already listed in A.2 and A.3 above. Where a specific claim could not be independently verified, meaning it came only from a vendor's own marketing or press release, that is flagged directly in the text as self reported.
-
-### A.5 Claude Design prompt for the Personas template (section 2.1)
-
-This is not a data source. It is the prompt to paste into Claude Design to generate the Aurora branded image referenced in section 2.1.
-
-```
-Design a persona template for Aurora, a platform that connects large brands to nano and micro creators (influencers with roughly 1,000 to 100,000 followers) in Brazil. The layout should hold three persona cards side by side, in a clean, modern SaaS style. Use Aurora's own brand colors and typography if a brand kit is available; otherwise default to a neutral, professional palette with one accent color, avoiding stock photo cliches.
-
-Each card needs these fields, in this order: a circular avatar placeholder, a fictional name, a role or title, one age and location line, then four short labeled blocks: Context, Goals, Frustrations, and What they need from Aurora. Keep each block to two or three short lines, not paragraphs, since the actual text will be swapped in afterward.
-
-Card 1: Marina, Influencer Media Manager at a large consumer brand, Sao Paulo. This card represents the brand side of the platform.
-
-Card 2: Duda, content creator with 15 thousand followers, parenting and lifestyle niche. This card represents the creator side of the platform.
-
-Card 3: a placeholder card for the Agency persona, whose role is still undecided between three hypotheses. Instead of filled in fields, this card should visually read as open or in progress, for example with a dashed border, a question mark in place of the avatar, and the label "Role still undecided" instead of a title. Keep it in the same visual family as the other two cards so it reads as part of the same set, not as an error state.
-
-Output as a single wide image, three cards in a row, with enough padding for it to be dropped directly into a written document as a section header image.
-```
