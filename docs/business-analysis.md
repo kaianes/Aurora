@@ -31,9 +31,11 @@ The industry grew out of Web 2.0 and the rise of user generated content in the l
 
 Today the creator economy is worth hundreds of billions of dollars and it keeps growing fast. Estimates vary a lot depending on the source, but they all point in the same direction.
 
-**Table 1**
+<p align="center"><strong>Table 1</strong></p>
 
-*Creator Economy Market Size and Growth Projections by Source*
+<p align="center"><em>Creator Economy Market Size and Growth Projections by Source</em></p>
+
+<div align="center">
 
 | Source | 2025/2026 Value | Future Projection | CAGR |
 |---|---|---|---|
@@ -42,6 +44,8 @@ Today the creator economy is worth hundreds of billions of dollars and it keeps 
 | Precedence Research | $313.95B (2026) | $2.08T by 2035 | 23.4% |
 | Grand View Research | $205.25B (2024) | $1.35T by 2033 | 23.3% |
 | Goldman Sachs | ~$250B (2023, base) | ~$480B by 2027 | 10 to 20% |
+
+</div>
 
 *Note.* CAGR (Compound Annual Growth Rate) indicates the market's average yearly growth on a compounded basis. It's useful for comparing sources with different values and timeframes on a common basis.
 
@@ -62,9 +66,11 @@ On a broader level, the creator economy changed who gets discovered. It no longe
 
 For years, brands believed that a bigger audience meant a bigger campaign result. That belief is changing. Instead of chasing reach alone, companies increasingly look for creators who can build trust with a specific, smaller community.
 
-**Table 2**
+<p align="center"><strong>Table 2</strong></p>
 
-*Average Instagram Engagement Rate by Follower Tier (2026)*
+<p align="center"><em>Average Instagram Engagement Rate by Follower Tier (2026)</em></p>
+
+<div align="center">
 
 | Tier | Followers | Average Engagement |
 |---|---|---|
@@ -72,6 +78,8 @@ For years, brands believed that a bigger audience meant a bigger campaign result
 | Micro | 10K to 100K | about 2.60% |
 | Macro | 100K to 1M | lower |
 | Mega or celebrity | 1M+ | about 1.21% |
+
+</div>
 
 *Note.* Compiled from Influencer Marketing Hub, HypeAuditor, Social Cat, and ViralMango.
 
@@ -107,11 +115,15 @@ This leads to the core question behind Aurora: what is missing from the creator 
 
 ### 1.3 The Solution
 
-**Figure 1**
+<p align="center"><strong>Figure 1</strong></p>
 
-*Aurora's Business Core*
+<p align="center"><em>Aurora's Business Core</em></p>
+
+<p align="center">
 
 ![Auroras Business Core](./images/aurora-what-it-is.png#width=500px)
+
+</p>
 
 *Note.* Diagram of Aurora's business model, treating a pool of nano and micro creators as a single media unit.
 
@@ -144,11 +156,15 @@ The single most important finding from this research is that Creator Ads, former
 
 **Creator Ads (formerly BrandLovrs)**
 
-**Figure 2**
+<p align="center"><strong>Figure 2</strong></p>
 
-*Creator Ads: Website Homepage*
+<p align="center"><em>Creator Ads: Website Homepage</em></p>
+
+<p align="center">
 
 ![Creator Ads](./images/business-analysis/creator-ads.png)
+
+</p>
 
 *Note.* Homepage screenshot captured from the company's website.
 
@@ -166,11 +182,15 @@ Creator Ads has 500,000 registered creators, 100,000 of them outside Brazil, up 
 
 **Squid (formerly Wake Creators)**
 
-**Figure 3**
+<p align="center"><strong>Figure 3</strong></p>
 
-*Squid: Website Homepage*
+<p align="center"><em>Squid: Website Homepage</em></p>
+
+<p align="center">
 
 ![Squid](./images/business-analysis/squid1.png)
+
+</p>
 
 *Note.* Homepage screenshot captured from the company's website.
 
@@ -178,11 +198,15 @@ Creator Ads has 500,000 registered creators, 100,000 of them outside Brazil, up 
 
 Founded in 2014 by Felipe Oliva and Carlos Tristan. One of Brazil's pioneers in influencer marketing, built as a data driven platform that connects creators to agencies and companies, automating identification, recruitment, management, and payment (Squid, n.d.).
 
-**Figure 4**
+<p align="center"><strong>Figure 4</strong></p>
 
-*Squid: Website (Additional View)*
+<p align="center"><em>Squid: Website (Additional View)</em></p>
+
+<p align="center">
 
 ![Squid](./images/business-analysis/squid2.png)
+
+</p>
 
 *Note.* Screenshot captured from the company's website.
 
@@ -196,11 +220,15 @@ Squid has more than 300,000 creators today, up from 50,000 in 2021. To join, cre
 
 **Sandwiche**
 
-**Figure 5**
+<p align="center"><strong>Figure 5</strong></p>
 
-*Sandwiche: Website Homepage*
+<p align="center"><em>Sandwiche: Website Homepage</em></p>
+
+<p align="center">
 
 ![Sandwiche](./images/business-analysis/sandwiche1.png)
+
+</p>
 
 *Note.* Homepage screenshot captured from the company's website.
 
@@ -210,11 +238,15 @@ Investors include Bossa Invest and Raio Capital, who led a R$1.5M seed round in 
 
 Sandwiche runs a hybrid model built mostly on affiliate economics: one off campaigns, always on community programs, and affiliate programs with trackable links and automatic commission. Creators can earn up to 25% commission, paid only on confirmed sales, with no commission on cancellations, chargebacks, or refunds, and a R$50 minimum payout. This structure rewards direct conversion and pulls the product toward e-commerce integrations, like Shopify, Nuvemshop, and VTEX, more than toward media buying (Sandwiche, n.d.).
 
-**Figure 6**
+<p align="center"><strong>Figure 6</strong></p>
 
-*Sandwiche: Website (Additional View)*
+<p align="center"><em>Sandwiche: Website (Additional View)</em></p>
+
+<p align="center">
 
 ![Sandwiche](./images/business-analysis/sandwiche2.png)
+
+</p>
 
 *Note.* Screenshot captured from the company's website.
 
@@ -224,11 +256,15 @@ Its creator base size is not published with precision, but it describes itself a
 
 **CreatorIQ (global benchmark)**
 
-**Figure 7**
+<p align="center"><strong>Figure 7</strong></p>
 
-*CreatorIQ: Website Homepage*
+<p align="center"><em>CreatorIQ: Website Homepage</em></p>
+
+<p align="center">
 
 ![CreatorIQ](./images/business-analysis/creatoriq.png)
+
+</p>
 
 *Note.* Homepage screenshot captured from the company's website.
 
@@ -240,11 +276,15 @@ Its strength is in decision support and governance rather than autonomous media 
 
 **BR Media Group (consolidation benchmark)**
 
-**Figure 8**
+<p align="center"><strong>Figure 8</strong></p>
 
-*BR Media Group: Website Homepage*
+<p align="center"><em>BR Media Group: Website Homepage</em></p>
+
+<p align="center">
 
 ![BR Media Group](./images/business-analysis/brmediagroup.png)
+
+</p>
 
 *Note.* Homepage screenshot captured from the company's website.
 
@@ -256,9 +296,11 @@ Its relevance to Aurora is less about product features and more about what the d
 
 **Cross player comparison**
 
-**Table 3**
+<p align="center"><strong>Table 3</strong></p>
 
-*Cross-Player Comparison of Leading Creator Media Platforms*
+<p align="center"><em>Cross-Player Comparison of Leading Creator Media Platforms</em></p>
+
+<div align="center">
 
 | | Creator Ads | Squid | Sandwiche | CreatorIQ | BR Media |
 |---|---|---|---|---|---|
@@ -269,6 +311,8 @@ Its relevance to Aurora is less about product features and more about what the d
 | Creator base | 500k (100k international) | 300k+ | Not disclosed, affiliate hub | 15M indexed | 500k |
 | Base exclusivity | Non exclusive | Non exclusive | Non exclusive | Index, not a network | Non exclusive |
 | Anchor clients | Coca-Cola, L'Oréal, P&G, Mercado Livre | Ambev, Unilever, Natura, iFood | C&A, Natura, Mastercard, GM | Disney, Unilever, LVMH, Nestlé | 500 brands |
+
+</div>
 
 *Note.* The five platforms are contrasted along the seven dimensions that most separate their business models. Creator Ads and CreatorIQ sit at opposite ends of the market. Creator Ads pairs media-spend pricing with decision-level automation, while CreatorIQ charges for enterprise SaaS seats focused on governance and measurement. BR Media Group, now part of Publicis, represents the human and service-led model rather than a self-service platform. Every creator base except CreatorIQ's index is open and non-exclusive, which means the same creators are reachable across multiple platforms at once.
 
@@ -305,9 +349,11 @@ This section brings together the strategic frameworks built on top of the resear
 A feature by feature competitive matrix is a simple, standard tool. It lines up direct competitors against the same set of dimensions, so differences and gaps become easy to see instead of staying buried in narrative comparisons. To keep this document consistent, this matrix covers the same five companies profiled in Market Players, section 1.4: Creator Ads, Squid, Sandwiche, CreatorIQ, and BR Media Group. It compares them across eleven dimensions: follower focus, discovery and matching, campaign management, brand safety, payment, usage rights, pricing model, creator education, creator base size, customization, and how international each platform is. Where a source did not disclose a detail for a given company, the cell says so directly instead of guessing.
 
 
-**Table 4**
+<p align="center"><strong>Table 4</strong></p>
 
-*Competitive Feature Matrix Across Eleven Dimensions*
+<p align="center"><em>Competitive Feature Matrix Across Eleven Dimensions</em></p>
+
+<div align="center">
 
 | Dimension | Creator Ads | Squid (Squid OS) | Sandwiche | CreatorIQ | BR Media Group |
 |---|---|---|---|---|---|
@@ -322,6 +368,8 @@ A feature by feature competitive matrix is a simple, standard tool. It lines up 
 | Creator base | 500k creators, 100k outside Brazil | 300k+ creators (400k in its linked database) | Not disclosed with precision, described as the largest affiliate hub in Brazil | 15M+ profiles indexed | 500k+ creators, 500 brands |
 | Customization | Closed, focused on performance | Brand can use only the modules it needs: search, campaign management, or gamification | Commission rules are configurable per campaign, but the product itself is not modular | Governance and workflow modules, with SafeIQ also sold standalone | Not applicable, not a self service software product |
 | International reach | Expanding to the US and Mexico in 2026 | Focused on Brazil | Already operating in Spain and Germany | Global, works with brands like Disney, Unilever, and LVMH | Part of the Publicis global network |
+
+</div>
 
 *Note.* Where a source did not disclose a detail for a given company, the cell says so directly rather than guessing.
 
@@ -344,11 +392,15 @@ Porter's Five Forces is a strategy framework built by Michael Porter in 1979 to 
 
 Industry defined as: technology platforms for creator media in Brazil. This includes Creator Ads, Squid, Sandwiche, and global players operating locally. It excludes pure service influencer agencies, like MField and Mynd, and the social networks themselves. Defining the industry too broadly, like all of digital advertising, makes the analysis too generic to be useful. Defining it too narrowly, like creator platforms just for the Brazilian mid-market, would leave an industry where only Aurora exists. This scope tries to stay wide enough to be honest and narrow enough to be useful.
 
-**Figure 9**
+<p align="center"><strong>Figure 9</strong></p>
 
-*Porter's Five Forces Applied to Aurora*
+<p align="center"><em>Porter's Five Forces Applied to Aurora</em></p>
+
+<p align="center">
 
 ![porters_five_forces](./images/business-analysis/porters-five-forces-aurora.png)
+
+</p>
 
 *Note.* Each force is rated and analyzed in the Forces Analysis below.
 
@@ -388,9 +440,11 @@ One methodological note: one reference analysis found that buyer power tends to 
 
 #### Conclusions
 
-**Table 5**
+<p align="center"><strong>Table 5</strong></p>
 
-*Summary of Porter's Five Forces Intensities and Implications for Aurora*
+<p align="center"><em>Summary of Porter's Five Forces Intensities and Implications for Aurora</em></p>
+
+<div align="center">
 
 | Force | Intensity | Implication for Aurora |
 |---|---|---|
@@ -400,6 +454,8 @@ One methodological note: one reference analysis found that buyer power tends to 
 | Suppliers, platforms | High | Dependency with no counterweight, a permanent risk |
 | Suppliers, creators | Medium | The real opportunity: give power to those who currently have none |
 | Buyers | High in enterprise, medium in mid-market | Confirms the segment choice, but smaller tickets carry their own risk |
+
+</div>
 
 *Note.* Synthesis based on the Forces Analysis in this section.
 
@@ -424,9 +480,11 @@ This is a consolidated view of market problems and Aurora's opportunities. Each 
 
 #### Market problems and Aurora's role
 
-**Table 6**
+<p align="center"><strong>Table 6</strong></p>
 
-*Market Problems and Aurora's Role*
+<p align="center"><em>Market Problems and Aurora's Role</em></p>
+
+<div align="center">
 
 | Problem identified | Status in the market | Aurora's role |
 |---|---|---|
@@ -435,13 +493,17 @@ This is a consolidated view of market problems and Aurora's opportunities. Each 
 | Creators are treated as supply, not as customers: no income stability, weak briefings, no predictability | Partly addressed. CreatorPay from Creator Ads covers some of this | The source of the only advantage Aurora can build from scratch: becoming the platform creators prefer to work with |
 | The mid-market has no real service, too big for a spreadsheet, too small for enterprise | Still open, with a warning sign. Squid Go has been abandoned since 2022, Creator Ads moved upmarket, and CreatorIQ starts at US$35k a year | The target segment, but the root cause of the gap needs to be understood first |
 
+</div>
+
 *Note.* Status reflects the market research in section 1.4 and sections 2.1–2.2.
 
 #### Opportunities and how they become product
 
-**Table 7**
+<p align="center"><strong>Table 7</strong></p>
 
-*Opportunities, Supporting Evidence, and Product Translation*
+<p align="center"><em>Opportunities, Supporting Evidence, and Product Translation</em></p>
+
+<div align="center">
 
 | Opportunity | Evidence | How it becomes product |
 |---|---|---|
@@ -450,6 +512,8 @@ This is a consolidated view of market problems and Aurora's opportunities. Each 
 | Agencies are becoming builders and buyers of infrastructure, not being cut out | Publicis bought BR Media for about R$550M (Pio & Viri, 2025), and MField is building its own tool called Atlas | Agencies as a distribution channel and as an infrastructure customer, bringing their own creators and running their clients' campaigns on Aurora |
 | The category is validated and still underused | 10 of the 20 largest advertisers already buy this way with 97% retention (Exame Brand Solutions, 2026), yet only about 2% of R$80bn in media spend goes to creators (Kantar IBOPE Media, 2025; Statista, n.d.) | No need to educate the market from scratch, since someone else already paid that cost |
 | Consolidation keeps creating displaced customers | Squid changed owners twice in 5 years | Displaced customers and neglected segments are a real entry point commercially |
+
+</div>
 
 The resulting thesis, in one sentence:
 
@@ -465,11 +529,15 @@ SWOT stands for Strengths, Weaknesses, Opportunities, and Threats. It is a plann
 
 The Gap Analysis in section 2.3 and the Five Forces analysis already give a lot of the raw material this SWOT will draw on. For example, the open mid-market segment and the idea of treating creators as customers point naturally toward Opportunities and Strengths, while dependency on platforms like Meta and TikTok, and the disproven idea of a curated network as an advantage, point toward Threats and Weaknesses.
 
-**Figure 10**
+<p align="center"><strong>Figure 10</strong></p>
 
-*SWOT Analysis for Aurora*
+<p align="center"><em>SWOT Analysis for Aurora</em></p>
+
+<p align="center">
 
 ![swot](./images/business-analysis/swot.png)
+
+</p>
 
 #### SWOT Analysis
 
@@ -495,9 +563,11 @@ A risk matrix for Aurora crosses two axes, likelihood (how likely it is to happe
 
 #### Aurora Application
 
-**Table 8**
+<p align="center"><strong>Table 8</strong></p>
 
-*Risk Matrix for Aurora*
+<p align="center"><em>Risk Matrix for Aurora</em></p>
+
+<div align="center">
 
 | Risk | Likelihood | Impact | Priority | Mitigation |
 |---|---|---|---|---|
@@ -509,6 +579,8 @@ A risk matrix for Aurora crosses two axes, likelihood (how likely it is to happe
 | Cannot raise enough capital to compete (the R$35M bar) | Medium | High | High | Prove traction in a niche first; grow capital-efficiently |
 | A new entrant copies the model (low barriers to entry) | Medium | Medium | Medium | Build the one moat that cannot be copied: creator relationships and data from real campaigns |
 | Brand safety failure at scale | Low to Medium | High | Medium | Message-level checks from day one; human review on sensitive verticals |
+
+</div>
 
 *Note.* CAC stands for Customer Acquisition Cost. It is the total amount a company spends to win one new customer, counting everything that goes into getting them: marketing, ads, sales team, onboarding, and so on.
 
@@ -525,11 +597,15 @@ A risk matrix for Aurora crosses two axes, likelihood (how likely it is to happe
 
 These are the initial personas for the tool that connects large brands to micro and nano influencers, based on the market pains and gaps identified in the sections above.
 
-**Figure 11**
+<p align="center"><strong>Figure 11</strong></p>
 
-*Aurora's Personas*
+<p align="center"><em>Aurora's Personas</em></p>
+
+<p align="center">
 
 ![personas](./images/business-analysis/personas-aurora.png)
+
+</p>
 
 **Persona 1: The Brand**
 
@@ -583,19 +659,27 @@ The Value Proposition Canvas maps a customer profile, meaning their jobs to be d
 
 Aurora is a two-sided platform, so it needs a value proposition canvas for each of its two main customers: the brand (Marina) and the creator (Duda). Each canvas checks whether Aurora's offer actually fits what that customer needs.
 
-**Figure 12**
+<p align="center"><strong>Figure 12</strong></p>
 
-*Value Proposition Canvas for Aurora — The Brand*
+<p align="center"><em>Value Proposition Canvas for Aurora — The Brand</em></p>
+
+<p align="center">
 
 ![value_proposition_canvas_brand](./images/business-analysis/Value%20proposition%20canvas%20-%20the%20brand.png)
 
+</p>
+
 On the brand side, Marina's jobs are to run campaigns with hundreds of nano and micro creators the way she buys programmatic media, prove ROI to her leadership, scale without growing her team, and keep brand safety under control. Her main pains are unpredictable creator costs, the heavy coordination of managing many small creators, weak brand safety at the message level, and metrics scattered across platforms. Aurora answers these directly, with a fixed, predictable price for buying a pool of creators as one unit, a single dashboard by creator and by pool, automated message-level brand safety, and one platform that handles matching, running, and payment. The fit is strong because each part of Aurora's value map removes one of Marina's specific pains and delivers the gains she is after.
 
-**Figure 13**
+<p align="center"><strong>Figure 13</strong></p>
 
-*Value Proposition Canvas for Aurora — The Creator*
+<p align="center"><em>Value Proposition Canvas for Aurora — The Creator</em></p>
+
+<p align="center">
 
 ![value_proposition_canvas_creator](./images/business-analysis/Value%20proposition%20canvas%20-%20the%20creator.png)
+
+</p>
 
 On the creator side, Duda's jobs are to turn content into stable income, get noticed by bigger brands, and grow without depending on an agency. Her pains are slow and unclear payment, high commissions with no room to negotiate, difficulty proving her value, and vague briefings. Aurora relieves these with fast and transparent payment, active recruitment that gives her visibility to larger brands, an automatic media kit with clear metrics, and clearer briefings. Here the fit is what sets Aurora apart from the rest of the market, since most platforms treat creators as anonymous supply rather than as customers worth keeping.
 
