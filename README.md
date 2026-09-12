@@ -17,11 +17,13 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-This project is currently in the research and strategy phase. There is no product or codebase yet — the repository holds the business analysis that grounds the product decisions to come.
+This project is in the system design phase. There is no codebase yet — the repository holds the business analysis, the product specification, and the architecture that will be built against.
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)
-- ⏳ **Next** — Product definition and prototyping
+- ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 functional and 36 non-functional requirements, with full traceability)
+- ✅ **System design** — Architecture complete (modular monolith with async workers, ATAM evaluation, information security and LGPD, DevOps and CI/CD)
+- ⏳ **Next** — Technical setup and core feature implementation
 
 ## Project Roadmap
 
@@ -43,7 +45,7 @@ gantt
     Sprint 2 (remaining frameworks + project planning)           :done, s2, 2026-08-17, 2026-08-28
 
     section Phase 2 - System Design
-    Sprint 3 (user journey + user stories + requirements)        :active, s3, 2026-08-31, 2026-09-11
+    Sprint 3 (user journey + user stories + requirements)        :done, s3, 2026-08-31, 2026-09-11
     Sprint 4 (agent orchestration design)                        :s4, 2026-09-14, 2026-09-25
 
     section Phase 3 - Coding
@@ -61,8 +63,10 @@ gantt
 ```
 .
 ├── docs/
-│   ├── business-analysis.md   # Full business analysis
-│   └── images/                # Diagrams and screenshots used in the analysis
+│   ├── business-analysis.md      # Market research and strategic frameworks
+│   ├── product-requirements.md   # Journeys, user stories, FRs and NFRs
+│   ├── architecture.md           # System design, ATAM, security, DevOps
+│   └── images/                   # Diagrams and screenshots used in the docs
 └── README.md
 ```
 
@@ -73,6 +77,30 @@ The full analysis lives in [docs/business-analysis.md](docs/business-analysis.md
 **1. Research and Context** — industry context, the problem, the solution, and a map of the main market players (Creator Ads, Squid, Sandwiche, CreatorIQ, BR Media Group).
 
 **2. Frameworks** — Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure.
+
+## Product Requirements
+
+The specification lives in [docs/product-requirements.md](docs/product-requirements.md). It converts the market gaps and customer pains from the business analysis into something buildable, as an unbroken chain: a journey phase exposes friction, a user story describes the behavior that removes it, and a requirement states it precisely enough to build and test.
+
+**User Journeys** — the current experience of Marina (the brand), Duda (the creator), and Renata (the agency), phase by phase, with the friction points that justify every feature that follows.
+
+**User Stories** — 47 stories across nine epics, prioritized with MoSCoW, with expanded Given/When/Then acceptance criteria for the six that carry the most weight.
+
+**Functional Requirements** — 60 requirements across nine modules, each traced to the story it comes from.
+
+**Non-Functional Requirements** — 36 requirements organized by quality attribute, each with a measurable target. These become the quality attribute scenarios evaluated in the architecture.
+
+## Architecture
+
+The system design lives in [docs/architecture.md](docs/architecture.md). Aurora is a modular monolith with asynchronous workers and externalized model inference — a decision driven by the mid-market economics rather than by preference, since an architecture that costs enterprise money to run would reproduce the very gap Aurora exists to close.
+
+**Architecture Overview** — the style and why microservices were rejected, context and container views, the data model, and the technology stack with its rationale.
+
+**ATAM** — the architecture stress-tested against eight quality attribute scenarios, producing the tradeoffs the design actually makes: integrity over cost on the payment path, cost over accuracy headroom on brand safety, and shared-schema tenancy over per-tenant isolation.
+
+**Information Security** — STRIDE threat modeling, the security controls, and LGPD compliance, including the constraints that govern building profiles for creators who never registered.
+
+**DevOps and CI/CD** — environments, pipeline, deployment and rollback, and the observability that makes every measurable requirement visible in production.
 
 ## Institution
 
