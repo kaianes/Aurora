@@ -1,6 +1,6 @@
 # Epic E1, Access and Onboarding: Summary
 
-**Author:** Kaiane Cordeiro. Aurora Project, Sprint 5. **Date:** September 25, 2026.
+**Author:** Kaiane Cordeiro. Aurora Project, Sprint 4. **Date:** September 25, 2026.
 
 ## 1. Purpose
 
