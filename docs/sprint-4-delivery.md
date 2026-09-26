@@ -1,6 +1,6 @@
-# Sprint 5 Delivery: Agent Pipeline and How to Run the System
+# Sprint 4 Delivery: Agent Pipeline and How to Run the System
 
-This document explains how Epic 1 (Access and Onboarding) was produced and how to run and test it. It is meant as the entry point for grading this sprint: read this first, then follow the links to the deeper artifacts each stage produced.
+This document explains how Epic 1 (Access and Onboarding) was produced and how to run and test it. It is meant as the entry point for grading Sprint 4: read this first, then follow the links to the deeper artifacts each stage produced.
 
 ## 1. Why an agent pipeline
 

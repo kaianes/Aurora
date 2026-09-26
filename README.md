@@ -17,14 +17,13 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-The project is now in the coding phase. The first epic, Access and Onboarding, is implemented end to end (backend, frontend, and database) and documented in [docs/sprint-5-delivery.md](docs/sprint-5-delivery.md).
+The project is now in the coding phase. The first epic, Access and Onboarding, is implemented end to end (backend, frontend, and database) and documented in [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md).
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)
 - ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 functional and 36 non-functional requirements, with full traceability)
-- ✅ **Sprint 4** — System design complete (modular monolith with async workers, ATAM evaluation, information security and LGPD, DevOps and CI/CD) plus the agent pipeline that builds every epic from here on
-- ✅ **Sprint 5** — Epic 1, Access and Onboarding, built by the agent pipeline: authentication, tenant isolation, RBAC, brand profile, team invitations, and agency client management, backend and frontend, with live API docs and a passing backend test suite (see the reviewer's summary for known gaps, including the frontend test environment and tenant isolation enforcement)
-- ⏳ **Next** — Epic 2 and onward, following the same pipeline
+- ✅ **Sprint 4** — System design finalized, the agent pipeline that builds every epic from here on defined, and Epic 1 (Access and Onboarding) built end to end ahead of schedule: authentication, tenant isolation, RBAC, brand profile, team invitations, and agency client management, backend and frontend, with live API docs and a passing backend test suite (see the reviewer's summary for known gaps, including the frontend test environment and tenant isolation enforcement)
+- ⏳ **Next** — Sprint 5, continuing into Epic 2 and onward with the same pipeline
 
 ## Project Roadmap
 
@@ -47,10 +46,10 @@ gantt
 
     section Phase 2 - System Design
     Sprint 3 (user journey + user stories + requirements)        :done, s3, 2026-08-31, 2026-09-11
-    Sprint 4 (agent orchestration design)                        :s4, 2026-09-14, 2026-09-25
+    Sprint 4 (agent pipeline + Epic 1, Access and Onboarding)     :done, s4, 2026-09-14, 2026-09-25
 
     section Phase 3 - Coding
-    Sprint 5 (setup + Epic 1 - Access and Onboarding)             :done, s5, 2026-09-28, 2026-10-09
+    Sprint 5 (Epic 2, core features - part 1)                     :s5, 2026-09-28, 2026-10-09
     Sprint 6 (core features - part 2)                            :s6, 2026-10-12, 2026-10-23
     Sprint 7 (integrations + polish)                             :s7, 2026-10-26, 2026-11-06
 
@@ -71,7 +70,7 @@ gantt
 │   ├── business-analysis.md          # Market research and strategic frameworks
 │   ├── product-requirements.md       # Journeys, user stories, FRs and NFRs
 │   ├── architecture.md               # System design, ATAM, security, DevOps
-│   ├── sprint-5-delivery.md          # How Epic 1 was built, how to run and test it
+│   ├── sprint-4-delivery.md          # How Epic 1 was built, how to run and test it
 │   ├── aurora-E1-setup-guide         # Step-by-step local setup for Epic 1
 │   ├── adr/                          # Architecture Decision Records, one per epic decision
 │   ├── architecture/                 # Per-epic architecture docs (data model, API contracts)
@@ -114,7 +113,7 @@ The system design lives in [docs/architecture.md](docs/architecture.md). Aurora 
 
 ## Agent Pipeline
 
-Starting in Sprint 5, every epic is built by a fixed sequence of specialized Claude Code agents rather than one agent doing everything end to end. Each agent has a narrow role, a fixed set of tools, and one kind of output, and each stage is auditable on its own before the next one starts.
+Starting in Sprint 4, every epic is built by a fixed sequence of specialized Claude Code agents rather than one agent doing everything end to end. Each agent has a narrow role, a fixed set of tools, and one kind of output, and each stage is auditable on its own before the next one starts.
 
 | Stage | Agent | Output |
 |---|---|---|
@@ -124,7 +123,7 @@ Starting in Sprint 5, every epic is built by a fixed sequence of specialized Cla
 | 4 | `qa` | Automated tests per acceptance criterion, reported back to the owning dev |
 | 5 | `reviewer` | The epic summary, checked against the ADRs and contracts, as the final gate before merge |
 
-Stories and architecture each require human approval before the next stage proceeds, and nothing merges without the reviewer's summary. The full instructions for each agent are in `.claude/agents/`. The pipeline itself, and how it produced Epic 1, is documented in [docs/sprint-5-delivery.md](docs/sprint-5-delivery.md).
+Stories and architecture each require human approval before the next stage proceeds, and nothing merges without the reviewer's summary. The full instructions for each agent are in `.claude/agents/`. The pipeline itself, and how it produced Epic 1, is documented in [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md).
 
 ## Epic 1: Access and Onboarding
 
@@ -134,9 +133,9 @@ The first epic removes the enterprise sales cycle from onboarding: a brand or ag
 - **Architecture and API contracts:** [docs/architecture/e1-access-onboarding.md](docs/architecture/e1-access-onboarding.md)
 - **Decisions:** authentication strategy, tenant isolation via PostgreSQL row-level security, workspace-scoped RBAC, and the brand profile draft lifecycle, each in its own ADR under [docs/adr/](docs/adr)
 - **What was built, tested, and any deviations from the design:** [docs/epics/e1-access-onboarding/summary.md](docs/epics/e1-access-onboarding/summary.md)
-- **Run it locally and test it:** [docs/sprint-5-delivery.md](docs/sprint-5-delivery.md) or the detailed [setup guide](docs/aurora-E1-setup-guide)
+- **Run it locally and test it:** [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md) or the detailed [setup guide](docs/aurora-E1-setup-guide)
 
-Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/sprint-5-delivery.md](docs/sprint-5-delivery.md#6-field-research-conducted-alongside-this-sprint) for the interview guide and analyses.
+Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md#6-field-research-conducted-alongside-this-sprint) for the interview guide and analyses.
 
 ## Institution
 
