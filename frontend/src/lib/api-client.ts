@@ -1,0 +1,241 @@
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import type {
+  AcceptInvitationRequest,
+  AcceptInvitationResponse,
+  AddOperatorRequest,
+  BrandProfile,
+  ClientListResponse,
+  CreateBrandProfileRequest,
+  CreateClientRequest,
+  CreateClientResponse,
+  CreateInvitationRequest,
+  Invitation,
+  LoginRequest,
+  LoginResponse,
+  LogoUploadResponse,
+  Member,
+  MfaConfirmRequest,
+  MfaConfirmResponse,
+  MfaSetupResponse,
+  OperatorAccess,
+  PaginatedResponse,
+  PricingResponse,
+  RefreshResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ResendInvitationResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
+  UpdateBrandProfileRequest,
+  UpdateMemberRequest,
+  UpdateMemberResponse,
+  VerifyEmailRequest,
+  VerifyEmailResponse,
+  WorkspaceResponse,
+} from '@/types/api';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3001/v1';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// Token management
+const TOKEN_KEY = 'aurora_access_token';
+const REFRESH_KEY = 'aurora_refresh_token';
+
+export function getAccessToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function getRefreshToken(): string | null {
+  return localStorage.getItem(REFRESH_KEY);
+}
+
+export function setTokens(access: string, refresh: string) {
+  localStorage.setItem(TOKEN_KEY, access);
+  localStorage.setItem(REFRESH_KEY, refresh);
+}
+
+export function clearTokens() {
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(REFRESH_KEY);
+}
+
+// Account context for agency workspaces
+const ACCOUNT_ID_KEY = 'aurora_account_id';
+
+export function getCurrentAccountId(): string | null {
+  return localStorage.getItem(ACCOUNT_ID_KEY);
+}
+
+export function setCurrentAccountId(id: string) {
+  localStorage.setItem(ACCOUNT_ID_KEY, id);
+}
+
+// Request interceptor: attach auth token and account context
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  const accountId = getCurrentAccountId();
+  if (accountId) {
+    config.headers['X-Account-Id'] = accountId;
+  }
+  return config;
+});
+
+// Response interceptor: handle token refresh
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        clearTokens();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          refreshSubscribers.push((token: string) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { data } = await axios.post<RefreshResponse>(`${API_BASE_URL}/auth/refresh`, {
+          refresh_token: refreshToken,
+        });
+        setTokens(data.access_token, data.refresh_token);
+        onRefreshed(data.access_token);
+        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        return api(originalRequest);
+      } catch {
+        clearTokens();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
+
+// API methods
+
+export const authApi = {
+  register: (data: RegisterRequest) =>
+    api.post<RegisterResponse>('/auth/register', data).then((r) => r.data),
+
+  verifyEmail: (data: VerifyEmailRequest) =>
+    api.post<VerifyEmailResponse>('/auth/verify-email', data).then((r) => r.data),
+
+  resendVerification: (data: ResendVerificationRequest) =>
+    api.post<ResendVerificationResponse>('/auth/resend-verification', data).then((r) => r.data),
+
+  login: (data: LoginRequest) =>
+    api.post<LoginResponse>('/auth/login', data).then((r) => r.data),
+
+  refresh: (refreshToken: string) =>
+    api.post<RefreshResponse>('/auth/refresh', { refresh_token: refreshToken }).then((r) => r.data),
+
+  mfaSetup: () =>
+    api.post<MfaSetupResponse>('/auth/mfa/setup').then((r) => r.data),
+
+  mfaConfirm: (data: MfaConfirmRequest) =>
+    api.post<MfaConfirmResponse>('/auth/mfa/confirm', data).then((r) => r.data),
+};
+
+export const pricingApi = {
+  get: () => api.get<PricingResponse>('/pricing').then((r) => r.data),
+};
+
+export const brandProfileApi = {
+  getCurrent: () =>
+    api.get<BrandProfile>('/brand-profiles/current').then((r) => r.data),
+
+  create: (data: CreateBrandProfileRequest) =>
+    api.post<BrandProfile>('/brand-profiles', data).then((r) => r.data),
+
+  update: (id: string, data: UpdateBrandProfileRequest) =>
+    api.patch<BrandProfile>(`/brand-profiles/${id}`, data).then((r) => r.data),
+
+  uploadLogo: (id: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api
+      .post<LogoUploadResponse>(`/brand-profiles/${id}/logo`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      .then((r) => r.data);
+  },
+};
+
+export const invitationApi = {
+  list: (params?: { status?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<Invitation>>('/invitations', { params }).then((r) => r.data),
+
+  create: (data: CreateInvitationRequest) =>
+    api.post<Invitation>('/invitations', data).then((r) => r.data),
+
+  resend: (id: string) =>
+    api.post<ResendInvitationResponse>(`/invitations/${id}/resend`).then((r) => r.data),
+
+  accept: (data: AcceptInvitationRequest) =>
+    api.post<AcceptInvitationResponse>('/invitations/accept', data).then((r) => r.data),
+
+  cancel: (id: string) => api.delete(`/invitations/${id}`).then(() => undefined),
+};
+
+export const workspaceApi = {
+  getCurrent: () =>
+    api.get<WorkspaceResponse>('/workspaces/current').then((r) => r.data),
+};
+
+export const memberApi = {
+  list: (accountId: string, params?: { cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<Member>>(`/accounts/${accountId}/members`, { params }).then((r) => r.data),
+
+  updateRole: (accountId: string, userId: string, data: UpdateMemberRequest) =>
+    api.patch<UpdateMemberResponse>(`/accounts/${accountId}/members/${userId}`, data).then((r) => r.data),
+
+  remove: (accountId: string, userId: string) =>
+    api.delete(`/accounts/${accountId}/members/${userId}`).then(() => undefined),
+};
+
+export const agencyApi = {
+  listClients: (params?: { cursor?: string; limit?: number }) =>
+    api.get<ClientListResponse>('/agency/clients', { params }).then((r) => r.data),
+
+  createClient: (data: CreateClientRequest) =>
+    api.post<CreateClientResponse>('/agency/clients', data).then((r) => r.data),
+
+  addOperator: (clientId: string, data: AddOperatorRequest) =>
+    api.post<OperatorAccess>(`/agency/clients/${clientId}/operators`, data).then((r) => r.data),
+
+  removeOperator: (clientId: string, userId: string) =>
+    api.delete(`/agency/clients/${clientId}/operators/${userId}`).then(() => undefined),
+};
+
+export default api;
