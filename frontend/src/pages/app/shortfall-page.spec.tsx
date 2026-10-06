@@ -54,6 +54,7 @@ describe('ShortfallPage - US-07 scenario 3 / ADR-0008', () => {
         refund_amount: null,
         revised_min_pool_size: 19,
         chosen_by: 'aurora_default',
+        choice_offered: false,
         notified_at: '2026-10-05T10:00:00Z',
         resolved_at: null,
       },
@@ -66,28 +67,22 @@ describe('ShortfallPage - US-07 scenario 3 / ADR-0008', () => {
     expect(screen.queryByText(/reembolso parcial/i)).not.toBeInTheDocument();
   });
 
-  // ---- Failure/bug case: a LARGE shortfall (>=15%) must let the buyer
-  // choose between partial refund and revised guarantee (ADR-0008, US-07
-  // scenario 3: "the buyer explicitly chooses between a proportional refund
-  // and a revised guarantee"). The backend signals this via
-  // choice_offered=true on the shortfall it creates (see campaign.service.ts
-  // recordShortfall). The GET /campaigns/:id/shortfall response the page
-  // consumes, however, never includes this flag (see
-  // campaign.service.additional.spec.ts "BUG: getShortfall response omits
-  // choice_offered"), so the page's own heuristic (`chosen_by === 'buyer'`)
-  // can never be true before the buyer has actually resolved it -- the
-  // choice UI never renders for a large shortfall. This test documents that
-  // failure against the acceptance criterion. ----
-  it('BUG: does not offer a refund-vs-revised-guarantee choice for a large shortfall before it is resolved', async () => {
+  // ---- Hard: a LARGE shortfall (>=15%) must let the buyer choose between
+  // partial refund and revised guarantee (ADR-0008, US-07 scenario 3: "the
+  // buyer explicitly chooses between a proportional refund and a revised
+  // guarantee"). The page gates the choice UI on choice_offered, which the
+  // backend sets to true for shortfalls >=15% (see campaign.service.ts
+  // recordShortfall), not on chosen_by (which only becomes 'buyer' after
+  // the buyer has already resolved it). ----
+  it('offers a refund-vs-revised-guarantee choice for a large shortfall before it is resolved', async () => {
     vi.mocked(campaignApi.getShortfall).mockResolvedValue({
       shortfall: {
         id: 'sf-2',
         resolution_type: 'revised_guarantee',
         refund_amount: '8500.00',
         revised_min_pool_size: 16,
-        // This is what the backend actually sends for an unresolved shortfall,
-        // even when it was created with choiceOffered=true internally.
         chosen_by: 'aurora_default',
+        choice_offered: true,
         notified_at: '2026-10-28T09:00:00Z',
         resolved_at: null,
       },
@@ -95,12 +90,11 @@ describe('ShortfallPage - US-07 scenario 3 / ADR-0008', () => {
 
     renderPage();
 
-    await waitFor(() => expect(screen.getByText(/garantia revisada/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /reembolso parcial/i })).toBeInTheDocument(),
+    );
 
-    // Per the acceptance criterion, Marina should be able to pick between
-    // "Reembolso parcial" and "Garantia revisada" here. She cannot.
-    expect(screen.queryByRole('button', { name: /reembolso parcial/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /garantia revisada/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /garantia revisada/i })).toBeInTheDocument();
   });
 
   // ---- Normal: an already-resolved shortfall shows the confirmation, not
@@ -113,6 +107,7 @@ describe('ShortfallPage - US-07 scenario 3 / ADR-0008', () => {
         refund_amount: '8500.00',
         revised_min_pool_size: null,
         chosen_by: 'buyer',
+        choice_offered: true,
         notified_at: '2026-10-28T09:00:00Z',
         resolved_at: '2026-10-28T10:15:00Z',
       },
