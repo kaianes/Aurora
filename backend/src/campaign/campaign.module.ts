@@ -20,10 +20,9 @@ import { QuoteProcessor } from './quote.processor';
 import { ReallocationProcessor } from './reallocation.processor';
 import { PoolFillCheckProcessor } from './pool-fill-check.processor';
 import { CampaignScheduledTasksService } from './campaign-scheduled-tasks.service';
-import {
-  MATCHING_ENGINE_ADAPTER,
-  StubMatchingEngineAdapter,
-} from './matching-engine.adapter';
+import { MATCHING_ENGINE_ADAPTER } from './matching-engine.adapter';
+import { MatchingModule } from '../matching/matching.module';
+import { RealMatchingEngineAdapter } from '../matching/real-matching-engine.adapter';
 
 @Module({
   imports: [
@@ -39,6 +38,7 @@ import {
       BrandProfile,
     ]),
     BullModule.registerQueue({ name: 'campaign' }),
+    MatchingModule,
   ],
   controllers: [CampaignController, TemplateController],
   providers: [
@@ -49,10 +49,12 @@ import {
     PoolFillCheckProcessor,
     CampaignScheduledTasksService,
     {
-      // Swapping to E3's real matching engine is a one-line DI binding
-      // change (section 3.3.1 of the E2 architecture doc).
+      // Swapping to E3's real matching engine was a one-line DI binding
+      // change (section 3.3.1 of the E2 architecture doc, ADR-0011):
+      // RealMatchingEngineAdapter is provided by the matching module and
+      // bound here under the same token campaign has always consumed.
       provide: MATCHING_ENGINE_ADAPTER,
-      useClass: StubMatchingEngineAdapter,
+      useExisting: RealMatchingEngineAdapter,
     },
   ],
   exports: [CampaignService, TemplateService],
