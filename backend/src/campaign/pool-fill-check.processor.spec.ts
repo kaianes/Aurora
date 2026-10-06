@@ -45,6 +45,11 @@ describe('PoolFillCheckProcessor - US-07 scenario 3', () => {
 
     expect(campaignService.recordShortfall).not.toHaveBeenCalled();
     expect(auditService.log).not.toHaveBeenCalled();
+    // ADR-0012: a creator excluded after a decline/expiry must not count
+    // toward the guarantee.
+    expect(poolMemberRepo.count).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ campaignId: 'camp-1' }) }),
+    );
   });
 
   // ---- Hard: pool exceeds the guarantee, still a no-op ----

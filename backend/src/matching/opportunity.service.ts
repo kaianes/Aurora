@@ -7,6 +7,8 @@ import {
   CampaignShortlistEntry,
   Campaign,
   Account,
+  CampaignPoolMember,
+  PoolMemberStatus,
 } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 
@@ -26,8 +28,20 @@ export class OpportunityService {
     private campaignRepo: Repository<Campaign>,
     @InjectRepository(Account)
     private accountRepo: Repository<Account>,
+    @InjectRepository(CampaignPoolMember)
+    private poolMemberRepo: Repository<CampaignPoolMember>,
     private auditService: AuditService,
   ) {}
+
+  // ADR-0012: removal from the shortlist's included set must also remove the
+  // creator from campaign_pool_member, so campaign's pool-fill-check job
+  // (which counts non-excluded pool members) can detect a post-lock shortfall.
+  private async excludeFromPool(campaignId: string, creatorId: string) {
+    await this.poolMemberRepo.update(
+      { campaignId, creatorId },
+      { status: PoolMemberStatus.EXCLUDED },
+    );
+  }
 
   async listForCreator(creatorId: string) {
     const opportunities = await this.opportunityRepo.find({
@@ -118,6 +132,7 @@ export class OpportunityService {
     // scenario 2). decision stays untouched -- the buyer's approval and the
     // creator's own choice are separate facts.
     await this.entryRepo.update({ id: saved.shortlistEntryId }, { included: false });
+    await this.excludeFromPool(saved.campaignId, creatorId);
 
     await this.auditService.log({
       actorUserId: null,

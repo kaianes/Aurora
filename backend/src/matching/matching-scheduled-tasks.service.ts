@@ -2,7 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { LessThan, Repository } from 'typeorm';
-import { CampaignOpportunity, OpportunityStatus, Creator } from '../database/entities';
+import {
+  CampaignOpportunity,
+  OpportunityStatus,
+  Creator,
+  CampaignPoolMember,
+  CampaignShortlistEntry,
+  PoolMemberStatus,
+} from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 
 const STALENESS_WINDOW_MS = 24 * 60 * 60 * 1000; // NFR-35
@@ -16,6 +23,10 @@ export class MatchingScheduledTasksService {
     private opportunityRepo: Repository<CampaignOpportunity>,
     @InjectRepository(Creator)
     private creatorRepo: Repository<Creator>,
+    @InjectRepository(CampaignShortlistEntry)
+    private entryRepo: Repository<CampaignShortlistEntry>,
+    @InjectRepository(CampaignPoolMember)
+    private poolMemberRepo: Repository<CampaignPoolMember>,
     private auditService: AuditService,
   ) {}
 
@@ -31,6 +42,17 @@ export class MatchingScheduledTasksService {
     for (const opportunity of expired) {
       opportunity.status = OpportunityStatus.EXPIRED;
       await this.opportunityRepo.save(opportunity);
+
+      // ADR-0012: an expired-unanswered opportunity also leaves the pool,
+      // same as a decline, so pool-fill-check can detect the shortfall.
+      const entry = await this.entryRepo.findOne({ where: { id: opportunity.shortlistEntryId } });
+      if (entry) {
+        await this.entryRepo.update({ id: entry.id }, { included: false });
+        await this.poolMemberRepo.update(
+          { campaignId: opportunity.campaignId, creatorId: opportunity.creatorId },
+          { status: PoolMemberStatus.EXCLUDED },
+        );
+      }
 
       await this.auditService.log({
         actorUserId: null,
