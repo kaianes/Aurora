@@ -52,9 +52,9 @@ export function ShortfallPage() {
     );
   }
 
-  // Aurora offers a single default resolution for small shortfalls (chosen_by aurora_default);
-  // for larger shortfalls the buyer picks between the two options, per ADR-0008.
-  const offersChoice = shortfall.chosen_by === 'buyer' && !shortfall.resolved_at;
+  // choice_offered reflects ADR-0008's 15% threshold at the time the shortfall was recorded;
+  // chosen_by only becomes 'buyer' after resolution, so it can't be used to gate the choice UI.
+  const offersChoice = shortfall.choice_offered && !shortfall.resolved_at;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">

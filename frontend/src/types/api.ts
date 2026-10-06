@@ -386,6 +386,7 @@ export interface PoolShortfallResolution {
   refund_amount: string | null;
   revised_min_pool_size: number | null;
   chosen_by: 'buyer' | 'aurora_default';
+  choice_offered: boolean;
   notified_at: string;
   resolved_at: string | null;
 }
