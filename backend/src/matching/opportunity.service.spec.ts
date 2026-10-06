@@ -16,6 +16,7 @@ describe('OpportunityService - US-28', () => {
   let entryRepo: ReturnType<typeof mockRepo>;
   let campaignRepo: ReturnType<typeof mockRepo>;
   let accountRepo: ReturnType<typeof mockRepo>;
+  let poolMemberRepo: ReturnType<typeof mockRepo>;
   let auditService: { log: ReturnType<typeof vi.fn> };
   const actor = { ipAddress: '127.0.0.1', userAgent: 'vitest' };
 
@@ -24,6 +25,7 @@ describe('OpportunityService - US-28', () => {
     entryRepo = mockRepo();
     campaignRepo = mockRepo();
     accountRepo = mockRepo();
+    poolMemberRepo = mockRepo();
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
 
     service = new OpportunityService(
@@ -31,6 +33,7 @@ describe('OpportunityService - US-28', () => {
       entryRepo as any,
       campaignRepo as any,
       accountRepo as any,
+      poolMemberRepo as any,
       auditService as any,
     );
   });
@@ -65,6 +68,12 @@ describe('OpportunityService - US-28', () => {
 
     expect(result.status).toBe(OpportunityStatus.DECLINED);
     expect(entryRepo.update).toHaveBeenCalledWith({ id: 'entry-1' }, { included: false });
+    // ADR-0012: decline must also exclude the creator from campaign_pool_member
+    // so campaign's pool-fill-check job can detect the resulting shortfall.
+    expect(poolMemberRepo.update).toHaveBeenCalledWith(
+      { campaignId: 'camp-1', creatorId: 'creator-1' },
+      { status: 'excluded' },
+    );
     expect(auditService.log).toHaveBeenCalledWith(expect.objectContaining({ action: 'opportunity.declined' }));
   });
 
