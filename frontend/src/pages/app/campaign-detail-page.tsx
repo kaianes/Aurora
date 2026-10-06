@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { campaignApi } from '@/lib/api-client';
 import { useAuth } from '@/contexts/auth-context';
-import { canWriteCampaign } from '@/lib/roles';
+import { canOverrideShortlist, canWriteCampaign } from '@/lib/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -61,6 +61,7 @@ export function CampaignDetailPage() {
   const queryClient = useQueryClient();
   const { currentRole } = useAuth();
   const canWrite = currentRole ? canWriteCampaign(currentRole) : false;
+  const canOverride = currentRole ? canOverrideShortlist(currentRole) : false;
   const [lifecycleReason, setLifecycleReason] = useState('');
   const [templateName, setTemplateName] = useState('');
   const [boundsError, setBoundsError] = useState<string | null>(null);
@@ -333,6 +334,26 @@ export function CampaignDetailPage() {
           <p className="text-xs text-muted mt-1">
             Esse valor nao muda, independente da variacao de custo por criador durante a execucao.
           </p>
+        </Card>
+      )}
+
+      {/* Shortlist, exclusions, agency override (E3) */}
+      {['confirmed', 'active', 'paused', 'completed'].includes(campaign.state) && (
+        <Card>
+          <h3 className="text-sm font-semibold text-text-dark mb-3">Shortlist de criadores</h3>
+          <div className="flex gap-2">
+            <Link to={`/app/campaigns/${campaign.id}/shortlist`}>
+              <Button variant="outline" size="sm">Ver shortlist</Button>
+            </Link>
+            <Link to={`/app/campaigns/${campaign.id}/exclusions`}>
+              <Button variant="outline" size="sm">Exclusoes da campanha</Button>
+            </Link>
+            {canOverride && (
+              <Link to={`/app/campaigns/${campaign.id}/shortlist/override`}>
+                <Button variant="outline" size="sm">Curadoria da agencia</Button>
+              </Link>
+            )}
+          </div>
         </Card>
       )}
 
