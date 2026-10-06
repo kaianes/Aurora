@@ -56,6 +56,12 @@ export function AppLayout() {
             <NavLink to="/app/brand-profile" className={navLinkClass}>
               Perfil da Marca
             </NavLink>
+            <NavLink to="/app/campaigns" className={navLinkClass}>
+              Campanhas
+            </NavLink>
+            <NavLink to="/app/templates" className={navLinkClass}>
+              Modelos
+            </NavLink>
             <NavLink to="/app/team" className={navLinkClass}>
               Equipe
             </NavLink>
