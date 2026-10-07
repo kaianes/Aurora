@@ -49,6 +49,34 @@ Removes the enterprise sales cycle from onboarding: a brand or agency can sign u
 - Implementation: `backend/src/` (NestJS: auth, pricing, brand-profile, invitation, workspace, agency, audit, jobs modules) and `frontend/src/` (React/Vite: public pages, protected app pages)
 - Epic summary (reviewer's output, the actual grading artifact): [docs/epics/e1-access-onboarding/summary.md](epics/e1-access-onboarding/summary.md)
 
+**Routes:**
+
+| Route | Access | Description |
+| --- | --- | --- |
+| `/pricing` | public | Pricing page with Brand/Agency toggle |
+| `/register` | public | Sign-up with workspace type selection |
+| `/verify-email` | public | Email verification (link from email) |
+| `/login` | public | Login with MFA support |
+| `/invitations/accept` | public | Accept team invitation |
+| `/app/brand-profile` | auth | Brand profile editor (logo, tone, guidelines) |
+| `/app/team` | auth | Manage team, invitations, and roles |
+| `/app/clients` | agency | Agency client account list (limit: 10 on the pilot plan) |
+| `/app/clients/:id` | agency | Client detail + operator management |
+
+**Roles:**
+
+| Role | Workspace | Can do |
+| --- | --- | --- |
+| `brand_owner` | Brand | Everything: profile, campaigns, invite team, change roles |
+| `brand_manager` | Brand | Edit profile, create campaigns. Cannot invite. |
+| `brand_analyst` | Brand | Read-only |
+| `agency_admin` | Agency | Everything: clients, team, operators |
+| `agency_operator` | Agency | Only assigned client accounts |
+
+**Endpoints** (25 total, all under `/v1`): Auth (7) — `POST /auth/register`, `/auth/verify-email`, `/auth/resend-verification`, `/auth/login`, `/auth/refresh`, `/auth/mfa/setup`, `/auth/mfa/confirm`. Pricing (1) — `GET /pricing` (public). Brand Profile (4) — `POST /brand-profiles`, `PATCH /brand-profiles/:id`, `GET /brand-profiles/current`, `POST /brand-profiles/:id/logo`. Invitations (5) — `POST /invitations`, `POST /invitations/:id/resend`, `GET /invitations`, `POST /invitations/accept`, `DELETE /invitations/:id`. Workspace (4) — `GET /workspaces/current`, `GET /accounts/:id/members`, `PATCH /accounts/:id/members/:userId`, `DELETE /accounts/:id/members/:userId`. Agency (4) — `POST /agency/clients`, `GET /agency/clients`, `POST /agency/clients/:id/operators`, `DELETE /agency/clients/:id/operators/:userId`.
+
+**Known tech debt from E1** (tracked for future sprints): breached-password check not implemented; MFA secret persisted before confirmation; MFA secrets not encrypted at the application level; pricing data hardcoded instead of DB + Redis; invitation-accepted email has an empty `to` field; pt-BR strings not externalized into keyed resources; `GET /agency/clients` lacks cursor-based pagination (acceptable at the pilot cap of 10).
+
 ## 5. Epic 2 — Campaign Planning and Pool Buying
 
 Lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. **Status: implemented and tested, pending merge.**
@@ -132,7 +160,7 @@ As of the last pipeline run, on `feature/e3-creator-matching-curation` (E1+E2+E3
 12. Visit `/creator-portal` with a seeded creator ID (the pilot login stub, ADR-0013) to accept or decline an opportunity as Duda would.
 13. Pause, resume, or cancel the campaign from the detail page and confirm the state transitions match the rules in [ADR-0006](adr/0006-campaign-state-machine.md).
 
-The full route map, roles table, and endpoint list for E1 are in [docs/aurora-E1-setup-guide.md](aurora-E1-setup-guide.md); for E2 and E3, in the architecture documents linked in sections 5 and 6 above.
+The full route map, roles table, and endpoint list for E1 are in section 4 above; for E2 and E3, in the architecture documents linked in sections 5 and 6.
 
 ## 9. Known limitations carried across epics
 
