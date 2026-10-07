@@ -72,7 +72,6 @@ gantt
 │   ├── product-requirements.md       # Journeys, user stories, FRs and NFRs
 │   ├── architecture.md               # System design, ATAM, security, DevOps
 │   ├── implementation.md             # Agent pipeline, every epic delivered so far, how to run and test them
-│   ├── aurora-E1-setup-guide.md      # Step-by-step local setup for Epic 1
 │   ├── adr/                          # Architecture Decision Records, one per epic decision
 │   ├── architecture/                 # Per-epic architecture docs (data model, API contracts)
 │   ├── epics/                        # Per-epic stories and the reviewer's summary
@@ -134,7 +133,7 @@ The first epic removes the enterprise sales cycle from onboarding: a brand or ag
 - **Architecture and API contracts:** [docs/architecture/e1-access-onboarding.md](docs/architecture/e1-access-onboarding.md)
 - **Decisions:** authentication strategy, tenant isolation via PostgreSQL row-level security, workspace-scoped RBAC, and the brand profile draft lifecycle, each in its own ADR under [docs/adr/](docs/adr)
 - **What was built, tested, and any deviations from the design:** [docs/epics/e1-access-onboarding/summary.md](docs/epics/e1-access-onboarding/summary.md)
-- **Run it locally and test it:** [docs/implementation.md](docs/implementation.md) or the detailed [setup guide](docs/aurora-E1-setup-guide.md)
+- **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
 
 Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#10-field-research-conducted-alongside-epic-1) for the interview guide and analyses.
 
