@@ -2,6 +2,8 @@
 
 **Author:** Kaiane Cordeiro. Aurora Project, Sprint 5. **Date:** October 5, 2026.
 
+> **TL;DR.** All 6 stories implemented, tested, and pending merge, built on top of E2's branch. Backend: 107/107 tests passing (E1+E2+E3 combined). Frontend: 31/31 passing. Replaces E2's stub matching engine with a real scoring model. QA found zero bugs; this review's own independent read found one real gap — declining or letting an opportunity expire wasn't propagating to the campaign's pool, contradicting an ADR — fixed and re-tested before this summary was written. Known gaps, by design: shortlist locking is only reachable via agency override until a campaign-activation trigger exists, commission/expiry values are placeholders, and the creator-portal login is a passwordless pilot stub.
+
 ## 1. Purpose
 
 This document summarizes what was built for Epic E3 (Creator Matching and Curation), checks it against the ADRs and architecture specification, reports the actual state of automated tests, and lists open items. It is the gate artifact reviewed before merging `feature/e3-creator-matching-curation` into `main`. E3 was built on top of `feature/e2-campaign-planning-pool-buying`, which has not yet been merged to `main`; this review covers only the diff introduced by E3, not E2's own changes, which are covered in `docs/epics/e2-campaign-planning-pool-buying/summary.md`.
