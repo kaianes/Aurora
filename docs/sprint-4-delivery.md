@@ -2,6 +2,8 @@
 
 This document explains how Epic 1 (Access and Onboarding) was produced and how to run and test it. It is meant as the entry point for grading Sprint 4: read this first, then follow the links to the deeper artifacts each stage produced.
 
+For Epic 2 and Epic 3, built with the same pipeline in Sprint 5, see [docs/sprint-5-delivery.md](sprint-5-delivery.md) instead.
+
 ## 1. Why an agent pipeline
 
 Aurora is built by a fixed sequence of specialized Claude Code agents, defined in `.claude/agents/`, instead of one agent doing everything end to end. Each agent has a narrow role, a fixed set of tools, and a single kind of output. Splitting the work this way keeps every stage auditable on its own: the product-analyst's stories can be reviewed and approved before any architecture exists, the architect's contracts can be approved before any code exists, and so on. Two gates enforce this: the product-analyst's stories and the architect's design each require human approval before the next stage starts.
@@ -40,7 +42,7 @@ Guardrails that hold across every stage:
 ![swagger](./images/frontend-register.png)
 
 
-Full setup steps, prerequisites, and troubleshooting are in [docs/aurora-E1-setup-guide](aurora-E1-setup-guide). Short version:
+Full setup steps, prerequisites, and troubleshooting are in [docs/aurora-E1-setup-guide](aurora-E1-setup-guide.md). Short version:
 
 ```bash
 # 1. Start Postgres and Redis
@@ -91,7 +93,7 @@ Actual pass/fail counts and coverage per story are reported in the reviewer's [e
 5. As a Brand: fill in the profile at `/app/brand-profile`, invite a teammate at `/app/team`.
 6. As an Agency: create a client at `/app/clients`, manage its operators at `/app/clients/:id`.
 
-The full route map, roles table, and endpoint list are in the [setup guide](aurora-E1-setup-guide).
+The full route map, roles table, and endpoint list are in the [setup guide](aurora-E1-setup-guide.md).
 
 ## 6. Field research conducted alongside this sprint
 
