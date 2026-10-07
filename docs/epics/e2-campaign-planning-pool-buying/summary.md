@@ -2,6 +2,8 @@
 
 **Author:** Kaiane Cordeiro. Aurora Project, Sprint 5. **Date:** October 5, 2026.
 
+> **TL;DR.** All 6 stories implemented, tested, and pending merge. Backend: 54/54 tests passing. Frontend: 13/13 tests passing (the jsdom/undici issue from E1 is fixed here by pinning jsdom). QA found 2 real bugs in shortfall resolution (one missing API field, one missing validation); both fixed and re-verified before this review. Known gaps, by design: automatic budget reallocation (US-10) is complete but inert until a future epic's metrics feed exists, and the row-level-security middleware gap from E1 is still unresolved.
+
 ## 1. Purpose
 
 This document summarizes what was built for Epic E2 (Campaign Planning and Pool Buying), checks it against the ADRs and architecture specification, reports the actual state of automated tests, and lists open items. It is the gate artifact reviewed before merging `feature/e2-campaign-planning-pool-buying` into `main`.
