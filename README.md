@@ -17,7 +17,9 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-The project is now in the coding phase. Three epics are implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), merged to `main`, and Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation), both built in Sprint 5 and currently awaiting merge review on stacked feature branches. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them.
+The project is now in the coding phase. Three epics are implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), merged to `main`, and Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation), both built in Sprint 5 and currently awaiting merge review on stacked feature branches. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
+
+**Live demo:** _link pending deploy — see [docs/deployment.md](docs/deployment.md)._
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)

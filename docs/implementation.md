@@ -101,6 +101,8 @@ Both E2's and E3's summaries flag the same carried-over gap first raised in E1's
 
 ## 7. How to run it
 
+For a clickable, no-setup version instead of running it locally, see [docs/deployment.md](deployment.md).
+
 ```bash
 # 0. Check out the branch with the latest delivered epics
 git checkout feature/e3-creator-matching-curation
