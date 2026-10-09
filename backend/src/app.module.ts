@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bull';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
+import { CommonModule } from './common/common.module';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { PricingModule } from './pricing/pricing.module';
@@ -102,6 +103,7 @@ import {
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
+    CommonModule,
     AuditModule,
     AuthModule,
     PricingModule,

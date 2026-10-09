@@ -167,7 +167,11 @@ describe('RolesGuard - US-04 Scenario 4: Insufficient privileges', () => {
       getAllAndOverride: vi.fn().mockReturnValue([Role.BRAND_OWNER, Role.AGENCY_ADMIN]),
     };
 
-    const guard = new RolesGuard(reflector as any, auditService as any);
+    const accountAccessService = {
+      resolveAccess: vi.fn().mockResolvedValue(Role.BRAND_ANALYST),
+    };
+
+    const guard = new RolesGuard(reflector as any, auditService as any, accountAccessService as any);
 
     const mockRequest = {
       user: {

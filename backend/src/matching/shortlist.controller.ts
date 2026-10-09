@@ -121,7 +121,6 @@ export class ShortlistController {
     return this.shortlistService.overrideShortlist(
       id,
       (req as any).currentAccountId,
-      (req as any).currentRole,
       user.sub,
       dto,
       this.actorContext(user, req),
