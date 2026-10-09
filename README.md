@@ -17,9 +17,9 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-The project is now in the coding phase. Three epics are implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), merged to `main`, and Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation), both built in Sprint 5 and currently awaiting merge review on stacked feature branches. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
+The project is now in the coding phase. Three epics are merged to `main` and implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), Epic 2 (Campaign Planning and Pool Buying), and Epic 3 (Creator Matching and Curation), the latter two built in Sprint 5. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
 
-**Live demo:** _link pending deploy — see [docs/deployment.md](docs/deployment.md)._
+**Live demo:** [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) (frontend) — backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs). See [docs/deployment.md](docs/deployment.md) for how it's hosted and its availability window.
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)
@@ -141,7 +141,7 @@ Alongside the build, three market validation interviews were conducted in the Br
 
 ## Epic 2: Campaign Planning and Pool Buying
 
-The second epic lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. Built on the same NestJS/PostgreSQL backend and React frontend, on top of Epic 1. **Status: implemented and tested, pending merge** — see the branches note below.
+The second epic lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. Built on the same NestJS/PostgreSQL backend and React frontend, on top of Epic 1. **Status: implemented, tested, and merged to `main`.**
 
 - **Stories:** [docs/epics/e2-campaign-planning-pool-buying/stories.md](docs/epics/e2-campaign-planning-pool-buying/stories.md)
 - **Architecture and API contracts:** [docs/architecture/e2-campaign-planning-pool-buying.md](docs/architecture/e2-campaign-planning-pool-buying.md)
@@ -151,15 +151,13 @@ The second epic lets a brand define a campaign's budget, audience, and message o
 
 ## Epic 3: Creator Matching and Curation
 
-The third epic replaces Epic 2's placeholder matching engine with a real one, ranking creators by audience fit, authenticity, engagement, and historical reliability, and lets a brand approve or reject individual creators, exclude specific creators or competitor-associated ones, and lets an agency override the shortlist with its own network. It also gives the creator (Duda) a minimal portal to accept or decline a campaign opportunity. **Status: implemented and tested, pending merge** — see the branches note below.
+The third epic replaces Epic 2's placeholder matching engine with a real one, ranking creators by audience fit, authenticity, engagement, and historical reliability, and lets a brand approve or reject individual creators, exclude specific creators or competitor-associated ones, and lets an agency override the shortlist with its own network. It also gives the creator (Duda) a minimal portal to accept or decline a campaign opportunity. **Status: implemented, tested, and merged to `main`.**
 
 - **Stories:** [docs/epics/e3-creator-matching-curation/stories.md](docs/epics/e3-creator-matching-curation/stories.md)
 - **Architecture and API contracts:** [docs/architecture/e3-creator-matching-curation.md](docs/architecture/e3-creator-matching-curation.md)
 - **Decisions:** real matching engine scoring model, shortlist locking, the minimal creator entity, exclusion precedence, override sequencing, guaranteed-minimum advisory, authenticity-score policy, and additional-candidates top-up, each in its own ADR under [docs/adr/](docs/adr) (0011-0018)
 - **What was built, tested, and any deviations from the design:** [docs/epics/e3-creator-matching-curation/summary.md](docs/epics/e3-creator-matching-curation/summary.md)
 - **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
-
-**Branches:** Epic 1 is merged to `main`. Epic 2 and Epic 3 are on stacked feature branches awaiting review (`feature/e2-campaign-planning-pool-buying`, with Epic 3 built on top of it as `feature/e3-creator-matching-curation`, since E3's matching module depends directly on E2's campaign module). Check out `feature/e3-creator-matching-curation` to run everything built so far.
 
 ## Institution
 

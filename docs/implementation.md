@@ -29,15 +29,7 @@ Guardrails that hold across every stage:
 
 ## 3. Branches and merge order
 
-Epics build on each other when a later one depends on an earlier one's data model, not strictly in a straight line to `main`:
-
-```
-main
- └── feature/e2-campaign-planning-pool-buying   (E2; PR open: GitHub #1 / GitLab MR pending)
-      └── feature/e3-creator-matching-curation  (E3; PR open: GitHub #2 / GitLab MR pending)
-```
-
-E3's `matching` module depends directly on E2's `campaign` module (it replaces E2's stub matching engine with a real one and writes into E2's `campaign_pool_member` table), so E3 was built on top of E2's branch rather than on `main`. **To see or run everything built so far, check out `feature/e3-creator-matching-curation`** — it contains E1 (already in `main`), E2, and E3.
+Each epic was built on a feature branch stacked on the previous one, since E3's `matching` module depends directly on E2's `campaign` module (it replaces E2's stub matching engine with a real one and writes into E2's `campaign_pool_member` table). Both `feature/e2-campaign-planning-pool-buying` ([PR #1](https://github.com/kaianes/Aurora/pull/1)) and `feature/e3-creator-matching-curation` ([PR #2](https://github.com/kaianes/Aurora/pull/2)) have since merged to `main`, so **`main` now contains E1, E2, and E3**; there's no need to check out a feature branch to run everything built so far.
 
 ## 4. Epic 1 — Access and Onboarding
 
@@ -79,7 +71,7 @@ Removes the enterprise sales cycle from onboarding: a brand or agency can sign u
 
 ## 5. Epic 2 — Campaign Planning and Pool Buying
 
-Lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. **Status: implemented and tested, pending merge.**
+Lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. **Status: implemented, tested, and merged to `main`.**
 
 - Stories: [docs/epics/e2-campaign-planning-pool-buying/stories.md](epics/e2-campaign-planning-pool-buying/stories.md)
 - Architecture: [docs/architecture/e2-campaign-planning-pool-buying.md](architecture/e2-campaign-planning-pool-buying.md)
@@ -89,7 +81,7 @@ Lets a brand define a campaign's budget, audience, and message once, see the mat
 
 ## 6. Epic 3 — Creator Matching and Curation
 
-Replaces Epic 2's placeholder matching engine with a real one, ranking creators by audience fit, authenticity, engagement, and historical reliability, and lets a brand approve or reject individual creators, exclude specific creators or competitor-associated ones, and lets an agency override the shortlist with its own network. Also gives the creator (Duda) a minimal portal to accept or decline a campaign opportunity. **Status: implemented and tested, pending merge.**
+Replaces Epic 2's placeholder matching engine with a real one, ranking creators by audience fit, authenticity, engagement, and historical reliability, and lets a brand approve or reject individual creators, exclude specific creators or competitor-associated ones, and lets an agency override the shortlist with its own network. Also gives the creator (Duda) a minimal portal to accept or decline a campaign opportunity. **Status: implemented, tested, and merged to `main`.**
 
 - Stories: [docs/epics/e3-creator-matching-curation/stories.md](epics/e3-creator-matching-curation/stories.md)
 - Architecture: [docs/architecture/e3-creator-matching-curation.md](architecture/e3-creator-matching-curation.md)
@@ -104,9 +96,6 @@ Both E2's and E3's summaries flag the same carried-over gap first raised in E1's
 For a clickable, no-setup version instead of running it locally, see [docs/deployment.md](deployment.md).
 
 ```bash
-# 0. Check out the branch with the latest delivered epics
-git checkout feature/e3-creator-matching-curation
-
 # 1. Start Postgres and Redis
 docker compose up -d
 
@@ -144,7 +133,7 @@ cd backend && npx vitest run
 cd frontend && npx vitest run
 ```
 
-As of the last pipeline run, on `feature/e3-creator-matching-curation` (E1+E2+E3 combined): **backend 107/107 passing**, **frontend 31/31 passing**. Build and lint are clean on both packages. Exact per-story pass/fail counts and any deviations are reported in each epic's summary, linked in sections 4-6 above, since those are qa's and the reviewer's verified output rather than a claim made ahead of time.
+As of the last pipeline run, on `main` (E1+E2+E3 combined): **backend 107/107 passing**, **frontend 31/31 passing**. Build and lint are clean on both packages. Exact per-story pass/fail counts and any deviations are reported in each epic's summary, linked in sections 4-6 above, since those are qa's and the reviewer's verified output rather than a claim made ahead of time.
 
 **Manual walkthrough**, once both servers are running:
 
