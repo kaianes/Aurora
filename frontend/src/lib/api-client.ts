@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { isAxiosError, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   AcceptInvitationRequest,
   AcceptInvitationResponse,
@@ -333,7 +333,13 @@ export const shortlistApi = {
     api.post<RequestShortlistResponse>(`/campaigns/${campaignId}/shortlist`).then((r) => r.data),
 
   get: (campaignId: string) =>
-    api.get<CampaignShortlist>(`/campaigns/${campaignId}/shortlist`).then((r) => r.data),
+    api
+      .get<CampaignShortlist>(`/campaigns/${campaignId}/shortlist`)
+      .then((r) => r.data)
+      .catch((err) => {
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
 
   decide: (campaignId: string, entryId: string, data: ShortlistDecisionRequest) =>
     api
