@@ -17,6 +17,18 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    // Every authenticated, account-scoped route needs currentAccountId set,
+    // regardless of whether it also requires specific roles -- a read-only
+    // endpoint intentionally has no @Roles() but still must know which
+    // account to scope its query to. This must run before the early return
+    // below, or any route without @Roles() silently queries with
+    // accountId=undefined.
+    const accountId = request.headers['x-account-id'] || user?.currentAccountId;
+    request.currentAccountId = accountId;
+
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -25,8 +37,6 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
     if (!user || !user.memberships) {
       throw new ForbiddenException({
         error: {
@@ -37,7 +47,6 @@ export class RolesGuard implements CanActivate {
       });
     }
 
-    const accountId = request.headers['x-account-id'] || user.currentAccountId;
     const membership = user.memberships.find(
       (m: any) => m.account_id === accountId,
     );
@@ -66,7 +75,6 @@ export class RolesGuard implements CanActivate {
       });
     }
 
-    request.currentAccountId = accountId;
     request.currentRole = membership.role;
     return true;
   }
