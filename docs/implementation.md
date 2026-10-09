@@ -161,7 +161,17 @@ The full route map, roles table, and endpoint list for E1 are in section 4 above
 - The creator-portal login (`POST /creator-portal/login`) is a passwordless pilot stub pending Epic 8 (Creator Recruitment and Growth)'s real creator authentication.
 - Tenant-context middleware (RLS enforcement) remains unregistered, carried over from E1.
 
-## 10. Field research conducted alongside Epic 1
+## 10. Bugs found and fixed via live deployment testing
+
+The automated pipeline (QA + reviewer) caught real bugs during each epic's own build, documented in that epic's summary. After both epics were live on Railway/Vercel, a separate round of manual end-to-end testing against the actual deployed app — registering real accounts, running full campaign-to-shortlist-to-opportunity flows for both a brand and an agency-acting-on-a-client-account — found several more bugs that neither QA's unit tests nor the reviewer's static read had caught, because they only reproduce under real request/response conditions (real HTTP headers, a real otplib version, two distinct logged-in users). All were fixed and covered with regression tests before being counted in section 8's totals:
+
+- **Cross-tenant data leak, critical:** any authenticated user could read another tenant's data on any route without an explicit `@Roles()` decorator, just by sending that account's id in the `X-Account-Id` header — nothing validated the requester actually belonged to it. The same root cause also blocked a legitimate case: an agency admin could not create or manage campaigns for their own client account, since the check only recognized accounts literally present in the JWT. Fixed with a dedicated `AccountAccessService` (`backend/src/common/`) that resolves real access for both direct memberships and the agency-acts-on-a-client-account case, enforced on every authenticated route.
+- **MFA setup/confirm crashed on every attempt:** `auth.service.ts` called an `otplib` API (`authenticator.generateSecret/keyuri/verify`) that was removed in the installed major version (v13), which replaced it with top-level functions. This would have failed in any environment, not just production — nothing in the test suite exercised MFA at all until this round. Fixed, with new tests that generate and verify a real TOTP code against the real library.
+- **`GET /campaigns/:id` and other read-only routes returned a generic 500:** found as part of the cross-tenant fix above — `RolesGuard` only ever set `currentAccountId` as a side effect of its role check, so any route without `@Roles()` queried with `accountId = undefined`.
+- **Shortlist page showed a dead-end error for a brand-new campaign:** the frontend treated the backend's 404 ("no shortlist requested yet") the same as a real failure, which hid the "Gerar shortlist" button entirely behind a generic error message.
+- Smaller fixes along the way: the backend's global exception filter never logged the underlying error for a 500 (it just returned a generic message), which is how the above took longer than necessary to diagnose; a Node version mismatch and a missing Redis password broke the first Railway deploy; and a TypeScript unused-import error only surfaced in Vercel's production build, not in local test runs.
+
+## 11. Field research conducted alongside Epic 1
 
 In parallel with building Epic 1, three market validation interviews were conducted with practitioners in the Brazilian creator economy, to check Aurora's market hypotheses (pricing predictability, client segmentation, automation maturity, and the role of agencies) against how established players actually operate. All interviews were conducted and analyzed by Kaiane Souza, using a shared interview guide (available in [English](field-research/Creator_Economy_Interview_Guide_EN.pdf) and [Portuguese](field-research/Creator_Economy_Interview_Guide_PT.pdf)), cross-referencing the question script, personal notes, an automated meeting summary, and the full transcript for each conversation.
 
@@ -173,10 +183,11 @@ In parallel with building Epic 1, three market validation interviews were conduc
 
 This research grounds the assumptions behind the epics being built, including the pricing model exposed publicly in US-02 and the agency-client relationship modeled in US-47, in direct input from people operating in this market today rather than in desk research alone.
 
-## 11. Reading order for grading
+## 12. Reading order for grading
 
 1. This document, for the process and what each epic delivered.
 2. Each epic's summary (linked in sections 4-6), for what was actually built and verified, and any deviations from the design.
 3. The architecture documents and ADRs linked in sections 4-6, for the design rationale.
-4. The running application, using the steps in sections 7 and 8.
-5. The field research interviews in section 10, for the market evidence behind the product decisions.
+4. The running application — the live demo linked in the README, or locally using the steps in sections 7 and 8.
+5. Section 10, for what manual testing against the live deployment found and fixed beyond what the automated pipeline caught.
+6. The field research interviews in section 11, for the market evidence behind the product decisions.

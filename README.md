@@ -19,13 +19,41 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 The project is now in the coding phase. Three epics are merged to `main` and implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), Epic 2 (Campaign Planning and Pool Buying), and Epic 3 (Creator Matching and Curation), the latter two built in Sprint 5. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
 
-**Live demo:** [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) (frontend) — backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs). See [docs/deployment.md](docs/deployment.md) for how it's hosted and its availability window.
+**Live demo:** [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) (frontend) — backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs). See [docs/deployment.md](docs/deployment.md) for how it's hosted and its availability window (it's a free trial on the backend host, not indefinite — see that doc before grading after early November 2026).
+
+### For graders: what to test
+
+Two accounts are seeded and ready to log in with, no sign-up needed:
+
+| Role | Email | Password |
+|---|---|---|
+| Brand owner (Marina) | `marina.demo.aurora@gmail.com` | `SenhaForte!2026` |
+| Agency admin (Renata) | `renata.demo.aurora@gmail.com` | `SenhaForte!2026` |
+
+A short script to exercise all three epics:
+
+1. **Log in as Marina** (brand). Land on `/app/brand-profile` — edit and save it.
+2. Go to **Campanhas** → **Nova campanha**. Fill in budget (≥ R$ 2.000), geography (try `BR-SP`), interests (try `skincare`), a message, pick a deliverable format, set a start/end date, save.
+3. Open the campaign → **Solicitar cotação** (polls for a few seconds) → **Confirmar compra** (locks the price).
+4. Click **Ver shortlist** → **Gerar shortlist**. Creators get ranked by fit score, with the specific attributes each one matched. Approve or reject a few.
+5. Go to **Lista de Exclusão** and add one, to see it's scoped for future shortlists only, not retroactive.
+6. **Log out, log in as Renata** (agency). Go to **Clientes** → **Novo cliente** to create a client account, then open it.
+7. Repeat steps 2-4 for the client account (campaign → quote → confirm → shortlist). Then try the **agency override** on that shortlist — remove a system-ranked creator, add one of your own — and note it locks the shortlist and flags the pool if it drops below the guaranteed minimum.
+8. Back on Marina's side, try pausing/cancelling a confirmed campaign from its detail page, saving it as a template, and instantiating a new campaign from that template.
+
+**What's a known limitation, not a bug**, if you run into it:
+- A campaign can't reach `active` state yet (no `CONFIRMED → ACTIVE` trigger exists), so the shortlist "lock" is only reachable through the agency override path above, not through normal activation.
+- Automatic budget reallocation (toggle in the campaign detail page) saves correctly but never actually reallocates, since it depends on a social-platform metrics feed that's out of scope until a later epic.
+- The creator-side portal (`/creator-portal`) uses a passwordless pilot login (just a creator ID, no real auth) — that's intentional, documented in ADR-0013, not a security bug in the rest of the app.
+- Verification/invitation emails don't arrive in an inbox (console-log stub); this doesn't block grading since both demo accounts are pre-verified.
+
+Full technical detail — what was built per epic, every ADR, test results, and the complete list of known limitations — is in [docs/implementation.md](docs/implementation.md). Each epic's [reviewer summary](docs/epics/) opens with a short TL;DR if you want the headline before the full audit.
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)
 - ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 functional and 36 non-functional requirements, with full traceability)
 - ✅ **Sprint 4** — System design finalized, the agent pipeline that builds every epic from here on defined, and Epic 1 (Access and Onboarding) built end to end ahead of schedule: authentication, tenant isolation, RBAC, brand profile, team invitations, and agency client management, backend and frontend, with live API docs and a passing backend test suite (see the reviewer's summary for known gaps, including the frontend test environment and tenant isolation enforcement)
-- ✅ **Sprint 5** — Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation) built end to end with the same pipeline, ahead of the original one-epic-per-sprint pace: async quoting and budget reallocation for E2, a real creator-matching engine (replacing E2's stub) and shortlist/exclusion/opportunity flows for E3. Both pass their full automated test suites (107 backend + 31 frontend tests combined) and are documented in [docs/implementation.md](docs/implementation.md); pending human review and merge to `main`.
+- ✅ **Sprint 5** — Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation) built end to end with the same pipeline, ahead of the original one-epic-per-sprint pace: async quoting and budget reallocation for E2, a real creator-matching engine (replacing E2's stub) and shortlist/exclusion/opportunity flows for E3. Both pass their full automated test suites (116 backend + 32 frontend tests combined) and are merged to `main`. Deployed live and tested end to end by hand afterward, which surfaced and fixed several real bugs the automated pipeline missed — see [docs/implementation.md](docs/implementation.md) section 9 and the "For graders" section below.
 - ⏳ **Next** — Sprint 6, continuing into the remaining epics (Brand Safety, Briefing and Content Workflow, and onward) with the same pipeline
 
 ## Project Roadmap
@@ -137,7 +165,7 @@ The first epic removes the enterprise sales cycle from onboarding: a brand or ag
 - **What was built, tested, and any deviations from the design:** [docs/epics/e1-access-onboarding/summary.md](docs/epics/e1-access-onboarding/summary.md)
 - **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
 
-Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#10-field-research-conducted-alongside-epic-1) for the interview guide and analyses.
+Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#11-field-research-conducted-alongside-epic-1) for the interview guide and analyses.
 
 ## Epic 2: Campaign Planning and Pool Buying
 
