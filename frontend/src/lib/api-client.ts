@@ -1,15 +1,30 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { isAxiosError, type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   AcceptInvitationRequest,
   AcceptInvitationResponse,
+  AcknowledgeDriftRequest,
   AddOperatorRequest,
   BrandProfile,
+  BulkShortlistDecisionRequest,
+  Campaign,
+  CampaignShortlist,
+  CampaignSummary,
+  CampaignTemplate,
   ClientListResponse,
   CreateBrandProfileRequest,
+  CreateCampaignRequest,
   CreateClientRequest,
   CreateClientResponse,
+  CreateExclusionRequest,
   CreateInvitationRequest,
+  CreatorMetrics,
+  CreatorOpportunity,
+  ConfirmCampaignResponse,
+  Exclusion,
+  InstantiateTemplateRequest,
   Invitation,
+  LifecycleActionRequest,
+  LifecycleActionResponse,
   LoginRequest,
   LoginResponse,
   LogoUploadResponse,
@@ -20,13 +35,27 @@ import type {
   OperatorAccess,
   PaginatedResponse,
   PricingResponse,
+  CampaignQuote,
+  ReallocationBounds,
+  ReallocationEvent,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
+  RequestAdditionalCandidatesResponse,
+  RequestQuoteResponse,
+  RequestShortlistResponse,
   ResendInvitationResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  ResolveShortfallRequest,
+  SaveAsTemplateRequest,
+  ShortfallResponse,
+  ShortlistDecisionRequest,
+  ShortlistDecisionResponse,
+  ShortlistOverrideRequest,
+  ShortlistOverrideResponse,
   UpdateBrandProfileRequest,
+  UpdateCampaignRequest,
   UpdateMemberRequest,
   UpdateMemberResponse,
   VerifyEmailRequest,
@@ -236,6 +265,166 @@ export const agencyApi = {
 
   removeOperator: (clientId: string, userId: string) =>
     api.delete(`/agency/clients/${clientId}/operators/${userId}`).then(() => undefined),
+};
+
+export const campaignApi = {
+  list: (params?: { state?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<CampaignSummary>>('/campaigns', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<Campaign>(`/campaigns/${id}`).then((r) => r.data),
+
+  create: (data: CreateCampaignRequest) =>
+    api.post<Campaign>('/campaigns', data).then((r) => r.data),
+
+  update: (id: string, data: UpdateCampaignRequest) =>
+    api.patch<Campaign>(`/campaigns/${id}`, data).then((r) => r.data),
+
+  requestQuote: (id: string) =>
+    api.post<RequestQuoteResponse>(`/campaigns/${id}/quote`).then((r) => r.data),
+
+  getQuote: (campaignId: string, quoteId: string) =>
+    api.get<CampaignQuote>(`/campaigns/${campaignId}/quote/${quoteId}`).then((r) => r.data),
+
+  confirm: (id: string) =>
+    api.post<ConfirmCampaignResponse>(`/campaigns/${id}/confirm`).then((r) => r.data),
+
+  getShortfall: (id: string) =>
+    api.get<ShortfallResponse>(`/campaigns/${id}/shortfall`).then((r) => r.data),
+
+  resolveShortfall: (id: string, data: ResolveShortfallRequest) =>
+    api.post<ShortfallResponse['shortfall']>(`/campaigns/${id}/shortfall/resolve`, data).then((r) => r.data),
+
+  pause: (id: string, data?: LifecycleActionRequest) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/pause`, data ?? {}).then((r) => r.data),
+
+  resume: (id: string) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/resume`).then((r) => r.data),
+
+  cancel: (id: string, data?: LifecycleActionRequest) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/cancel`, data ?? {}).then((r) => r.data),
+
+  setReallocationBounds: (id: string, data: ReallocationBounds) =>
+    api.put<ReallocationBounds>(`/campaigns/${id}/reallocation-bounds`, data).then((r) => r.data),
+
+  listReallocationEvents: (id: string, params?: { cursor?: string; limit?: number }) =>
+    api
+      .get<PaginatedResponse<ReallocationEvent>>(`/campaigns/${id}/reallocation-events`, { params })
+      .then((r) => r.data),
+
+  saveAsTemplate: (id: string, data: SaveAsTemplateRequest) =>
+    api.post<CampaignTemplate>(`/campaigns/${id}/save-as-template`, data).then((r) => r.data),
+
+  acknowledgeDrift: (id: string, data: AcknowledgeDriftRequest) =>
+    api.post<Campaign>(`/campaigns/${id}/acknowledge-drift`, data).then((r) => r.data),
+};
+
+export const templateApi = {
+  list: (params?: { cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<CampaignTemplate>>('/campaign-templates', { params }).then((r) => r.data),
+
+  instantiate: (id: string, data: InstantiateTemplateRequest) =>
+    api.post<Campaign>(`/campaign-templates/${id}/instantiate`, data).then((r) => r.data),
+};
+
+// E3 -- shortlist, metrics, exclusions, agency override (per docs/architecture/e3-creator-matching-curation.md section 3)
+
+export const shortlistApi = {
+  request: (campaignId: string) =>
+    api.post<RequestShortlistResponse>(`/campaigns/${campaignId}/shortlist`).then((r) => r.data),
+
+  get: (campaignId: string) =>
+    api
+      .get<CampaignShortlist>(`/campaigns/${campaignId}/shortlist`)
+      .then((r) => r.data)
+      .catch((err) => {
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  decide: (campaignId: string, entryId: string, data: ShortlistDecisionRequest) =>
+    api
+      .patch<ShortlistDecisionResponse>(`/campaigns/${campaignId}/shortlist/entries/${entryId}`, data)
+      .then((r) => r.data),
+
+  bulkDecide: (campaignId: string, data: BulkShortlistDecisionRequest) =>
+    api
+      .patch<{ entries: ShortlistDecisionResponse[] }>(`/campaigns/${campaignId}/shortlist/entries/bulk`, data)
+      .then((r) => r.data),
+
+  requestAdditionalCandidates: (campaignId: string) =>
+    api
+      .post<RequestAdditionalCandidatesResponse>(`/campaigns/${campaignId}/shortlist/request-additional-candidates`)
+      .then((r) => r.data),
+
+  override: (campaignId: string, data: ShortlistOverrideRequest) =>
+    api.post<ShortlistOverrideResponse>(`/campaigns/${campaignId}/shortlist/override`, data).then((r) => r.data),
+};
+
+export const creatorApi = {
+  getMetrics: (creatorId: string, campaignId?: string) =>
+    api
+      .get<CreatorMetrics>(`/creators/${creatorId}/metrics`, { params: campaignId ? { campaign_id: campaignId } : undefined })
+      .then((r) => r.data),
+};
+
+export const exclusionApi = {
+  list: (params?: { campaign_id?: string }) =>
+    api.get<PaginatedResponse<Exclusion>>('/exclusions', { params }).then((r) => r.data),
+
+  create: (data: CreateExclusionRequest) =>
+    api.post<Exclusion>('/exclusions', data).then((r) => r.data),
+
+  remove: (id: string) => api.delete(`/exclusions/${id}`).then(() => undefined),
+};
+
+// Creator portal (US-28): separate token storage since creators are not account members.
+// Pilot-only creator login (ADR-0013): POST /creator-portal/login takes a creator_id
+// (no password -- E8 owns the real social-auth/magic-link flow) and returns a short-lived
+// creator JWT, used against the /creator-portal/* endpoints below.
+
+const CREATOR_TOKEN_KEY = 'aurora_creator_token';
+
+export function getCreatorToken(): string | null {
+  return localStorage.getItem(CREATOR_TOKEN_KEY);
+}
+
+export function setCreatorToken(token: string) {
+  localStorage.setItem(CREATOR_TOKEN_KEY, token);
+}
+
+export function clearCreatorToken() {
+  localStorage.removeItem(CREATOR_TOKEN_KEY);
+}
+
+const creatorPortalClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+creatorPortalClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = getCreatorToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const creatorPortalApi = {
+  login: (creator_id: string) =>
+    creatorPortalClient
+      .post<{ access_token: string; expires_in: number; creator_id: string }>('/creator-portal/login', {
+        creator_id,
+      })
+      .then((r) => r.data),
+
+  listOpportunities: () =>
+    creatorPortalClient.get<{ data: CreatorOpportunity[] }>('/creator-portal/opportunities').then((r) => r.data),
+
+  accept: (id: string) =>
+    creatorPortalClient.post<CreatorOpportunity>(`/creator-portal/opportunities/${id}/accept`).then((r) => r.data),
+
+  decline: (id: string) =>
+    creatorPortalClient.post<CreatorOpportunity>(`/creator-portal/opportunities/${id}/decline`).then((r) => r.data),
 };
 
 export default api;

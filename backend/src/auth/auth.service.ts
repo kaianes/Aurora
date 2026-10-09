@@ -10,8 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { authenticator } = require('otplib');
+import { generateSecret, generateURI, verifySync } from 'otplib';
 import {
   User,
   Workspace,
@@ -315,10 +314,11 @@ export class AuthService {
         });
       }
 
-      const isValid = authenticator.verify({
+      const isValid = verifySync({
+        strategy: 'totp',
         token: dto.mfa_code,
         secret: user.mfaSecret!,
-      });
+      }).valid;
 
       if (!isValid) {
         await this.auditService.log({
@@ -407,7 +407,7 @@ export class AuthService {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new UnauthorizedException();
 
-    const secret = authenticator.generateSecret();
+    const secret = generateSecret();
 
     // Store temporarily -- will be persisted on confirm
     // Use a simple in-memory approach via the user entity mfaSecret field
@@ -415,7 +415,7 @@ export class AuthService {
     user.mfaSecret = secret;
     await this.userRepo.save(user);
 
-    const otpauthUrl = authenticator.keyuri(user.email, 'Aurora', secret);
+    const otpauthUrl = generateURI({ strategy: 'totp', issuer: 'Aurora', label: user.email, secret });
 
     // Generate backup codes
     const backupCodes = Array.from({ length: 8 }, () =>
@@ -446,10 +446,11 @@ export class AuthService {
       });
     }
 
-    const isValid = authenticator.verify({
+    const isValid = verifySync({
+      strategy: 'totp',
       token: code,
       secret: user.mfaSecret,
-    });
+    }).valid;
 
     if (!isValid) {
       throw new BadRequestException({

@@ -2,6 +2,8 @@
 
 **Author:** Kaiane Cordeiro. Aurora Project, Sprint 4. **Date:** September 25, 2026.
 
+> **TL;DR.** All 5 stories implemented and merged to `main`. Backend: 17/17 tests passing. Frontend: 0 tests executed — the test runner itself failed to start due to a jsdom/undici/Node incompatibility, fixed later in Sprint 5. One critical open item: row-level security is defined in the database but the middleware that activates it was never registered, so tenant isolation runs entirely on explicit `accountId` filtering in application code, not the database guarantee the architecture describes.
+
 ## 1. Purpose
 
 This document summarizes what was built for Epic E1 (Access and Onboarding), checks it against the ADRs and architecture specification, reports the actual state of automated tests, and lists open items. It is the gate artifact reviewed before merging `feature/e1-access-onboarding` into `main`.

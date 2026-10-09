@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthService } from './auth.service';
 import { BadRequestException } from '@nestjs/common';
+import { generateSync } from 'otplib';
 
 // Helpers to build mock repos
 const mockRepo = () => ({
@@ -157,5 +158,75 @@ describe('AuthService - US-01 Self-Service Brand Sign-Up', () => {
       expect(response.error.code).toBe('VERIFICATION_EXPIRED');
       expect(response.error.details.resend_url).toBeDefined();
     }
+  });
+});
+
+// Regression: mfaSetup/mfaConfirm called otplib's v10-12 `authenticator`
+// export, removed in the installed v13. Nothing mocks otplib here --
+// generateSync produces a real TOTP code against the secret mfaSetup
+// returns, so this exercises the actual library API, the only way this bug
+// would have been caught (it crashed in every environment, not just
+// production).
+describe('AuthService - MFA setup and confirm', () => {
+  let service: AuthService;
+  let userRepo: ReturnType<typeof mockRepo>;
+
+  beforeEach(() => {
+    userRepo = mockRepo();
+    const auditService = { log: vi.fn().mockResolvedValue(undefined) };
+    const emailQueue = { add: vi.fn().mockResolvedValue(undefined) };
+    const dataSource = { createQueryRunner: () => mockQueryRunner };
+    const jwtService = { sign: vi.fn(), verify: vi.fn() };
+    const configService = { get: vi.fn().mockReturnValue('http://localhost:3000') };
+
+    service = new AuthService(
+      userRepo as any,
+      mockRepo() as any,
+      mockRepo() as any,
+      mockRepo() as any,
+      mockRepo() as any,
+      dataSource as any,
+      jwtService as any,
+      configService as any,
+      auditService as any,
+      emailQueue as any,
+    );
+  });
+
+  it('generates a secret and QR URL that a real authenticator app could use', async () => {
+    const user = { id: 'user-1', email: 'marina@example.com', mfaSecret: null as string | null };
+    userRepo.findOne.mockResolvedValue(user);
+
+    const result = await service.mfaSetup('user-1');
+
+    expect(result.secret).toMatch(/^[A-Z2-7]+$/); // base32
+    expect(result.qr_code_url).toContain('otpauth://totp/');
+    expect(result.qr_code_url).toContain(encodeURIComponent('marina@example.com'));
+    expect(result.backup_codes).toHaveLength(8);
+    expect(user.mfaSecret).toBe(result.secret);
+  });
+
+  it('confirms MFA with a code generated from the real secret and enables it', async () => {
+    const user = { id: 'user-1', mfaSecret: null as string | null, mfaEnabled: false };
+    userRepo.findOne.mockResolvedValue(user);
+
+    const { secret } = await service.mfaSetup('user-1');
+    const validCode = generateSync({ strategy: 'totp', secret });
+
+    await service.mfaConfirm('user-1', validCode, '127.0.0.1', 'vitest');
+
+    expect(user.mfaEnabled).toBe(true);
+  });
+
+  it('rejects an incorrect MFA code without enabling MFA', async () => {
+    const user = { id: 'user-1', mfaSecret: null as string | null, mfaEnabled: false };
+    userRepo.findOne.mockResolvedValue(user);
+
+    await service.mfaSetup('user-1');
+
+    await expect(
+      service.mfaConfirm('user-1', '000000', '127.0.0.1', 'vitest'),
+    ).rejects.toThrow(BadRequestException);
+    expect(user.mfaEnabled).toBe(false);
   });
 });
