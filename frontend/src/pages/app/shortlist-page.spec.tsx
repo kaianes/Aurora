@@ -66,6 +66,19 @@ describe('ShortlistPage - US-11', () => {
     expect(screen.getByText(/Rank #1/)).toBeInTheDocument();
   });
 
+  // Normal: no shortlist has been requested yet offers the "Gerar shortlist" action
+  // instead of a generic failure. shortlistApi.get resolves to null for a 404
+  // (see api-client.ts), which the page must distinguish from a real load error.
+  it('offers to generate a shortlist when none has been requested yet', async () => {
+    (shortlistApi.get as any).mockResolvedValue(null);
+
+    renderPage();
+
+    expect(await screen.findByText(/Nenhum shortlist gerado ainda/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Gerar shortlist/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Nao foi possivel carregar o shortlist/)).not.toBeInTheDocument();
+  });
+
   // Hard: pool below the guaranteed minimum is flagged explicitly, not padded silently (US-11 scenario 2).
   it('flags explicitly when the pool is below the guaranteed minimum', async () => {
     (shortlistApi.get as any).mockResolvedValue({
