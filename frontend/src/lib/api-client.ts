@@ -2,14 +2,23 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type {
   AcceptInvitationRequest,
   AcceptInvitationResponse,
+  AcknowledgeDriftRequest,
   AddOperatorRequest,
   BrandProfile,
+  Campaign,
+  CampaignSummary,
+  CampaignTemplate,
   ClientListResponse,
   CreateBrandProfileRequest,
+  CreateCampaignRequest,
   CreateClientRequest,
   CreateClientResponse,
   CreateInvitationRequest,
+  ConfirmCampaignResponse,
+  InstantiateTemplateRequest,
   Invitation,
+  LifecycleActionRequest,
+  LifecycleActionResponse,
   LoginRequest,
   LoginResponse,
   LogoUploadResponse,
@@ -20,13 +29,21 @@ import type {
   OperatorAccess,
   PaginatedResponse,
   PricingResponse,
+  CampaignQuote,
+  ReallocationBounds,
+  ReallocationEvent,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
+  RequestQuoteResponse,
   ResendInvitationResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
+  ResolveShortfallRequest,
+  SaveAsTemplateRequest,
+  ShortfallResponse,
   UpdateBrandProfileRequest,
+  UpdateCampaignRequest,
   UpdateMemberRequest,
   UpdateMemberResponse,
   VerifyEmailRequest,
@@ -236,6 +253,65 @@ export const agencyApi = {
 
   removeOperator: (clientId: string, userId: string) =>
     api.delete(`/agency/clients/${clientId}/operators/${userId}`).then(() => undefined),
+};
+
+export const campaignApi = {
+  list: (params?: { state?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<CampaignSummary>>('/campaigns', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<Campaign>(`/campaigns/${id}`).then((r) => r.data),
+
+  create: (data: CreateCampaignRequest) =>
+    api.post<Campaign>('/campaigns', data).then((r) => r.data),
+
+  update: (id: string, data: UpdateCampaignRequest) =>
+    api.patch<Campaign>(`/campaigns/${id}`, data).then((r) => r.data),
+
+  requestQuote: (id: string) =>
+    api.post<RequestQuoteResponse>(`/campaigns/${id}/quote`).then((r) => r.data),
+
+  getQuote: (campaignId: string, quoteId: string) =>
+    api.get<CampaignQuote>(`/campaigns/${campaignId}/quote/${quoteId}`).then((r) => r.data),
+
+  confirm: (id: string) =>
+    api.post<ConfirmCampaignResponse>(`/campaigns/${id}/confirm`).then((r) => r.data),
+
+  getShortfall: (id: string) =>
+    api.get<ShortfallResponse>(`/campaigns/${id}/shortfall`).then((r) => r.data),
+
+  resolveShortfall: (id: string, data: ResolveShortfallRequest) =>
+    api.post<ShortfallResponse['shortfall']>(`/campaigns/${id}/shortfall/resolve`, data).then((r) => r.data),
+
+  pause: (id: string, data?: LifecycleActionRequest) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/pause`, data ?? {}).then((r) => r.data),
+
+  resume: (id: string) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/resume`).then((r) => r.data),
+
+  cancel: (id: string, data?: LifecycleActionRequest) =>
+    api.post<LifecycleActionResponse>(`/campaigns/${id}/cancel`, data ?? {}).then((r) => r.data),
+
+  setReallocationBounds: (id: string, data: ReallocationBounds) =>
+    api.put<ReallocationBounds>(`/campaigns/${id}/reallocation-bounds`, data).then((r) => r.data),
+
+  listReallocationEvents: (id: string, params?: { cursor?: string; limit?: number }) =>
+    api
+      .get<PaginatedResponse<ReallocationEvent>>(`/campaigns/${id}/reallocation-events`, { params })
+      .then((r) => r.data),
+
+  saveAsTemplate: (id: string, data: SaveAsTemplateRequest) =>
+    api.post<CampaignTemplate>(`/campaigns/${id}/save-as-template`, data).then((r) => r.data),
+
+  acknowledgeDrift: (id: string, data: AcknowledgeDriftRequest) =>
+    api.post<Campaign>(`/campaigns/${id}/acknowledge-drift`, data).then((r) => r.data),
+};
+
+export const templateApi = {
+  list: (params?: { cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<CampaignTemplate>>('/campaign-templates', { params }).then((r) => r.data),
+
+  instantiate: (id: string, data: InstantiateTemplateRequest) =>
+    api.post<Campaign>(`/campaign-templates/${id}/instantiate`, data).then((r) => r.data),
 };
 
 export default api;

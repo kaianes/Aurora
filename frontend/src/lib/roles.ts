@@ -26,3 +26,15 @@ export function canManageClients(role: Role): boolean {
 export function getInvitableRoles(workspaceType: 'brand' | 'agency'): Role[] {
   return workspaceType === 'brand' ? BRAND_INVITABLE_ROLES : AGENCY_INVITABLE_ROLES;
 }
+
+// Campaign (E2) permissions, per docs/architecture/e2-campaign-planning-pool-buying.md 2.3
+
+const CAMPAIGN_WRITE_ROLES: Role[] = ['brand_owner', 'brand_manager', 'agency_admin', 'agency_operator'];
+
+export function canWriteCampaign(role: Role): boolean {
+  return CAMPAIGN_WRITE_ROLES.includes(role);
+}
+
+export function canResolveShortfall(role: Role): boolean {
+  return role === 'brand_owner' || role === 'agency_admin';
+}

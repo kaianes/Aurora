@@ -13,6 +13,12 @@ import { BrandProfilePage } from '@/pages/app/brand-profile-page';
 import { TeamPage } from '@/pages/app/team-page';
 import { ClientsPage } from '@/pages/app/clients-page';
 import { ClientDetailPage } from '@/pages/app/client-detail-page';
+import { CampaignsPage } from '@/pages/app/campaigns-page';
+import { CampaignFormPage } from '@/pages/app/campaign-form-page';
+import { CampaignDetailPage } from '@/pages/app/campaign-detail-page';
+import { ShortfallPage } from '@/pages/app/shortfall-page';
+import { TemplatesPage } from '@/pages/app/templates-page';
+import { TemplateInstantiatePage } from '@/pages/app/template-instantiate-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +55,13 @@ export default function App() {
             >
               <Route path="brand-profile" element={<BrandProfilePage />} />
               <Route path="team" element={<TeamPage />} />
+              <Route path="campaigns" element={<CampaignsPage />} />
+              <Route path="campaigns/new" element={<CampaignFormPage />} />
+              <Route path="campaigns/:id/edit" element={<CampaignFormPage />} />
+              <Route path="campaigns/:id/shortfall" element={<ShortfallPage />} />
+              <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+              <Route path="templates" element={<TemplatesPage />} />
+              <Route path="templates/:id/instantiate" element={<TemplateInstantiatePage />} />
               <Route
                 path="clients"
                 element={

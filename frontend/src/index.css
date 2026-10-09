@@ -20,6 +20,13 @@
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Aurora brand accents (E2 campaign/pool UI): each color carries a fixed meaning,
+     do not use interchangeably. See docs brand system. */
+  --color-signal-green: #3DDC97;   /* safety and reach */
+  --color-strategy-violet: #7F77DD; /* structure and tiers (campaign states) */
+  --color-creator-pink: #F0507A;    /* creator energy (pool / creators) */
+  --color-performance-orange: #E8823C; /* performance and attention (reallocation) */
 }
 
 @layer base {
