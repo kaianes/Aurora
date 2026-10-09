@@ -13,6 +13,7 @@ import { InvitationModule } from './invitation/invitation.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AgencyModule } from './agency/agency.module';
 import { JobsModule } from './jobs/jobs.module';
+import { CampaignModule } from './campaign/campaign.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -27,6 +28,14 @@ import {
   VerificationToken,
   AuditLog,
   OperatorClientAccess,
+  Campaign,
+  CampaignQuote,
+  CampaignPoolMember,
+  CampaignReallocationEvent,
+  CampaignStateTransition,
+  CampaignTemplate,
+  ReallocationBounds,
+  PoolShortfallResolution,
 } from './database/entities';
 
 @Module({
@@ -54,6 +63,14 @@ import {
           VerificationToken,
           AuditLog,
           OperatorClientAccess,
+          Campaign,
+          CampaignQuote,
+          CampaignPoolMember,
+          CampaignReallocationEvent,
+          CampaignStateTransition,
+          CampaignTemplate,
+          ReallocationBounds,
+          PoolShortfallResolution,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -79,6 +96,7 @@ import {
     WorkspaceModule,
     AgencyModule,
     JobsModule,
+    CampaignModule,
   ],
   providers: [
     {
