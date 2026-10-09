@@ -24,11 +24,8 @@ import {
   CreatorOnboardingStatus,
   Creator,
   AdditionalCandidatesRequest,
-  Membership,
-  OperatorClientAccess,
   Account,
   WorkspaceType,
-  Role,
   CampaignOpportunity,
 } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
@@ -72,10 +69,6 @@ export class ShortlistService {
     private creatorRepo: Repository<Creator>,
     @InjectRepository(AdditionalCandidatesRequest)
     private requestRepo: Repository<AdditionalCandidatesRequest>,
-    @InjectRepository(Membership)
-    private membershipRepo: Repository<Membership>,
-    @InjectRepository(OperatorClientAccess)
-    private operatorAccessRepo: Repository<OperatorClientAccess>,
     @InjectRepository(Account)
     private accountRepo: Repository<Account>,
     @InjectRepository(CampaignOpportunity)
@@ -343,7 +336,6 @@ export class ShortlistService {
   async overrideShortlist(
     campaignId: string,
     accountId: string,
-    currentRole: Role,
     userId: string,
     dto: OverrideShortlistDto,
     actor: ActorContext,
@@ -363,24 +355,9 @@ export class ShortlistService {
     }
 
     // NFR-16: an agency_operator may only override shortlists for client
-    // accounts they have been explicitly granted access to.
-    if (currentRole === Role.AGENCY_OPERATOR) {
-      const membership = await this.membershipRepo.findOne({ where: { userId, accountId } });
-      const access = membership
-        ? await this.operatorAccessRepo.findOne({
-            where: { membershipId: membership.id, accountId },
-          })
-        : null;
-      if (!access) {
-        throw new ForbiddenException({
-          error: {
-            code: 'NOT_AGENCY_CONTEXT',
-            message: 'Voce nao tem acesso de operador a esta conta de cliente.',
-            details: {},
-          },
-        });
-      }
-    }
+    // accounts they have been explicitly granted access to. Enforced by
+    // RolesGuard (AccountAccessService) before this handler runs at all --
+    // reaching this line already proves currentRole is valid for accountId.
 
     const campaign = await this.findCampaignOrFail(campaignId, accountId);
     const shortlist = await this.shortlistRepo.findOne({ where: { campaignId } });

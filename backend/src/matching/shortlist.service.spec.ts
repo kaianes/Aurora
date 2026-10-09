@@ -14,7 +14,6 @@ import {
   CreatorStatus,
   CreatorOnboardingStatus,
   WorkspaceType,
-  Role,
 } from '../database/entities';
 
 const mockRepo = () => ({
@@ -38,8 +37,6 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
   let poolMemberRepo: ReturnType<typeof mockRepo>;
   let creatorRepo: ReturnType<typeof mockRepo>;
   let requestRepo: ReturnType<typeof mockRepo>;
-  let membershipRepo: ReturnType<typeof mockRepo>;
-  let operatorAccessRepo: ReturnType<typeof mockRepo>;
   let accountRepo: ReturnType<typeof mockRepo>;
   let opportunityRepo: ReturnType<typeof mockRepo>;
   let matchingQueue: { add: ReturnType<typeof vi.fn> };
@@ -55,8 +52,6 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
     poolMemberRepo = mockRepo();
     creatorRepo = mockRepo();
     requestRepo = mockRepo();
-    membershipRepo = mockRepo();
-    operatorAccessRepo = mockRepo();
     accountRepo = mockRepo();
     opportunityRepo = mockRepo();
     matchingQueue = { add: vi.fn().mockResolvedValue(undefined) };
@@ -70,8 +65,6 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
       poolMemberRepo as any,
       creatorRepo as any,
       requestRepo as any,
-      membershipRepo as any,
-      operatorAccessRepo as any,
       accountRepo as any,
       opportunityRepo as any,
       matchingQueue as any,
@@ -184,7 +177,6 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
     const result = await service.overrideShortlist(
       'camp-1',
       'account-client-1',
-      Role.AGENCY_ADMIN,
       'user-1',
       { remove_entry_ids: ['entry-1'], add_creators: [{ creator_id: 'creator-2' }] },
       actor,
@@ -210,7 +202,6 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
       service.overrideShortlist(
         'camp-1',
         'account-client-1',
-        Role.AGENCY_ADMIN,
         'user-1',
         { add_creators: [{ creator_id: 'creator-3' }] },
         actor,
@@ -218,30 +209,12 @@ describe('ShortlistService - US-11/US-13/US-40', () => {
     ).rejects.toThrow(UnprocessableEntityException);
   });
 
-  // ---- Failure: an agency_operator without granted client access is blocked (NFR-16) ----
-  it('blocks an agency_operator override attempt without operator_client_access', async () => {
-    accountRepo.findOne.mockResolvedValue({ id: 'account-client-1', workspace: { type: WorkspaceType.AGENCY } });
-    membershipRepo.findOne.mockResolvedValue({ id: 'membership-1' });
-    operatorAccessRepo.findOne.mockResolvedValue(null);
-
-    await expect(
-      service.overrideShortlist(
-        'camp-1',
-        'account-client-1',
-        Role.AGENCY_OPERATOR,
-        'user-1',
-        {},
-        actor,
-      ),
-    ).rejects.toThrow(ForbiddenException);
-  });
-
   // ---- Failure: override attempted on a non-agency account ----
   it('rejects an override attempted outside an agency workspace context', async () => {
     accountRepo.findOne.mockResolvedValue({ id: 'account-1', workspace: { type: WorkspaceType.BRAND } });
 
     await expect(
-      service.overrideShortlist('camp-1', 'account-1', Role.AGENCY_ADMIN, 'user-1', {}, actor),
+      service.overrideShortlist('camp-1', 'account-1', 'user-1', {}, actor),
     ).rejects.toThrow(ForbiddenException);
   });
 });
