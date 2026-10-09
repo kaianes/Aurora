@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "export PATH=\"$HOME/.local/share/fnm:$PATH\" && eval \"$(fnm env)\" && cd frontend && npm run dev"],
+      "port": 5173
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "export PATH=\"$HOME/.local/share/fnm:$PATH\" && eval \"$(fnm env)\" && cd backend && npm run start:dev"],
+      "port": 3001
+    }
+  ]
+}
