@@ -452,3 +452,134 @@ export interface AcknowledgeDriftRequest {
   acknowledged_fields: string[];
   overrides?: Record<string, unknown>;
 }
+
+// ---------------------------------------------------------------------------
+// E3 -- Creator Matching and Curation
+// Types mirror docs/architecture/e3-creator-matching-curation.md section 3.
+// ---------------------------------------------------------------------------
+
+export type ShortlistStatus = 'pending' | 'ready' | 'failed' | 'no_viable_pool';
+export type ShortlistEntryOrigin = 'system_ranked' | 'agency_added';
+export type ShortlistEntryDecision = 'pending' | 'approved' | 'rejected';
+
+export interface ShortlistEntry {
+  id: string;
+  creator_id: string;
+  rank: number | null;
+  fit_score: number | null;
+  matched_attributes: string[];
+  origin: ShortlistEntryOrigin;
+  decision: ShortlistEntryDecision;
+  included: boolean;
+  decision_at?: string | null;
+}
+
+export interface CampaignShortlist {
+  id: string;
+  campaign_id: string;
+  status: ShortlistStatus;
+  below_guaranteed_minimum: boolean;
+  locked: boolean;
+  locked_reason?: 'agency_override' | 'campaign_activated' | null;
+  entries: ShortlistEntry[];
+  guaranteed_min_pool_size?: number;
+  matched_count?: number;
+  failure_reason?: string | null;
+  requested_at: string;
+  resolved_at?: string | null;
+}
+
+export interface RequestShortlistResponse {
+  shortlist_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+export interface ShortlistDecisionRequest {
+  decision: 'approved' | 'rejected';
+}
+
+export interface ShortlistDecisionResponse {
+  id: string;
+  decision: ShortlistEntryDecision;
+  included: boolean;
+  decision_at: string;
+  warning?: 'pool_below_guaranteed_minimum';
+}
+
+export interface BulkShortlistDecisionRequest {
+  decisions: { entry_id: string; decision: 'approved' | 'rejected' }[];
+}
+
+export interface RequestAdditionalCandidatesResponse {
+  request_id: string;
+  status: 'pending';
+}
+
+export type AuthenticityFlag = 'none' | 'review' | 'low';
+
+export interface CreatorMetrics {
+  creator_id: string;
+  display_name: string;
+  audience_size: number | null;
+  demographic_composition: Record<string, number> | null;
+  engagement_rate: string | null;
+  content_niche: string | null;
+  authenticity_score: number | null;
+  authenticity_flag: AuthenticityFlag;
+  metrics_computed_at: string | null;
+  metrics_stale: boolean;
+  stale_since?: string | null;
+  matched_attributes?: string[];
+}
+
+export type ExclusionScope = 'brand' | 'campaign';
+export type ExclusionType = 'creator' | 'competitor_brand';
+
+export interface Exclusion {
+  id: string;
+  scope: ExclusionScope;
+  exclusion_type: ExclusionType;
+  creator_id?: string | null;
+  competitor_name?: string | null;
+  campaign_id?: string | null;
+  created_at: string;
+  applies_to?: string;
+}
+
+export interface CreateExclusionRequest {
+  scope: ExclusionScope;
+  exclusion_type: ExclusionType;
+  creator_id?: string;
+  competitor_name?: string;
+  campaign_id?: string;
+}
+
+export interface ShortlistOverrideRequest {
+  remove_entry_ids: string[];
+  add_creators: { creator_id: string }[];
+}
+
+export interface ShortlistOverrideResponse {
+  shortlist_id: string;
+  locked: true;
+  locked_reason: 'agency_override';
+  locked_at: string;
+  below_guaranteed_minimum: boolean;
+  entries: ShortlistEntry[];
+}
+
+export type OpportunityStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export interface CreatorOpportunity {
+  id: string;
+  campaign_id: string;
+  brand_name: string;
+  deliverable: { format: string; quantity: number };
+  payout_gross: string;
+  payout_commission: string;
+  payout_net: string;
+  expires_at: string;
+  status: OpportunityStatus;
+  responded_at?: string | null;
+}

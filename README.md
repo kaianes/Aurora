@@ -17,13 +17,16 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-The project is now in the coding phase. The first epic, Access and Onboarding, is implemented end to end (backend, frontend, and database) and documented in [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md).
+The project is now in the coding phase. Three epics are implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), merged to `main`, and Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation), both built in Sprint 5 and currently awaiting merge review on stacked feature branches. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
+
+**Live demo:** _link pending deploy — see [docs/deployment.md](docs/deployment.md)._
 
 - ✅ **Sprint 1** — Initial market research and business analysis (industry context, the problem, the solution, and the competitive landscape)
 - ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, and Revenue and Cost Structure)
 - ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 functional and 36 non-functional requirements, with full traceability)
 - ✅ **Sprint 4** — System design finalized, the agent pipeline that builds every epic from here on defined, and Epic 1 (Access and Onboarding) built end to end ahead of schedule: authentication, tenant isolation, RBAC, brand profile, team invitations, and agency client management, backend and frontend, with live API docs and a passing backend test suite (see the reviewer's summary for known gaps, including the frontend test environment and tenant isolation enforcement)
-- ⏳ **Next** — Sprint 5, continuing into Epic 2 and onward with the same pipeline
+- ✅ **Sprint 5** — Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation) built end to end with the same pipeline, ahead of the original one-epic-per-sprint pace: async quoting and budget reallocation for E2, a real creator-matching engine (replacing E2's stub) and shortlist/exclusion/opportunity flows for E3. Both pass their full automated test suites (107 backend + 31 frontend tests combined) and are documented in [docs/implementation.md](docs/implementation.md); pending human review and merge to `main`.
+- ⏳ **Next** — Sprint 6, continuing into the remaining epics (Brand Safety, Briefing and Content Workflow, and onward) with the same pipeline
 
 ## Project Roadmap
 
@@ -31,7 +34,7 @@ The Aurora project is organized into four phases (business study, system design,
 
 - Phase 1 (business study) is already complete, covered in Sprints 1 and 2, spanning market research, Porter's Five Forces, the competitive matrix, gap analysis, SWOT, the risk matrix, and initial personas.
 - Phase 2 (system design) begins, with two sprints dedicated to mapping the user journey and user stories, followed by defining the functional and non-functional requirements.
-- Phase 3 (coding) is the longest stretch, with three sprints set aside for technical setup, building out the core features, and finally integrations and polish.
+- Phase 3 (coding) is the longest stretch: three sprints, the first two building out the core features and the third for integrations and polish.
 - Phase 4 (evaluation) closes out the schedule with a sprint for testing and validation, followed by a shorter final sprint for last adjustments, documentation, and delivery, keeping everything on track for the December 1 deadline.
 
 ```mermaid
@@ -49,7 +52,7 @@ gantt
     Sprint 4 (agent pipeline + Epic 1, Access and Onboarding)     :done, s4, 2026-09-14, 2026-09-25
 
     section Phase 3 - Coding
-    Sprint 5 (Epic 2, core features - part 1)                     :s5, 2026-09-28, 2026-10-09
+    Sprint 5 (Epic 2 + Epic 3, core features - part 1)            :done, s5, 2026-09-28, 2026-10-09
     Sprint 6 (core features - part 2)                            :s6, 2026-10-12, 2026-10-23
     Sprint 7 (integrations + polish)                             :s7, 2026-10-26, 2026-11-06
 
@@ -63,15 +66,14 @@ gantt
 ```
 .
 ├── .claude/agents/                    # One file per pipeline agent (see Agent Pipeline below)
-├── backend/                           # NestJS API (auth, pricing, brand profile, invitations, workspace, agency)
-├── frontend/                          # React/Vite app consuming the API
+├── backend/                           # NestJS API (auth, pricing, brand-profile, invitation, workspace, agency, campaign, matching, audit, jobs)
+├── frontend/                          # React/Vite app consuming the API (public pages, protected app pages, creator-portal)
 ├── docker-compose.yml                 # PostgreSQL 16 + Redis 7 for local development
 ├── docs/
 │   ├── business-analysis.md          # Market research and strategic frameworks
 │   ├── product-requirements.md       # Journeys, user stories, FRs and NFRs
 │   ├── architecture.md               # System design, ATAM, security, DevOps
-│   ├── sprint-4-delivery.md          # How Epic 1 was built, how to run and test it
-│   ├── aurora-E1-setup-guide         # Step-by-step local setup for Epic 1
+│   ├── implementation.md             # Agent pipeline, every epic delivered so far, how to run and test them
 │   ├── adr/                          # Architecture Decision Records, one per epic decision
 │   ├── architecture/                 # Per-epic architecture docs (data model, API contracts)
 │   ├── epics/                        # Per-epic stories and the reviewer's summary
@@ -123,7 +125,7 @@ Starting in Sprint 4, every epic is built by a fixed sequence of specialized Cla
 | 4 | `qa` | Automated tests per acceptance criterion, reported back to the owning dev |
 | 5 | `reviewer` | The epic summary, checked against the ADRs and contracts, as the final gate before merge |
 
-Stories and architecture each require human approval before the next stage proceeds, and nothing merges without the reviewer's summary. The full instructions for each agent are in `.claude/agents/`. The pipeline itself, and how it produced Epic 1, is documented in [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md).
+Stories and architecture each require human approval before the next stage proceeds, and nothing merges without the reviewer's summary. The full instructions for each agent are in `.claude/agents/`. The pipeline itself, and how it produced every epic so far, is documented in [docs/implementation.md](docs/implementation.md).
 
 ## Epic 1: Access and Onboarding
 
@@ -133,9 +135,31 @@ The first epic removes the enterprise sales cycle from onboarding: a brand or ag
 - **Architecture and API contracts:** [docs/architecture/e1-access-onboarding.md](docs/architecture/e1-access-onboarding.md)
 - **Decisions:** authentication strategy, tenant isolation via PostgreSQL row-level security, workspace-scoped RBAC, and the brand profile draft lifecycle, each in its own ADR under [docs/adr/](docs/adr)
 - **What was built, tested, and any deviations from the design:** [docs/epics/e1-access-onboarding/summary.md](docs/epics/e1-access-onboarding/summary.md)
-- **Run it locally and test it:** [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md) or the detailed [setup guide](docs/aurora-E1-setup-guide)
+- **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
 
-Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/sprint-4-delivery.md](docs/sprint-4-delivery.md#6-field-research-conducted-alongside-this-sprint) for the interview guide and analyses.
+Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#10-field-research-conducted-alongside-epic-1) for the interview guide and analyses.
+
+## Epic 2: Campaign Planning and Pool Buying
+
+The second epic lets a brand define a campaign's budget, audience, and message once, see the matched creator pool's projected reach and price before committing, and buy that pool at one locked price instead of negotiating per creator. Built on the same NestJS/PostgreSQL backend and React frontend, on top of Epic 1. **Status: implemented and tested, pending merge** — see the branches note below.
+
+- **Stories:** [docs/epics/e2-campaign-planning-pool-buying/stories.md](docs/epics/e2-campaign-planning-pool-buying/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e2-campaign-planning-pool-buying.md](docs/architecture/e2-campaign-planning-pool-buying.md)
+- **Decisions:** pool allocation model, campaign state machine, budget reallocation bounds, pool-shortfall resolution criteria, minimum campaign budget, and template library scope, each in its own ADR under [docs/adr/](docs/adr) (0005-0010)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e2-campaign-planning-pool-buying/summary.md](docs/epics/e2-campaign-planning-pool-buying/summary.md)
+- **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
+
+## Epic 3: Creator Matching and Curation
+
+The third epic replaces Epic 2's placeholder matching engine with a real one, ranking creators by audience fit, authenticity, engagement, and historical reliability, and lets a brand approve or reject individual creators, exclude specific creators or competitor-associated ones, and lets an agency override the shortlist with its own network. It also gives the creator (Duda) a minimal portal to accept or decline a campaign opportunity. **Status: implemented and tested, pending merge** — see the branches note below.
+
+- **Stories:** [docs/epics/e3-creator-matching-curation/stories.md](docs/epics/e3-creator-matching-curation/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e3-creator-matching-curation.md](docs/architecture/e3-creator-matching-curation.md)
+- **Decisions:** real matching engine scoring model, shortlist locking, the minimal creator entity, exclusion precedence, override sequencing, guaranteed-minimum advisory, authenticity-score policy, and additional-candidates top-up, each in its own ADR under [docs/adr/](docs/adr) (0011-0018)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e3-creator-matching-curation/summary.md](docs/epics/e3-creator-matching-curation/summary.md)
+- **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
+
+**Branches:** Epic 1 is merged to `main`. Epic 2 and Epic 3 are on stacked feature branches awaiting review (`feature/e2-campaign-planning-pool-buying`, with Epic 3 built on top of it as `feature/e3-creator-matching-curation`, since E3's matching module depends directly on E2's campaign module). Check out `feature/e3-creator-matching-curation` to run everything built so far.
 
 ## Institution
 

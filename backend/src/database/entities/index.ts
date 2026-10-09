@@ -25,3 +25,22 @@ export {
   ShortfallResolutionType,
   ShortfallChosenBy,
 } from './pool-shortfall-resolution.entity';
+export { Creator, CreatorStatus, CreatorOnboardingStatus } from './creator.entity';
+export type { DemographicComposition } from './creator.entity';
+export { CreatorExclusion, ExclusionType } from './creator-exclusion.entity';
+export {
+  CampaignShortlist,
+  ShortlistStatus,
+  ShortlistLockedReason,
+} from './campaign-shortlist.entity';
+export {
+  CampaignShortlistEntry,
+  ShortlistEntryOrigin,
+  ShortlistEntryDecision,
+} from './campaign-shortlist-entry.entity';
+export { CampaignOpportunity, OpportunityStatus } from './campaign-opportunity.entity';
+export type { OpportunityDeliverable } from './campaign-opportunity.entity';
+export {
+  AdditionalCandidatesRequest,
+  AdditionalCandidatesRequestStatus,
+} from './additional-candidates-request.entity';

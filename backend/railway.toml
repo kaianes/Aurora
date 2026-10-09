@@ -1,0 +1,9 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm install && npm run build"
+
+[deploy]
+startCommand = "npx tsx src/database/run-migrations.ts && npm run start:prod"
+healthcheckPath = "/v1/pricing"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
