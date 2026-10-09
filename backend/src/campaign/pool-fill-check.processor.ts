@@ -1,9 +1,9 @@
 import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Job } from 'bull';
-import { Campaign, CampaignPoolMember } from '../database/entities';
+import { Campaign, CampaignPoolMember, PoolMemberStatus } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 import { CampaignService } from './campaign.service';
 
@@ -30,7 +30,9 @@ export class PoolFillCheckProcessor {
       return;
     }
 
-    const actualPoolSize = await this.poolMemberRepo.count({ where: { campaignId } });
+    const actualPoolSize = await this.poolMemberRepo.count({
+      where: { campaignId, status: Not(PoolMemberStatus.EXCLUDED) },
+    });
 
     if (actualPoolSize >= campaign.guaranteedMinPoolSize) {
       return; // Guarantee met, no-op.

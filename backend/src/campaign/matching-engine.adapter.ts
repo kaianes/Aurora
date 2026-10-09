@@ -21,12 +21,50 @@ export interface EstimatePoolNoViablePool {
 
 export type EstimatePoolResult = EstimatePoolReady | EstimatePoolNoViablePool;
 
+export interface GenerateShortlistInput {
+  campaignId: string;
+  accountId: string;
+  audienceTargeting: AudienceTargeting | null;
+  deliverableFormats: string[] | null;
+  guaranteedMinPoolSize: number;
+  // Resolved brand + campaign exclusions, already unioned (US-14, ADR-0014).
+  excludedCreatorIds: string[];
+  // For top-up requests (ADR-0018), empty otherwise.
+  alreadyOnShortlistCreatorIds: string[];
+  // 150 ceiling per NFR-06.
+  maxCandidates: number;
+}
+
+export interface GenerateShortlistEntry {
+  creatorId: string;
+  rank: number;
+  fitScore: number;
+  matchedAttributes: string[];
+}
+
+export interface GenerateShortlistReady {
+  status: 'ready';
+  entries: GenerateShortlistEntry[];
+}
+
+export interface GenerateShortlistNoViablePool {
+  status: 'no_viable_pool';
+}
+
+export type GenerateShortlistResult =
+  | GenerateShortlistReady
+  | GenerateShortlistNoViablePool;
+
 // Interface consumed from E3 (full shortlist/matching engine). E2 only defines
 // the contract and ships a deterministic stub so quoting works end to end
 // before E3's matching engine (FR-25) exists. Swapping to the real engine is
 // a DI binding change only (see section 3.3.1 of the E2 architecture doc).
+//
+// generateShortlist is added by E3 (section 3.2.1 of the E3 architecture
+// doc); estimatePool is unchanged, still consumed by E2's quote flow.
 export interface MatchingEngineAdapter {
   estimatePool(input: EstimatePoolInput): Promise<EstimatePoolResult>;
+  generateShortlist(input: GenerateShortlistInput): Promise<GenerateShortlistResult>;
 }
 
 export const MATCHING_ENGINE_ADAPTER = 'MATCHING_ENGINE_ADAPTER';
@@ -69,6 +107,14 @@ export class StubMatchingEngineAdapter implements MatchingEngineAdapter {
       projectedReachHigh,
       totalPrice: budget > 0 ? budget.toFixed(2) : (guaranteedMinPoolSize * costPerCreator).toFixed(2),
     };
+  }
+
+  // Stub retained for pre-E3 tests only; production traffic is bound to
+  // RealMatchingEngineAdapter (matching module) once E3 ships. Never called
+  // in that configuration, kept deterministic and honest (no_viable_pool)
+  // rather than fabricating a fake shortlist.
+  async generateShortlist(): Promise<GenerateShortlistResult> {
+    return { status: 'no_viable_pool' };
   }
 
   // Narrower targeting (more geography/interest constraints, narrow age range)

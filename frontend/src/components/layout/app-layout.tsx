@@ -62,6 +62,9 @@ export function AppLayout() {
             <NavLink to="/app/templates" className={navLinkClass}>
               Modelos
             </NavLink>
+            <NavLink to="/app/exclusions" className={navLinkClass}>
+              Lista de Exclusao
+            </NavLink>
             <NavLink to="/app/team" className={navLinkClass}>
               Equipe
             </NavLink>

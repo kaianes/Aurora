@@ -4,6 +4,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { PublicLayout } from '@/components/layout/public-layout';
 import { AppLayout } from '@/components/layout/app-layout';
 import { ProtectedRoute } from '@/components/layout/protected-route';
+import { CreatorPortalLayout } from '@/components/layout/creator-portal-layout';
 import { PricingPage } from '@/pages/pricing-page';
 import { RegisterPage } from '@/pages/auth/register-page';
 import { VerifyEmailPage } from '@/pages/auth/verify-email-page';
@@ -19,6 +20,12 @@ import { CampaignDetailPage } from '@/pages/app/campaign-detail-page';
 import { ShortfallPage } from '@/pages/app/shortfall-page';
 import { TemplatesPage } from '@/pages/app/templates-page';
 import { TemplateInstantiatePage } from '@/pages/app/template-instantiate-page';
+import { ShortlistPage } from '@/pages/app/shortlist-page';
+import { CreatorMetricsPage } from '@/pages/app/creator-metrics-page';
+import { ExclusionsPage } from '@/pages/app/exclusions-page';
+import { ShortlistOverridePage } from '@/pages/app/shortlist-override-page';
+import { CreatorAccessPage } from '@/pages/creator-portal/creator-access-page';
+import { OpportunitiesPage } from '@/pages/creator-portal/opportunities-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,7 +66,19 @@ export default function App() {
               <Route path="campaigns/new" element={<CampaignFormPage />} />
               <Route path="campaigns/:id/edit" element={<CampaignFormPage />} />
               <Route path="campaigns/:id/shortfall" element={<ShortfallPage />} />
+              <Route path="campaigns/:id/shortlist" element={<ShortlistPage />} />
+              <Route path="campaigns/:id/shortlist/creators/:creatorId" element={<CreatorMetricsPage />} />
+              <Route path="campaigns/:id/exclusions" element={<ExclusionsPage />} />
+              <Route
+                path="campaigns/:id/shortlist/override"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <ShortlistOverridePage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+              <Route path="exclusions" element={<ExclusionsPage />} />
               <Route path="templates" element={<TemplatesPage />} />
               <Route path="templates/:id/instantiate" element={<TemplateInstantiatePage />} />
               <Route
@@ -78,6 +97,12 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+            </Route>
+
+            {/* Creator portal (US-28): separate from /app, creators are not account members */}
+            <Route path="/creator-portal" element={<CreatorPortalLayout />}>
+              <Route path="access" element={<CreatorAccessPage />} />
+              <Route path="opportunities" element={<OpportunitiesPage />} />
             </Route>
 
             {/* Default redirect */}
