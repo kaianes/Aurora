@@ -2,15 +2,15 @@
 
 This is a step-by-step guide to put a working, link-shareable demo of Aurora online: backend + Postgres + Redis on [Railway](https://railway.app), frontend as a static site on [Vercel](https://vercel.com). Both have free tiers; Railway's free usage is trial credit, not permanent (see note at the end).
 
-This guide assumes the `feature/e3-creator-matching-curation` branch (the one with E1+E2+E3) is what you want live. If the branch has since merged, use `main` instead.
+**Live right now:** frontend at [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app), backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs), both deployed from `main` (E1+E2+E3). The steps below are what it took to get there, kept for redeploying or recreating the demo later.
 
 ## 1. Backend + Postgres + Redis on Railway
 
 1. Go to [railway.app](https://railway.app) and sign up (GitHub login is the fastest path).
-2. **New Project** → **Deploy from GitHub repo** → pick `kaianes/Aurora`.
+2. **New Project** → **Deploy from GitHub repo** → pick `kaianes/Aurora`. If the branch dropdown says "Could not load branches," Railway's GitHub App isn't actually installed on your account yet (only OAuth-authorized) — install it at `github.com/apps/railway-app/installations/new`, select the repo, then refresh.
 3. Railway will try to build the whole repo as one service — stop it from deploying yet. Click into the new service, go to **Settings**, and set:
    - **Root Directory:** `backend`
-   - **Branch:** `feature/e3-creator-matching-curation`
+   - **Branch:** `main`
    - Railway auto-detects the build/start commands from `backend/railway.toml` (already in the repo) — it installs, runs `nest build`, runs migrations, then starts `node dist/main`.
 4. In the same project, click **+ New** → **Database** → **Add PostgreSQL**. Click **+ New** → **Database** → **Add Redis**.
 5. Back on the backend service → **Variables** tab, add these, referencing the Postgres/Redis plugins Railway just created (type `${{` in the value field and Railway autocompletes the reference):
@@ -26,6 +26,7 @@ This guide assumes the `feature/e3-creator-matching-curation` branch (the one wi
 
    REDIS_HOST=${{Redis.REDISHOST}}
    REDIS_PORT=${{Redis.REDISPORT}}
+   REDIS_PASSWORD=${{Redis.REDISPASSWORD}}
 
    JWT_SECRET=<generate a random 32+ char string>
    JWT_REFRESH_SECRET=<a different random 32+ char string>
@@ -55,14 +56,16 @@ This guide assumes the `feature/e3-creator-matching-curation` branch (the one wi
 2. **Add New** → **Project** → import `kaianes/Aurora`.
 3. Set:
    - **Root Directory:** `frontend`
-   - **Branch:** `feature/e3-creator-matching-curation`
+   - **Branch:** `main`
    - **Framework Preset:** Vite (auto-detected)
 4. **Environment Variables** → add:
    ```
    VITE_API_BASE_URL=https://<your-railway-backend-url>/v1
    ```
-5. **Deploy**. Vercel gives you a URL like `https://aurora-<hash>.vercel.app`. `frontend/vercel.json` (already in the repo) handles client-side routing, so deep links like `/app/campaigns` work on refresh.
-6. Go back to Railway's backend service → **Variables** → set `FRONTEND_URL` to this Vercel URL, so CORS allows the frontend to call the API. Redeploy the backend for the change to take effect.
+   Set its **Type** to **Config**, not **Secret** — Vercel won't let a variable with a public framework prefix (`VITE_` is exposed to the browser by Vite's own convention) be saved as Secret, and a saved Secret can't be converted to Config afterward, so pick Config from the start.
+5. **Deploy**. Vercel gives you a URL like `https://aurora-<hash>.vercel.app` (and a stable `https://<project-name>-<your-vercel-username>.vercel.app` alias). `frontend/vercel.json` (already in the repo) handles client-side routing, so deep links like `/app/campaigns` work on refresh.
+6. **Settings** → **Deployment Protection** → make sure **Vercel Authentication ("Require Log In")** is turned **off**. It's sometimes on by default on new projects and silently redirects every visitor to a Vercel login page — if a grader hits that, it looks like the site is broken rather than just protected.
+7. Go back to Railway's backend service → **Variables** → set `FRONTEND_URL` to this Vercel URL, so CORS allows the frontend to call the API. Redeploy the backend for the change to take effect.
 
 ## 3. Verify
 
