@@ -103,6 +103,49 @@ describe('ContentSubmissionService - US-16', () => {
     expect(saved[0].extractionStatus).toBe(ExtractionStatus.NOT_REQUIRED);
   });
 
+  describe('version lineage (ADR-0025, ADR-0032)', () => {
+    it('defaults to a first-version shape when no options are passed (backward-compatible with E4 callers)', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola' },
+        'creator-1',
+        actor,
+      );
+
+      expect(result.version_number).toBe(1);
+      expect(submissionRepo.save).toHaveBeenCalledTimes(2); // insert, then self-referencing root fixup
+    });
+
+    it('computes version_number and carries root_submission_id forward when supersedesSubmissionId is given', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+      submissionRepo.findOne.mockResolvedValue({ id: 'sub-1', versionNumber: 1, rootSubmissionId: 'sub-1' });
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola v2' },
+        'creator-1',
+        actor,
+        { supersedesSubmissionId: 'sub-1' },
+      );
+
+      expect(result.version_number).toBe(2);
+    });
+
+    it('includes review_deadline_at in the response when provided', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+      const deadline = new Date('2026-10-23T09:00:00Z');
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola' },
+        'creator-1',
+        actor,
+        { reviewDeadlineAt: deadline },
+      );
+
+      expect(result.review_deadline_at).toBe(deadline.toISOString());
+    });
+  });
+
   describe('getCheckStatus', () => {
     it('denies a creator polling a submission that is not theirs (404, no existence leak)', async () => {
       submissionRepo.findOne.mockResolvedValue({ id: 'sub-1', creatorId: 'creator-2' });

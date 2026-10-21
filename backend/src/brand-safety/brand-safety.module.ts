@@ -19,7 +19,6 @@ import { RulesetService } from './ruleset.service';
 import { RulesetController } from './ruleset.controller';
 import { CampaignSafetyRulesetController } from './campaign-safety-ruleset.controller';
 import { ContentSubmissionService } from './content-submission.service';
-import { ContentSubmissionIntakeController } from './content-submission-intake.controller';
 import { SafetyCheckController } from './safety-check.controller';
 import { BrandSafetyGateService } from './brand-safety-gate.service';
 import { ReviewQueueService } from './review-queue.service';
@@ -68,10 +67,13 @@ import {
       inject: [ConfigService],
     }),
   ],
+  // ContentSubmissionIntakeController (E4's POST /creator-portal/content-
+  // submissions stub) is retired here, superseded by content-workflow's own
+  // controller at the same route (ADR-0032, section 7.4 of the E5
+  // architecture doc) -- exactly the retirement ADR-0020 forecast in advance.
   controllers: [
     RulesetController,
     CampaignSafetyRulesetController,
-    ContentSubmissionIntakeController,
     SafetyCheckController,
     ReviewQueueController,
     MonitoringController,
@@ -104,9 +106,14 @@ import {
       useExisting: HttpLiveContentFetcher,
     },
   ],
-  // BrandSafetyGateService's two public methods (section 3.6) are the only
-  // surface a future E5 or payments module is permitted to depend on
-  // (NFR-29) -- nothing else in this module is exported.
-  exports: [BrandSafetyGateService],
+  // BrandSafetyGateService's two public methods (section 3.6) remain the
+  // fixed gate interface. ContentSubmissionService is additionally exported
+  // (ADR-0032) so content-workflow's draft-intake endpoint can create a
+  // content_submission row in-process, through the one code path that
+  // creates one and starts its safety check -- not via HTTP, and not by
+  // duplicating that logic. Nothing else in this module is exported
+  // (NFR-29): content-workflow still cannot reach safety_check, safety_rule,
+  // or safety_review_queue_item directly.
+  exports: [BrandSafetyGateService, ContentSubmissionService],
 })
 export class BrandSafetyModule {}
