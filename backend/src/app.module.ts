@@ -18,6 +18,7 @@ import { CampaignModule } from './campaign/campaign.module';
 import { MatchingModule } from './matching/matching.module';
 import { BrandSafetyModule } from './brand-safety/brand-safety.module';
 import { ContentWorkflowModule } from './content-workflow/content-workflow.module';
+import { PaymentsModule } from './payments/payments.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -58,6 +59,12 @@ import {
   BriefingQaThread,
   BriefingQaMessage,
   ContentReviewDecision,
+  PayoutObligation,
+  PayoutExecutionAttempt,
+  LedgerEntry,
+  TaxDocument,
+  Invoice,
+  InvoiceLineItem,
 } from './database/entities';
 
 @Module({
@@ -111,6 +118,12 @@ import {
           BriefingQaThread,
           BriefingQaMessage,
           ContentReviewDecision,
+          PayoutObligation,
+          PayoutExecutionAttempt,
+          LedgerEntry,
+          TaxDocument,
+          Invoice,
+          InvoiceLineItem,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -142,6 +155,7 @@ import {
     MatchingModule,
     BrandSafetyModule,
     ContentWorkflowModule,
+    PaymentsModule,
   ],
   providers: [
     {
