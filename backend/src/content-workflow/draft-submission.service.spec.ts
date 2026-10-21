@@ -141,6 +141,47 @@ describe('DraftSubmissionService - US-32a/US-32b/US-33', () => {
         expect.objectContaining({ supersedesSubmissionId: 'sub-1' }),
       );
     });
+
+    // US-32a scenario 2 / ADR-0025 section 3.3: the resubmission precondition must be checked
+    // against the lineage's highest version_number, never a stale earlier one -- this asserts
+    // the query that resolves "latest" is explicitly ordered descending by version_number rather
+    // than relying on insertion order or an unordered find.
+    it('resolves the latest version by version_number descending, not insertion order', async () => {
+      opportunityRepo.findOne.mockResolvedValue({ id: 'opp-1', status: OpportunityStatus.ACCEPTED });
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', state: CampaignState.ACTIVE });
+      submissionRepo.findOne.mockResolvedValue({ id: 'sub-2', versionNumber: 2 });
+      decisionRepo.findOne.mockResolvedValue({ decision: ContentReviewDecisionValue.REJECTED });
+
+      await service.createDraft(dto as any, 'creator-1', actor);
+
+      expect(submissionRepo.findOne).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { opportunityId: 'opp-1' },
+          order: { versionNumber: 'DESC' },
+        }),
+      );
+    });
+
+    // US-32b / ADR-0030: escalation is a visibility-only flag, never an auto-action. A pending
+    // version that has been escalated must still block resubmission exactly as an un-escalated
+    // pending version would -- escalation does not implicitly unlock or change the resubmission
+    // precondition.
+    it('still refuses resubmission with PENDING_REVIEW_IN_PROGRESS even when the pending version has been escalated', async () => {
+      opportunityRepo.findOne.mockResolvedValue({ id: 'opp-1', status: OpportunityStatus.ACCEPTED });
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', state: CampaignState.ACTIVE });
+      submissionRepo.findOne.mockResolvedValue({
+        id: 'sub-1',
+        versionNumber: 1,
+        reviewEscalated: true,
+        reviewEscalatedAt: new Date(),
+      });
+      decisionRepo.findOne.mockResolvedValue(undefined);
+
+      await expect(service.createDraft(dto as any, 'creator-1', actor)).rejects.toMatchObject({
+        response: { error: { code: 'PENDING_REVIEW_IN_PROGRESS' } },
+      });
+      expect(contentSubmissionService.createSubmission).not.toHaveBeenCalled();
+    });
   });
 
   describe('listForCreator', () => {

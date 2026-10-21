@@ -48,4 +48,23 @@ describe('ContentWorkflowScheduledTasksService - US-32b', () => {
     await service.escalateOverdueDraftReviews();
     expect(decisionRepo.findOne).not.toHaveBeenCalled();
   });
+
+  // US-32b scenario 3 / ADR-0030: escalation is a visibility-only flag, never an auto-action --
+  // the sweeper must never itself create, approve, reject, or otherwise decide anything. Its only
+  // writes are the two escalation fields on content_submission plus the audit log entry.
+  it('never creates or otherwise touches a content_review_decision row -- escalation is a flag, not a decision', async () => {
+    submissionRepo.find.mockResolvedValue([{ id: 'sub-1', campaignId: 'camp-1', reviewEscalated: false }]);
+    decisionRepo.findOne.mockResolvedValue(undefined);
+
+    await service.escalateOverdueDraftReviews();
+
+    expect(decisionRepo.findOne).toHaveBeenCalledWith({ where: { contentSubmissionId: 'sub-1' } });
+    // The service only ever reads decisionRepo (to check whether a decision already exists) --
+    // it never writes to it. This is this test's structural proof that no decision is ever
+    // created by the sweeper itself.
+    expect(decisionRepo.save).not.toHaveBeenCalled();
+    expect(submissionRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({ reviewEscalated: true, reviewEscalatedAt: expect.any(Date) }),
+    );
+  });
 });
