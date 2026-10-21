@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -86,9 +86,27 @@ export class PayoutObligationService {
 
   // ---- US-35a: creation, called from E5's publication-confirmation flow ----
 
+  // `manager` is optional and, when provided, is the caller's own
+  // transactional EntityManager -- PublicationService.confirmPublication
+  // passes its publication-confirmation transaction here, so that write
+  // participates in the same ACID boundary as the published_url/
+  // published_at write, rather than opening (and auto-committing) a
+  // second, independent one. This is the financial-integrity fix this
+  // epic's review required (NFR-13). The read-then-insert below, and the
+  // UNIQUE(content_submission_id) race-catch fallback, both keep working
+  // identically either way, since they always read and write through
+  // whichever repository (manager-bound or this service's own) is
+  // resolved below. When no manager is given, this falls back to this
+  // service's own injected repositories, unchanged, so this method still
+  // works standalone for any future caller that has no transaction of its
+  // own to extend.
   async createForConfirmedPublication(
     input: CreateForConfirmedPublicationInput,
+    manager?: EntityManager,
   ): Promise<CreateForConfirmedPublicationResult> {
+    const obligationRepo = manager ? manager.getRepository(PayoutObligation) : this.obligationRepo;
+    const opportunityRepo = manager ? manager.getRepository(CampaignOpportunity) : this.opportunityRepo;
+
     // Defensive re-checks only (section 2.1 of the E6 architecture doc):
     // the caller's own gates (content_review_decision.decision = approved,
     // the brand-safety gate) have already run by the time this is ever
@@ -112,7 +130,7 @@ export class PayoutObligationService {
       });
     }
 
-    const existingBefore = await this.obligationRepo.findOne({
+    const existingBefore = await obligationRepo.findOne({
       where: { contentSubmissionId: input.contentSubmissionId },
     });
     if (existingBefore) {
@@ -120,7 +138,7 @@ export class PayoutObligationService {
       return { payoutObligationId: existingBefore.id, alreadyExisted: true };
     }
 
-    const opportunity = await this.opportunityRepo.findOne({
+    const opportunity = await opportunityRepo.findOne({
       where: { id: input.opportunityId },
     });
     if (!opportunity || opportunity.status !== OpportunityStatus.ACCEPTED) {
@@ -145,7 +163,7 @@ export class PayoutObligationService {
 
     const committedDeadlineAt = addDays(input.publishedAt, PAYOUT_WINDOW_DAYS);
 
-    const obligation = this.obligationRepo.create({
+    const obligation = obligationRepo.create({
       contentSubmissionId: input.contentSubmissionId,
       campaignId: input.campaignId,
       creatorId: input.creatorId,
@@ -158,7 +176,7 @@ export class PayoutObligationService {
     });
 
     try {
-      const saved = await this.obligationRepo.save(obligation);
+      const saved = await obligationRepo.save(obligation);
 
       await this.auditService.log({
         actorUserId: null,
@@ -181,7 +199,7 @@ export class PayoutObligationService {
       // US-35a scenario 2, the race window: a concurrent call already won
       // the UNIQUE (content_submission_id) insert.
       if (isUniqueViolation(error)) {
-        const existing = await this.obligationRepo.findOne({
+        const existing = await obligationRepo.findOne({
           where: { contentSubmissionId: input.contentSubmissionId },
         });
         if (existing) {

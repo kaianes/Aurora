@@ -152,6 +152,60 @@ describe('PayoutObligationService - US-35a/b/c', () => {
     expect(obligationRepo.save).not.toHaveBeenCalled();
   });
 
+  // ---- Financial-integrity fix: participating in a caller-provided transaction ----
+  it('writes through the caller-provided EntityManager instead of its own repository when one is given', async () => {
+    const managerObligationRepo = mockRepo();
+    const managerOpportunityRepo = mockRepo();
+    managerObligationRepo.findOne.mockResolvedValue(undefined);
+    managerOpportunityRepo.findOne.mockResolvedValue({
+      id: 'opp-1',
+      status: OpportunityStatus.ACCEPTED,
+      payoutGross: '800.00',
+      payoutCommission: '120.00',
+      payoutNet: '680.00',
+    });
+    const manager = {
+      getRepository: vi.fn((entity: any) =>
+        entity.name === 'PayoutObligation' ? managerObligationRepo : managerOpportunityRepo,
+      ),
+    };
+
+    const result = await service.createForConfirmedPublication(baseInput, manager as any);
+
+    expect(result.alreadyExisted).toBe(false);
+    // The caller's own manager is used for the read-then-insert, never
+    // this service's own injected repositories, so the write lands in the
+    // caller's transaction rather than auto-committing independently.
+    expect(managerObligationRepo.save).toHaveBeenCalled();
+    expect(obligationRepo.save).not.toHaveBeenCalled();
+    expect(obligationRepo.findOne).not.toHaveBeenCalled();
+  });
+
+  it('still recovers from a concurrent-insert race as idempotent when using a caller-provided manager', async () => {
+    const managerObligationRepo = mockRepo();
+    const managerOpportunityRepo = mockRepo();
+    managerObligationRepo.findOne
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ id: 'race-winner', contentSubmissionId: 'sub-1' });
+    managerOpportunityRepo.findOne.mockResolvedValue({
+      id: 'opp-1',
+      status: OpportunityStatus.ACCEPTED,
+      payoutGross: '800.00',
+      payoutCommission: '120.00',
+      payoutNet: '680.00',
+    });
+    managerObligationRepo.save.mockRejectedValueOnce({ code: '23505' });
+    const manager = {
+      getRepository: vi.fn((entity: any) =>
+        entity.name === 'PayoutObligation' ? managerObligationRepo : managerOpportunityRepo,
+      ),
+    };
+
+    const result = await service.createForConfirmedPublication(baseInput, manager as any);
+
+    expect(result).toEqual({ payoutObligationId: 'race-winner', alreadyExisted: true });
+  });
+
   // ---- US-35b/c: operator manual fallback ----
   it('markSettledManually writes the ledger pair, settles the obligation, and enqueues tax-document generation', async () => {
     const obligation = {

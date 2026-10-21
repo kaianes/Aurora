@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ContentSubmission, ContentReviewDecision, ContentReviewDecisionValue } from '../database/entities';
 import { BrandSafetyGateService } from '../brand-safety/brand-safety-gate.service';
 import { AuditService } from '../audit/audit.service';
@@ -33,6 +33,7 @@ export class PublicationService {
     private linkVerifier: PublicationLinkVerifierAdapter,
     private auditService: AuditService,
     private payoutObligationService: PayoutObligationService,
+    private dataSource: DataSource,
   ) {}
 
   async confirmPublication(submissionId: string, creatorId: string, dto: ConfirmPublicationDto, actor: ActorContext) {
@@ -102,24 +103,51 @@ export class PublicationService {
 
     submission.publishedUrl = dto.published_url;
     submission.publishedAt = new Date();
-    await this.submissionRepo.save(submission);
 
-    // FR-42's completion hook (section 3.6 of the E4 architecture doc),
-    // called here, never reimplemented. recordPublication's own
-    // defense-in-depth re-check of the gate is intentionally redundant with
-    // the check above (ADR-0027).
-    await this.gateService.recordPublication(submissionId, dto.published_url);
+    // Financial-integrity fix (post-E6 review): the submission write and
+    // the payout obligation write below are wrapped in one database
+    // transaction so a crash or thrown error between them can never leave
+    // a submission marked published with no corresponding payout_obligation
+    // row (NFR-13 -- no financial obligation may ever be lost). This is
+    // the ACID boundary ADR-0036 and section 2.1 of the E6 architecture
+    // document already describe; it was previously missing from the code.
+    //
+    // gateService.recordPublication runs inside this same block too, since
+    // it is the FR-42 completion hook named by the E4/E5 architecture docs
+    // as sharing a transaction with the published_url/published_at write
+    // (E5 architecture doc section 4.6, step 5). If it throws, the
+    // submission write below is rolled back along with it.
+    //
+    // The audit log write after this block is deliberately left outside
+    // the transaction: losing an audit entry (while still writing the
+    // submission and the obligation) is not the same severity as losing a
+    // financial obligation, and audit_log is append-only, best-effort
+    // observability elsewhere in this codebase too, not itself a source of
+    // truth NFR-13 protects.
+    await this.dataSource.transaction(async (manager) => {
+      await manager.save(ContentSubmission, submission);
 
-    // ADR-0036 / FR-44 (E6): the payout obligation is created immediately
-    // after the two writes above and before the audit log entry below, in
-    // the same transaction as this endpoint's own writes. No approval
-    // re-check happens here -- gate 1's check above already established it.
-    await this.payoutObligationService.createForConfirmedPublication({
-      contentSubmissionId: submission.id,
-      campaignId: submission.campaignId,
-      creatorId: creatorId,
-      opportunityId: submission.opportunityId as string,
-      publishedAt: submission.publishedAt,
+      // FR-42's completion hook (section 3.6 of the E4 architecture doc),
+      // called here, never reimplemented. recordPublication's own
+      // defense-in-depth re-check of the gate is intentionally redundant
+      // with the check above (ADR-0027).
+      await this.gateService.recordPublication(submissionId, dto.published_url);
+
+      // ADR-0036 / FR-44 (E6): the payout obligation is created immediately
+      // after the two writes above and before the audit log entry below,
+      // participating in this same transaction via the manager passed
+      // through. No approval re-check happens here -- gate 1's check above
+      // already established it.
+      await this.payoutObligationService.createForConfirmedPublication(
+        {
+          contentSubmissionId: submission.id,
+          campaignId: submission.campaignId,
+          creatorId: creatorId,
+          opportunityId: submission.opportunityId as string,
+          publishedAt: submission.publishedAt,
+        },
+        manager,
+      );
     });
 
     await this.auditService.log({
