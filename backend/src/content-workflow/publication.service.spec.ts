@@ -17,6 +17,7 @@ describe('PublicationService - US-34', () => {
   let gateService: { getGateStatus: ReturnType<typeof vi.fn>; recordPublication: ReturnType<typeof vi.fn> };
   let linkVerifier: { verify: ReturnType<typeof vi.fn> };
   let auditService: { log: ReturnType<typeof vi.fn> };
+  let payoutObligationService: { createForConfirmedPublication: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     submissionRepo = mockRepo();
@@ -27,8 +28,19 @@ describe('PublicationService - US-34', () => {
     };
     linkVerifier = { verify: vi.fn().mockResolvedValue({ resolved: true, matches: true }) };
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
+    payoutObligationService = {
+      createForConfirmedPublication: vi
+        .fn()
+        .mockResolvedValue({ payoutObligationId: 'pay-1', alreadyExisted: false }),
+    };
 
-    submissionRepo.findOne.mockResolvedValue({ id: 'sub-1', creatorId: 'creator-1', captionText: 'ola mundo' });
+    submissionRepo.findOne.mockResolvedValue({
+      id: 'sub-1',
+      creatorId: 'creator-1',
+      campaignId: 'camp-1',
+      opportunityId: 'opp-1',
+      captionText: 'ola mundo',
+    });
     decisionRepo.findOne.mockResolvedValue({ decision: ContentReviewDecisionValue.APPROVED });
 
     service = new PublicationService(
@@ -37,6 +49,7 @@ describe('PublicationService - US-34', () => {
       gateService as any,
       linkVerifier as any,
       auditService as any,
+      payoutObligationService as any,
     );
   });
 
@@ -46,6 +59,9 @@ describe('PublicationService - US-34', () => {
     const result = await service.confirmPublication('sub-1', 'creator-1', dto, actor);
     expect(result.status).toBe('confirmed');
     expect(gateService.recordPublication).toHaveBeenCalledWith('sub-1', dto.published_url);
+    expect(payoutObligationService.createForConfirmedPublication).toHaveBeenCalledWith(
+      expect.objectContaining({ contentSubmissionId: 'sub-1', opportunityId: 'opp-1' }),
+    );
     expect(auditService.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'content_submission.publication_confirmed' }),
     );

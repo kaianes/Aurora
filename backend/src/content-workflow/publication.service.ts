@@ -9,6 +9,7 @@ import {
   PUBLICATION_LINK_VERIFIER_ADAPTER,
   PublicationLinkVerifierAdapter,
 } from './adapters/publication-link-verifier.adapter';
+import { PayoutObligationService } from '../payments/payout-obligation.service';
 
 interface ActorContext {
   ipAddress: string;
@@ -31,6 +32,7 @@ export class PublicationService {
     @Inject(PUBLICATION_LINK_VERIFIER_ADAPTER)
     private linkVerifier: PublicationLinkVerifierAdapter,
     private auditService: AuditService,
+    private payoutObligationService: PayoutObligationService,
   ) {}
 
   async confirmPublication(submissionId: string, creatorId: string, dto: ConfirmPublicationDto, actor: ActorContext) {
@@ -107,6 +109,18 @@ export class PublicationService {
     // defense-in-depth re-check of the gate is intentionally redundant with
     // the check above (ADR-0027).
     await this.gateService.recordPublication(submissionId, dto.published_url);
+
+    // ADR-0036 / FR-44 (E6): the payout obligation is created immediately
+    // after the two writes above and before the audit log entry below, in
+    // the same transaction as this endpoint's own writes. No approval
+    // re-check happens here -- gate 1's check above already established it.
+    await this.payoutObligationService.createForConfirmedPublication({
+      contentSubmissionId: submission.id,
+      campaignId: submission.campaignId,
+      creatorId: creatorId,
+      opportunityId: submission.opportunityId as string,
+      publishedAt: submission.publishedAt,
+    });
 
     await this.auditService.log({
       actorUserId: null,
