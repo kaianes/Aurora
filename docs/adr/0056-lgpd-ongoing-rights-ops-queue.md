@@ -1,0 +1,36 @@
+# ADR-0056: Ongoing LGPD Data-Subject Rights for Already-Active Creators, via a Minimal Ops-Mediated Request Queue
+
+**Status:** Proposed
+**Date:** 2026-10-21
+**Epic:** E8 -- Creator Recruitment and Growth
+**Governs:** NFR-21 (beyond FR-13's claim-time scope)
+
+## Context
+
+NFR-21 commits to fulfilling "access, correction, deletion, and portability requests within 15 days," and its own "Constrains" column in the PRD names only FR-13 -- the claim/decline moment. The stories document's own open question 4 names the resulting gap directly: "there is no FR describing what happens if an already-active creator who has worked campaigns later wants to exercise an access, correction, deletion, or portability request outside that one moment," and recommends "this gap should be closed with an explicit story before NFR-21 can be verified in full." `docs/architecture.md` section 4.3 already states, at the whole-platform level, the structural properties any such mechanism would need to rely on: "every record is keyed to a subject identifier and enumerable; deletion is hard deletion with per-entity cascade rules; export reuses the media kit's projection," and names the one explicit conflict resolution already decided platform-wide: "a deletion request does not delete ledger entries, retained under legal obligation... the response states what was deleted, what was retained, and why."
+
+This leaves a real choice for this epic: build nothing (leave the gap exactly as open as the stories document found it, since no story defines the mechanism) or build the minimal mechanism the architecture document's own section 4.3 already structurally promised, without inventing new product scope (a self-service UI, a specific creator-facing flow) that no story asked for.
+
+Two options were considered:
+
+- **Build nothing in this epic**, leaving NFR-21 unverifiable for any creator past her claim/decline moment, exactly as the stories document's open question describes the current state. This is defensible -- the task's own instructions distinguish genuinely product-level open questions (to be left alone) from architectural gaps where a sensible default can be picked -- but NFR-21 is a named, numbered, "Constrains"-column requirement in the PRD that this epic's own governing-NFR table lists, and leaving it with literally zero mechanism (not even an operational one) means this document could not honestly claim to meet it at all in section 12's compliance checklist.
+- **A minimal, ops-mediated request queue**, following the identical "manual fallback standing in for automation the team cannot yet build" pattern the PRD's own NFR catalog explicitly endorses for pilot-scale targets (the same framing NFR-11 uses for payout settlement, which ADR-0033/ADR-0038 already built as a manual, `aurora_operator`-mediated mechanism rather than full automation) -- closing the structural gap without inventing a self-service product feature no story specified.
+
+## Decision
+
+`creator_data_subject_request` (E8 architecture doc section 2.2) gives an `aurora_operator` a trackable queue: `request_type` (access/correction/deletion/portability), `status` (pending/fulfilled), `due_at` computed once at creation (`requested_at + 15 days`), and an `export_document_url` for the access/portability cases. There is no creator-facing endpoint to *create* one of these requests in this epic -- a creator's request still arrives through whatever out-of-band channel (support email, a future contact form) the business already uses, consistent with every other "the mechanism exists, the self-service trigger does not yet" gap this platform currently has. An operator creates the row on her behalf once a request is received, then fulfills it manually: for access/portability, by generating an export that reuses the media kit's own audience-metrics projection (`docs/architecture.md` section 4.3's own stated plan: "export reuses the media kit's projection") plus whatever additional data categories a real implementation decides belong in scope; for deletion, by executing the identical hard-delete cascade `expire-unclaimed-profiles` already uses for the unclaimed-profile case, with the same explicit exception `docs/architecture.md` section 4.3 already states platform-wide -- ledger entries are retained under legal obligation (Art. 7, II), and the fulfillment response is expected to state plainly what was deleted and what was retained, and why.
+
+This ADR explicitly does **not** decide whether this should eventually become a self-service, creator-facing flow, what specific data categories "access" or "portability" must include beyond what the media kit's projection already covers, or whether correction requests require any validation beyond an operator's own judgment. These remain open, exactly as the stories document itself frames this gap -- this ADR builds the minimal mechanism a future, more complete story would attach to, the same relationship ADR-0038 already has to a future `aurora_operator` governance policy.
+
+## Consequences
+
+**What Aurora gains:**
+- NFR-21 has a concrete, trackable mechanism covering the full scope its own wording promises (access, correction, deletion, portability, not just the claim-time decline), closing the specific gap the stories document's open question 4 named, without this document inventing product scope (a UI, a specific creator-facing trigger) that no story requested.
+- The mechanism reuses two things this codebase already has rather than building new ones: the `aurora_operator` principal and guard (ADR-0038) and the media-kit export projection (ADR-0057) -- the fulfillment side of this ADR adds no new adapter, no new encryption concern, and no new RLS consideration.
+- `due_at` being computed once and never recalculated means this requirement is honestly measurable (a query for `status = pending AND due_at < now()` finds every breach), rather than aspirational.
+
+**What Aurora gives up:**
+- This is explicitly a thinner commitment than a real self-service flow would be: a creator cannot check her own request's status, cannot submit one directly through the product, and depends entirely on an operator noticing and acting on an out-of-band request within the 15-day window -- the same operational-load risk `docs/architecture.md`'s R-03 already names for the payout manual fallback, now extended to this domain. This is an accepted, explicitly-flagged limitation, not a hidden one.
+- Because there is no creator-facing trigger, this mechanism cannot be load-tested or demonstrated against real creator-initiated requests in this pilot -- only against an operator manually creating a row to simulate one.
+
+**Risk:** An operator who fails to notice an out-of-band request, or who creates the row late relative to when the request actually arrived (since `requested_at`/`due_at` are set at row-creation time, not at the true moment the creator asked), could silently breach the 15-day commitment with no system-level detection beyond a periodic manual review of the queue. Mitigation: this is recorded as an explicit limitation; a future improvement (an intake endpoint that timestamps the request at first contact, regardless of when an operator gets to creating the tracked row) is a natural next step once a real intake channel exists, requiring no change to this table's shape.

@@ -81,8 +81,10 @@ import {
     },
   ],
   // PayoutObligationService.createForConfirmedPublication is the only
-  // method content-workflow's PublicationService calls (ADR-0036); nothing
-  // else in this module is exported.
-  exports: [PayoutObligationService],
+  // method content-workflow's PublicationService calls (ADR-0036).
+  // OperatorAuthGuard is additionally exported so creator-network's
+  // ops-mediated endpoints can reuse it unchanged (E8 section 14, ADR-0038
+  // precedent) -- no new guard, no change to its own logic.
+  exports: [PayoutObligationService, OperatorAuthGuard],
 })
 export class PaymentsModule {}

@@ -1,62 +1,23 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Param,
-  Body,
-  Req,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-} from '@nestjs/common';
+import { Controller, Post, Get, Param, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { Request } from 'express';
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { IsUUID } from 'class-validator';
-import { Creator } from '../database/entities';
 import { OpportunityService } from './opportunity.service';
 import { CreatorAuthGuard } from './creator-auth.guard';
-import { Public, CurrentUser } from '../common/decorators';
+import { CurrentUser } from '../common/decorators';
 
-class CreatorLoginDto {
-  @IsUUID()
-  creator_id: string;
-}
-
+// E8 / ADR-0050 replaces this controller's former pilot-only login stub
+// (a bare creator_id, no password, no verification) with real creator
+// registration/verification/login, built in creator-network and reusing
+// AuthService's exported createUser/verifyEmailToken/authenticateCredentials
+// methods. The opportunity accept/decline endpoints below are untouched:
+// both the old stub and the real login issue the identical creator JWT
+// shape (sub = user_id, creator_id claim), which CreatorAuthGuard and
+// JwtStrategy already handle unchanged.
 @Controller('creator-portal')
 export class CreatorPortalController {
-  constructor(
-    private opportunityService: OpportunityService,
-    private jwtService: JwtService,
-    @InjectRepository(Creator)
-    private creatorRepo: Repository<Creator>,
-  ) {}
+  constructor(private opportunityService: OpportunityService) {}
 
   private actorContext(req: Request) {
     return { ipAddress: req.ip || '', userAgent: req.headers['user-agent'] || '' };
-  }
-
-  // Pilot-only stub (ADR-0013): E8 owns the real creator login flow (social
-  // auth or magic link). This endpoint exists only so US-28 is testable end
-  // to end before that flow ships; it issues a creator JWT for a creator row
-  // that already exists (seeded for the pilot), with no password.
-  @Public()
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: CreatorLoginDto) {
-    const creator = await this.creatorRepo.findOne({ where: { id: dto.creator_id } });
-    if (!creator) {
-      throw new NotFoundException({
-        error: { code: 'CREATOR_NOT_FOUND', message: 'Criador nao encontrado.', details: {} },
-      });
-    }
-    const accessToken = this.jwtService.sign(
-      { sub: creator.id, creator_id: creator.id },
-      { expiresIn: '15m' },
-    );
-    return { access_token: accessToken, expires_in: 900, creator_id: creator.id };
   }
 
   @UseGuards(CreatorAuthGuard)
