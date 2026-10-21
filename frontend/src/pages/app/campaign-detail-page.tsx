@@ -59,15 +59,19 @@ export function CampaignDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { currentRole } = useAuth();
+  const { currentRole, workspace } = useAuth();
+  const accountId = workspace?.current_account?.id;
   const canWrite = currentRole ? canWriteCampaign(currentRole) : false;
   const canOverride = currentRole ? canOverrideShortlist(currentRole) : false;
   const [lifecycleReason, setLifecycleReason] = useState('');
   const [templateName, setTemplateName] = useState('');
   const [boundsError, setBoundsError] = useState<string | null>(null);
 
+  // Keying on accountId (the US-39 client-context selector), not just the route's campaign id,
+  // so switching client context re-validates against the backend under the new account instead
+  // of continuing to show the previous client's cached campaign (the route/id do not change).
   const { data: campaign, isLoading, error } = useQuery({
-    queryKey: ['campaign', id],
+    queryKey: ['campaign', id, accountId],
     queryFn: () => campaignApi.get(id!),
     enabled: !!id,
   });
@@ -75,7 +79,7 @@ export function CampaignDetailPage() {
   const pendingQuoteId = campaign?.latest_quote?.status === 'pending' ? campaign.latest_quote.id : null;
 
   const { data: polledQuote } = useQuery({
-    queryKey: ['campaign-quote', id, pendingQuoteId],
+    queryKey: ['campaign-quote', id, accountId, pendingQuoteId],
     queryFn: () => campaignApi.getQuote(id!, pendingQuoteId!),
     enabled: !!id && !!pendingQuoteId,
     refetchInterval: (query) => (query.state.data?.status === 'pending' ? 2000 : false),
@@ -87,18 +91,18 @@ export function CampaignDetailPage() {
   const quoteJustResolved = polledQuote && polledQuote.status !== 'pending';
   useEffect(() => {
     if (quoteJustResolved) {
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     }
-  }, [quoteJustResolved, id, queryClient]);
+  }, [quoteJustResolved, id, accountId, queryClient]);
 
   const { data: shortfallData } = useQuery({
-    queryKey: ['campaign-shortfall', id],
+    queryKey: ['campaign-shortfall', id, accountId],
     queryFn: () => campaignApi.getShortfall(id!),
     enabled: !!id && (campaign?.state === 'confirmed' || campaign?.state === 'active' || campaign?.state === 'paused'),
   });
 
   const { data: reallocationEvents } = useQuery({
-    queryKey: ['reallocation-events', id],
+    queryKey: ['reallocation-events', id, accountId],
     queryFn: () => campaignApi.listReallocationEvents(id!),
     enabled: !!id && (campaign?.state === 'active' || campaign?.state === 'paused'),
   });
@@ -106,14 +110,14 @@ export function CampaignDetailPage() {
   const requestQuoteMutation = useMutation({
     mutationFn: () => campaignApi.requestQuote(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     },
   });
 
   const confirmMutation = useMutation({
     mutationFn: () => campaignApi.confirm(id!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     },
   });
 
@@ -121,20 +125,20 @@ export function CampaignDetailPage() {
     mutationFn: () => campaignApi.pause(id!, { reason: lifecycleReason || undefined }),
     onSuccess: () => {
       setLifecycleReason('');
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     },
   });
 
   const resumeMutation = useMutation({
     mutationFn: () => campaignApi.resume(id!),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign', id] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] }),
   });
 
   const cancelMutation = useMutation({
     mutationFn: () => campaignApi.cancel(id!, { reason: lifecycleReason || undefined }),
     onSuccess: () => {
       setLifecycleReason('');
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     },
   });
 
@@ -162,7 +166,7 @@ export function CampaignDetailPage() {
       }),
     onSuccess: () => {
       setBoundsError(null);
-      queryClient.invalidateQueries({ queryKey: ['campaign', id] });
+      queryClient.invalidateQueries({ queryKey: ['campaign', id, accountId] });
     },
     onError: (err) => {
       setBoundsError(
@@ -212,6 +216,8 @@ export function CampaignDetailPage() {
             <CardDescription>Criada em {new Date(campaign.created_at).toLocaleDateString('pt-BR')}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {/* US-39 (E9): client attribution, shown for every workspace type. */}
+            {campaign.account_name && <Badge variant="default">{campaign.account_name}</Badge>}
             <Badge variant={STATE_BADGE[campaign.state]}>{STATE_LABELS[campaign.state]}</Badge>
             {canWrite && campaign.state === 'draft' && (
               <Link to={`/app/campaigns/${campaign.id}/edit`}>

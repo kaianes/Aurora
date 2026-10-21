@@ -23,6 +23,7 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
   let operatorAccessRepo: ReturnType<typeof mockRepo>;
   let brandProfileRepo: ReturnType<typeof mockRepo>;
   let auditService: { log: ReturnType<typeof vi.fn> };
+  let templateCopyService: { copyAllTemplates: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     accountRepo = mockRepo();
@@ -31,6 +32,7 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
     operatorAccessRepo = mockRepo();
     brandProfileRepo = mockRepo();
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
+    templateCopyService = { copyAllTemplates: vi.fn().mockResolvedValue(0) };
 
     service = new AgencyService(
       accountRepo as any,
@@ -39,6 +41,7 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
       operatorAccessRepo as any,
       brandProfileRepo as any,
       auditService as any,
+      templateCopyService as any,
     );
   });
 
@@ -69,8 +72,10 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
     }));
   });
 
-  // US-47 Scenario 2 - Hard: template copied without data leakage
-  it('should accept copy_templates_from and copy only structure, no client data', async () => {
+  // US-41 / section 4.1 of the E9 architecture doc: the onboarding-time
+  // bulk copy, now wired to TemplateCopyService instead of the old,
+  // hardcoded E1 stub.
+  it('should accept copy_templates_from and delegate the real copy to TemplateCopyService', async () => {
     const workspace = { id: 'ws-1', type: WorkspaceType.AGENCY, maxClientAccounts: 10 };
     accountRepo.findOne
       .mockResolvedValueOnce({ id: 'home-account', workspace }) // current account
@@ -78,6 +83,7 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
     accountRepo.find.mockResolvedValue([
       { id: 'home-account', createdAt: new Date('2026-01-01') },
     ]);
+    templateCopyService.copyAllTemplates.mockResolvedValue(3);
 
     const result = await service.createClient(
       'home-account',
@@ -87,9 +93,40 @@ describe('AgencyService - US-47 Agency Client Onboarding', () => {
       'test-agent',
     );
 
-    // Template copy acknowledged but no actual data carried over (E1 stub)
-    expect(result.templates_copied).toBe(0);
+    expect(templateCopyService.copyAllTemplates).toHaveBeenCalledWith(
+      'source-client',
+      'new-client-id',
+      'ws-1',
+    );
+    expect(result.templates_copied).toBe(3);
     expect(result.name).toBe('New Client');
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'client_account.created',
+        metadata: expect.objectContaining({ templates_copied: 3 }),
+      }),
+    );
+  });
+
+  // US-41 scenario 1, restated: no templates to copy still returns 0, and
+  // TemplateCopyService is never invoked when copy_templates_from is absent.
+  it('does not invoke TemplateCopyService when copy_templates_from is not provided', async () => {
+    const workspace = { id: 'ws-1', type: WorkspaceType.AGENCY, maxClientAccounts: 10 };
+    accountRepo.findOne.mockResolvedValue({ id: 'home-account', workspace });
+    accountRepo.find.mockResolvedValue([
+      { id: 'home-account', createdAt: new Date('2026-01-01') },
+    ]);
+
+    const result = await service.createClient(
+      'home-account',
+      { name: 'New Client' },
+      'admin-user-id',
+      '127.0.0.1',
+      'test-agent',
+    );
+
+    expect(templateCopyService.copyAllTemplates).not.toHaveBeenCalled();
+    expect(result.templates_copied).toBe(0);
   });
 
   // US-47 Scenario 3 - Failure: client limit reached returns 403

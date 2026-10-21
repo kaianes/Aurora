@@ -10,10 +10,15 @@ import { canManageAgencyBranding } from '@/lib/roles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+// Lowercase, RFC 1123-compatible hostname: labels of letters/digits/hyphens (no leading or
+// trailing hyphen), at least one dot, matching the backend's own format-only validation
+// (no DNS lookup, no ownership proof) per ADR-0061.
+const DOMAIN_RE = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/;
 
 const brandingSchema = z.object({
   logo_url: z.string().max(2048, 'URL muito longa (maximo de 2048 caracteres)'),
@@ -22,6 +27,9 @@ const brandingSchema = z.object({
   }),
   secondary_color_hex: z.string().refine((v) => v === '' || HEX_RE.test(v), {
     message: 'Use o formato hexadecimal #RRGGBB.',
+  }),
+  custom_domain: z.string().refine((v) => v === '' || DOMAIN_RE.test(v), {
+    message: 'Use um dominio valido, em letras minusculas (ex: relatorios.suaagencia.com.br).',
   }),
 });
 
@@ -61,7 +69,7 @@ export function AgencyBrandingPage() {
     formState: { errors, isDirty },
   } = useForm<BrandingForm>({
     resolver: zodResolver(brandingSchema),
-    defaultValues: { logo_url: '', primary_color_hex: '', secondary_color_hex: '' },
+    defaultValues: { logo_url: '', primary_color_hex: '', secondary_color_hex: '', custom_domain: '' },
   });
 
   useEffect(() => {
@@ -70,6 +78,7 @@ export function AgencyBrandingPage() {
         logo_url: profile.logo_url ?? '',
         primary_color_hex: profile.primary_color_hex ?? '',
         secondary_color_hex: profile.secondary_color_hex ?? '',
+        custom_domain: profile.custom_domain ?? '',
       });
     }
   }, [profile, reset]);
@@ -80,6 +89,7 @@ export function AgencyBrandingPage() {
         logo_url: data.logo_url || undefined,
         primary_color_hex: data.primary_color_hex || undefined,
         secondary_color_hex: data.secondary_color_hex || undefined,
+        custom_domain: data.custom_domain || undefined,
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(['agency-branding'], data);
@@ -223,6 +233,33 @@ export function AgencyBrandingPage() {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* US-44 (E9): custom domain, format-validated only (no DNS lookup, no ownership
+              proof in this pilot, ADR-0061). Every request this epic serves, including the
+              public share-link view, continues to be served at Aurora's own domain -- this
+              field is for display/reference only until Aurora's infrastructure team activates
+              it, never implying real-time self-service activation. */}
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-text-dark" htmlFor="custom_domain">
+                Dominio personalizado
+              </label>
+              {profile?.domain_status === 'pending_activation' && (
+                <Badge variant="warning">Ativacao pendente</Badge>
+              )}
+            </div>
+            <Input
+              id="custom_domain"
+              placeholder="relatorios.suaagencia.com.br"
+              {...register('custom_domain')}
+              error={errors.custom_domain?.message}
+            />
+            <p className="mt-1 text-xs text-muted">
+              Esse dominio e exibido para referencia da sua equipe ao compartilhar relatorios com
+              clientes. A ativacao real (DNS e certificado) depende da equipe de infraestrutura
+              da Aurora e nao acontece automaticamente ao salvar.
+            </p>
           </div>
 
           {/* Preview strip: brand motif, colored data points on a thin horizontal grid */}

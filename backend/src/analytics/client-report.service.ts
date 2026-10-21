@@ -75,4 +75,33 @@ export class ClientReportService {
       resolved_at: report.resolvedAt?.toISOString() ?? null,
     };
   }
+
+  // US-44 / FR-57, section 3.3/5.5 of the E9 architecture doc: the one new
+  // exported method this epic adds, narrowly scoped to the public figures
+  // the token-gated share-link view renders -- not the full admin-facing
+  // shape getReport returns (no id, status, branding_applied, resolved_at).
+  // Called only after agency's public controller has already validated the
+  // share link's token, expiry, and revocation state; accountId here is the
+  // link's own, already-trusted account_id, not caller input.
+  async getReportForSharing(reportId: string, accountId: string) {
+    const report = await this.reportRepo.findOne({
+      where: { id: reportId, accountId },
+    });
+    if (!report) {
+      throw new NotFoundException({
+        error: { code: 'REPORT_NOT_FOUND', message: 'Relatorio nao encontrado.', details: {} },
+      });
+    }
+
+    return {
+      campaign_count: report.campaignCount,
+      total_spend: report.totalSpend,
+      total_delivered_reach: report.totalDeliveredReach,
+      total_delivered_engagement: report.totalDeliveredEngagement,
+      cost_per_engagement: report.costPerEngagement,
+      cpm_equivalent: report.cpmEquivalent,
+      pdf_document_url: report.pdfDocumentUrl,
+      csv_document_url: report.csvDocumentUrl,
+    };
+  }
 }
