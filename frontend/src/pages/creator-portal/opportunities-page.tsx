@@ -109,12 +109,21 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
       </div>
 
       {opportunity.status === 'accepted' && (
-        <div className="mt-3">
+        <div className="mt-3 flex flex-col gap-1.5">
+          <Link to={`/creator-portal/briefing?campaign_id=${opportunity.campaign_id}`} className="text-sm text-primary hover:underline">
+            Ver briefing
+          </Link>
+          <Link to={`/creator-portal/briefing/qa?campaign_id=${opportunity.campaign_id}`} className="text-sm text-primary hover:underline">
+            Perguntas sobre o briefing
+          </Link>
           <Link
-            to={`/creator-portal/submissions/new?opportunity_id=${opportunity.id}&campaign_id=${opportunity.campaign_id}`}
+            to={`/creator-portal/drafts/new?opportunity_id=${opportunity.id}&campaign_id=${opportunity.campaign_id}`}
             className="text-sm text-primary hover:underline"
           >
-            Enviar conteudo para verificacao de seguranca
+            Enviar rascunho de conteudo
+          </Link>
+          <Link to={`/creator-portal/drafts?opportunity_id=${opportunity.id}`} className="text-sm text-primary hover:underline">
+            Ver versoes enviadas
           </Link>
         </div>
       )}

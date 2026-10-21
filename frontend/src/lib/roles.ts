@@ -69,3 +69,22 @@ export function canManageSafetyRules(role: Role): boolean {
 export function canDecideReviewQueue(role: Role): boolean {
   return SAFETY_WRITE_ROLES.includes(role);
 }
+
+// Briefing, Q&A, and content review (E5) permissions, per
+// docs/architecture/e5-briefing-content-workflow.md section 3.4.
+// brand_analyst stays read-only here too, consistent with every other brand-risk or
+// creative-approval action in E2 through E4 -- this is an architectural default pending the
+// product decision the architecture document flags as open (PRD open question 5).
+const CONTENT_WORKFLOW_WRITE_ROLES: Role[] = ['brand_owner', 'brand_manager', 'agency_admin', 'agency_operator'];
+
+export function canManageBriefing(role: Role): boolean {
+  return CONTENT_WORKFLOW_WRITE_ROLES.includes(role);
+}
+
+export function canAnswerBriefingQa(role: Role): boolean {
+  return CONTENT_WORKFLOW_WRITE_ROLES.includes(role);
+}
+
+export function canDecideContentSubmission(role: Role): boolean {
+  return CONTENT_WORKFLOW_WRITE_ROLES.includes(role);
+}

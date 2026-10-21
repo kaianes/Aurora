@@ -4,6 +4,14 @@ import type {
   AcceptInvitationResponse,
   AcknowledgeDriftRequest,
   AddOperatorRequest,
+  AnswerBriefingQuestionRequest,
+  AskBriefingQuestionRequest,
+  AskBriefingQuestionResponse,
+  Briefing,
+  BriefingDistribution,
+  BriefingQaThreadDetail,
+  BriefingQaThreadSummary,
+  BrandContentSubmissionVersion,
   BrandProfile,
   BulkShortlistDecisionRequest,
   Campaign,
@@ -12,6 +20,9 @@ import type {
   CampaignSummary,
   CampaignTemplate,
   ClientListResponse,
+  ConfirmPublicationRequest,
+  ConfirmPublicationResponse,
+  ContentSubmissionVersion,
   CreateBrandProfileRequest,
   CreateCampaignOverrideRequest,
   CreateCampaignRequest,
@@ -24,13 +35,17 @@ import type {
   CreateSafetyRuleRequest,
   CreatorMetrics,
   CreatorOpportunity,
+  CreatorQaThreadResponse,
   ConfirmCampaignResponse,
   DecideReviewItemRequest,
   DecideReviewItemResponse,
+  DecideSubmissionRequest,
+  DecideSubmissionResponse,
   DeleteSafetyRuleResponse,
   Exclusion,
   InstantiateTemplateRequest,
   Invitation,
+  IssueBriefingResponse,
   LifecycleActionRequest,
   LifecycleActionResponse,
   LoginRequest,
@@ -64,6 +79,7 @@ import type {
   SafetyRule,
   SafetyRuleset,
   SaveAsTemplateRequest,
+  SaveBriefingRequest,
   ShortfallResponse,
   ShortlistDecisionRequest,
   ShortlistDecisionResponse,
@@ -441,6 +457,61 @@ export const monitoringApi = {
   get: (id: string) => api.get<MonitoringSnapshotDetail>(`/safety/monitoring/${id}`).then((r) => r.data),
 };
 
+// E5 -- Briefing composition, distribution, and Q&A (US-18a, US-18b, US-31 brand side), per
+// docs/architecture/e5-briefing-content-workflow.md section 4.2-4.3.
+
+export const briefingApi = {
+  get: (campaignId: string) =>
+    api
+      .get<Briefing>(`/campaigns/${campaignId}/briefing`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 BRIEFING_NOT_FOUND means Marina has never saved a draft yet -- not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  save: (campaignId: string, data: SaveBriefingRequest) =>
+    api.put<Briefing>(`/campaigns/${campaignId}/briefing`, data).then((r) => r.data),
+
+  issue: (campaignId: string) =>
+    api.post<IssueBriefingResponse>(`/campaigns/${campaignId}/briefing/issue`).then((r) => r.data),
+
+  getDistribution: (campaignId: string) =>
+    api.get<BriefingDistribution>(`/campaigns/${campaignId}/briefing/distribution`).then((r) => r.data),
+
+  listQa: (campaignId: string) =>
+    api.get<{ data: BriefingQaThreadSummary[] }>(`/campaigns/${campaignId}/briefing/qa`).then((r) => r.data),
+
+  getQaThread: (campaignId: string, threadId: string) =>
+    api.get<BriefingQaThreadDetail>(`/campaigns/${campaignId}/briefing/qa/${threadId}`).then((r) => r.data),
+
+  answerQa: (campaignId: string, threadId: string, data: AnswerBriefingQuestionRequest) =>
+    api
+      .post<{ sender_type: 'brand'; body: string; created_at: string }>(
+        `/campaigns/${campaignId}/briefing/qa/${threadId}/messages`,
+        data,
+      )
+      .then((r) => r.data),
+};
+
+// E5 -- Marina's review queue and decision (US-19), per section 4.4-4.5.
+
+export const contentSubmissionApi = {
+  list: (
+    campaignId: string,
+    params?: { opportunity_id?: string; review_status?: string; cursor?: string; limit?: number },
+  ) =>
+    api
+      .get<PaginatedResponse<BrandContentSubmissionVersion>>(`/campaigns/${campaignId}/content-submissions`, {
+        params,
+      })
+      .then((r) => r.data),
+
+  decide: (submissionId: string, data: DecideSubmissionRequest) =>
+    api.post<DecideSubmissionResponse>(`/content-submissions/${submissionId}/decide`, data).then((r) => r.data),
+};
+
 // Creator portal (US-28): separate token storage since creators are not account members.
 // Pilot-only creator login (ADR-0013): POST /creator-portal/login takes a creator_id
 // (no password -- E8 owns the real social-auth/magic-link flow) and returns a short-lived
@@ -490,8 +561,8 @@ export const creatorPortalApi = {
   decline: (id: string) =>
     creatorPortalClient.post<CreatorOpportunity>(`/creator-portal/opportunities/${id}/decline`).then((r) => r.data),
 
-  // E4 -- content submission intake (US-16), per docs/architecture/e4-brand-safety.md section 3.3.
-  // This is the one creator-facing endpoint E4 exposes ahead of E5's real draft-submission flow.
+  // E5 -- content-workflow's own controller now answers this same route (US-32a), replacing
+  // E4's stub per docs/architecture/e5-briefing-content-workflow.md section 4.4/7.4.
   submitContent: (data: CreateContentSubmissionRequest) =>
     creatorPortalClient
       .post<CreateContentSubmissionResponse>('/creator-portal/content-submissions', data)
@@ -501,6 +572,40 @@ export const creatorPortalApi = {
   // creator JWT since this page is the creator-facing side of the check.
   getSafetyCheck: (contentSubmissionId: string) =>
     creatorPortalClient.get<SafetyCheckResult>(`/safety/submissions/${contentSubmissionId}/check`).then((r) => r.data),
+
+  // E5 -- briefing viewer and Q&A (US-30, US-31), per section 4.3.
+  getBriefing: (campaignId: string) =>
+    creatorPortalClient
+      .get<Briefing>('/creator-portal/briefing', { params: { campaign_id: campaignId } })
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 BRIEFING_NOT_AVAILABLE covers "no briefing", "not issued", and "opportunity not
+        // accepted" uniformly, by design (section 4.3) -- the UI never tries to tell those apart.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  askBriefingQuestion: (data: AskBriefingQuestionRequest) =>
+    creatorPortalClient.post<AskBriefingQuestionResponse>('/creator-portal/briefing/qa', data).then((r) => r.data),
+
+  getBriefingQa: (campaignId: string) =>
+    creatorPortalClient
+      .get<CreatorQaThreadResponse>('/creator-portal/briefing/qa', { params: { campaign_id: campaignId } })
+      .then((r) => r.data),
+
+  // E5 -- draft version history (US-32a, US-32b, US-33), per section 4.4.
+  listSubmissions: (opportunityId: string) =>
+    creatorPortalClient
+      .get<{ data: ContentSubmissionVersion[] }>('/creator-portal/content-submissions', {
+        params: { opportunity_id: opportunityId },
+      })
+      .then((r) => r.data),
+
+  // E5 -- publication confirmation (US-34), per section 4.6.
+  confirmPublication: (submissionId: string, data: ConfirmPublicationRequest) =>
+    creatorPortalClient
+      .post<ConfirmPublicationResponse>(`/creator-portal/content-submissions/${submissionId}/confirm-publication`, data)
+      .then((r) => r.data),
 };
 
 export default api;
