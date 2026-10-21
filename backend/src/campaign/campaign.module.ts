@@ -23,6 +23,7 @@ import { CampaignScheduledTasksService } from './campaign-scheduled-tasks.servic
 import { MATCHING_ENGINE_ADAPTER } from './matching-engine.adapter';
 import { MatchingModule } from '../matching/matching.module';
 import { RealMatchingEngineAdapter } from '../matching/real-matching-engine.adapter';
+import { AnalyticsModule } from '../analytics/analytics.module';
 
 @Module({
   imports: [
@@ -39,6 +40,12 @@ import { RealMatchingEngineAdapter } from '../matching/real-matching-engine.adap
     ]),
     BullModule.registerQueue({ name: 'campaign' }),
     MatchingModule,
+    // ADR-0047: imports AnalyticsModule to reach its one exported service,
+    // PerformanceScoringService, in process -- CampaignScheduledTasksService
+    // calls getReallocationInputs immediately before enqueueing each
+    // reallocate-budget job, the same mechanism ADR-0032/ADR-0036 already
+    // established for other cross-module hand-offs.
+    AnalyticsModule,
   ],
   controllers: [CampaignController, TemplateController],
   providers: [
