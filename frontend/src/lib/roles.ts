@@ -56,3 +56,16 @@ export function canManageExclusions(role: Role): boolean {
 export function canOverrideShortlist(role: Role): boolean {
   return role === 'agency_admin' || role === 'agency_operator';
 }
+
+// Brand safety (E4) permissions, per docs/architecture/e4-brand-safety.md section 2.4.
+// brand_analyst is read-only across this epic: it can view rulesets, the review queue and
+// monitoring, but cannot write rules or decide a flagged item.
+const SAFETY_WRITE_ROLES: Role[] = ['brand_owner', 'brand_manager', 'agency_admin', 'agency_operator'];
+
+export function canManageSafetyRules(role: Role): boolean {
+  return SAFETY_WRITE_ROLES.includes(role);
+}
+
+export function canDecideReviewQueue(role: Role): boolean {
+  return SAFETY_WRITE_ROLES.includes(role);
+}
