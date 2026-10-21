@@ -703,6 +703,10 @@ export interface CreateContentSubmissionResponse {
   safety_check_id: string;
   status: 'pending';
   poll_url: string;
+  // E5 (US-32a/US-32b): populated once content-workflow's own controller replaces E4's stub at
+  // this same route, per docs/architecture/e5-briefing-content-workflow.md section 4.4.
+  version_number?: number;
+  review_deadline_at?: string;
 }
 
 // Human review queue (US-17)
@@ -763,4 +767,163 @@ export interface MonitoringSnapshotDetail extends MonitoringSnapshot {
   approved_on_screen_text: string | null;
   approved_audio_transcript: string | null;
   monitoring_status: 'active' | 'stopped';
+}
+
+// ---------------------------------------------------------------------------
+// E5 -- Briefing and Content Workflow
+// Types mirror docs/architecture/e5-briefing-content-workflow.md section 4.
+// ---------------------------------------------------------------------------
+
+export type BriefingStatus = 'draft' | 'issued';
+
+export interface DeliverableSpec {
+  format: string;
+  quantity?: number;
+  aspect_ratio?: string;
+  caption_length_limit?: number;
+  mandatory_hashtags?: string[];
+  notes?: string;
+}
+
+export interface Briefing {
+  id: string;
+  campaign_id: string;
+  status: BriefingStatus;
+  dos: string[] | null;
+  donts: string[] | null;
+  reference_examples: string[] | null;
+  deliverable_spec: DeliverableSpec | null;
+  deadline: string | null;
+  issued_at: string | null;
+  issued_by_user_id?: string | null; // brand-side read only, absent on the creator-portal GET
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SaveBriefingRequest {
+  dos?: string[];
+  donts?: string[];
+  reference_examples?: string[];
+  deliverable_spec?: DeliverableSpec;
+  deadline?: string;
+}
+
+export interface IssueBriefingResponse {
+  id: string;
+  status: 'issued';
+  issued_at: string;
+  recipients_queued: number;
+}
+
+export interface BriefingDistributionFailure {
+  creator_id: string;
+  failure_reason: string;
+}
+
+export interface BriefingDistribution {
+  briefing_id: string;
+  recipients_total: number;
+  delivered: number;
+  failed: BriefingDistributionFailure[];
+  pending: number;
+}
+
+// Briefing Q&A (US-31)
+
+export type QaSenderType = 'creator' | 'brand';
+
+export interface QaMessage {
+  sender_type: QaSenderType;
+  body: string;
+  created_at: string;
+}
+
+export interface CreatorQaThreadResponse {
+  thread_id: string | null;
+  messages: QaMessage[];
+  answered: boolean | null;
+}
+
+export interface AskBriefingQuestionRequest {
+  campaign_id: string;
+  question: string;
+}
+
+export interface AskBriefingQuestionResponse extends QaMessage {
+  thread_id: string;
+  sender_type: 'creator';
+}
+
+export interface BriefingQaThreadSummary {
+  thread_id: string;
+  creator_id: string;
+  creator_display_name: string;
+  message_count: number;
+  answered: boolean;
+  last_message_at: string;
+}
+
+export interface BriefingQaThreadDetail {
+  thread_id: string;
+  creator_id: string;
+  creator_display_name?: string;
+  messages: QaMessage[];
+  answered: boolean;
+}
+
+export interface AnswerBriefingQuestionRequest {
+  body: string;
+}
+
+// Content submission version history and review decision (US-32a, US-32b, US-19, US-33)
+
+export type ReviewDecisionStatus = 'pending' | 'approved' | 'rejected' | 'revision_requested';
+
+export interface SafetyGateStatus {
+  cleared: boolean;
+  blocking_reason: string | null;
+}
+
+export interface ContentSubmissionVersion {
+  id: string;
+  version_number: number;
+  supersedes_submission_id: string | null;
+  review_status: ReviewDecisionStatus;
+  review_reason: string | null;
+  review_decided_at: string | null;
+  review_deadline_at: string | null;
+  review_escalated: boolean;
+  safety_gate: SafetyGateStatus;
+  published_url: string | null;
+  submitted_at: string;
+}
+
+export interface BrandContentSubmissionVersion extends ContentSubmissionVersion {
+  creator_display_name: string;
+  latest_version: boolean;
+}
+
+export interface DecideSubmissionRequest {
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  reason?: string;
+}
+
+export interface DecideSubmissionResponse {
+  id: string;
+  content_submission_id: string;
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  decided_at: string;
+}
+
+// Publication confirmation (US-34)
+
+export interface ConfirmPublicationRequest {
+  published_url: string;
+}
+
+export interface ConfirmPublicationResponse {
+  content_submission_id: string;
+  published_url: string;
+  published_at: string;
+  status: 'confirmed';
 }

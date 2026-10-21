@@ -365,6 +365,25 @@ export function CampaignDetailPage() {
         </Link>
       </Card>
 
+      {/* Briefing, Q&A, and content review (E5, US-18a/US-18b/US-19/US-31) */}
+      <Card>
+        <h3 className="text-sm font-semibold text-text-dark mb-3">Briefing e revisao de conteudo</h3>
+        <div className="flex flex-wrap gap-2">
+          <Link to={`/app/campaigns/${campaign.id}/briefing`}>
+            <Button variant="outline" size="sm">Briefing</Button>
+          </Link>
+          <Link to={`/app/campaigns/${campaign.id}/briefing/distribution`}>
+            <Button variant="outline" size="sm">Status de distribuicao</Button>
+          </Link>
+          <Link to={`/app/campaigns/${campaign.id}/briefing/qa`}>
+            <Button variant="outline" size="sm">Perguntas dos criadores</Button>
+          </Link>
+          <Link to={`/app/campaigns/${campaign.id}/content-submissions`}>
+            <Button variant="outline" size="sm">Rascunhos de conteudo</Button>
+          </Link>
+        </div>
+      </Card>
+
       {/* Lifecycle controls */}
       {canWrite && ['active', 'paused', 'confirmed'].includes(campaign.state) && (
         <Card>

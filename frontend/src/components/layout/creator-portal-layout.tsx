@@ -24,8 +24,8 @@ export function CreatorPortalLayout() {
             </Link>
             <div className="flex items-center gap-4">
               {hasToken && (
-                <Link to="/creator-portal/submissions/new" className="text-sm text-muted hover:text-text-dark transition-colors">
-                  Enviar conteudo
+                <Link to="/creator-portal/opportunities" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Oportunidades
                 </Link>
               )}
               {hasToken && (
