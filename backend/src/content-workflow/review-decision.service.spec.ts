@@ -73,4 +73,27 @@ describe('ReviewDecisionService - US-19', () => {
       NotFoundException,
     );
   });
+
+  // US-32b / ADR-0030: escalation is visibility-only and must never block or alter Marina's
+  // decision path -- a decision on an already-escalated submission still succeeds normally,
+  // proving the escalation sweeper is not a gate this endpoint has to clear.
+  it('still records a decision normally on a submission that has already been escalated', async () => {
+    submissionRepo.findOne.mockResolvedValue({
+      id: 'sub-1',
+      campaignId: 'camp-1',
+      reviewEscalated: true,
+      reviewEscalatedAt: new Date(),
+    });
+    decisionRepo.findOne.mockResolvedValue(undefined);
+
+    const result = await service.decide(
+      'sub-1',
+      'account-1',
+      { decision: 'rejected', reason: 'Audio incompreensivel.' },
+      actor,
+    );
+
+    expect(result.decision).toBe(ContentReviewDecisionValue.REJECTED);
+    expect(decisionRepo.save).toHaveBeenCalled();
+  });
 });
