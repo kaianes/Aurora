@@ -4,6 +4,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { campaignApi } from '@/lib/api-client';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,7 +50,15 @@ export function CampaignFormPage() {
   const isEditing = !!id;
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { workspace } = useAuth();
   const [preserved, setPreserved] = useState<Record<string, unknown> | null>(null);
+
+  // US-39 (E9): a confirmation of which client this campaign is about to be created for,
+  // not a new field submitted -- POST /campaigns already attributes it to whatever
+  // X-Account-Id resolved (E2, FR-24, unchanged). Only shown for the creation form, in an
+  // agency workspace, per docs/architecture/e9-agency-multi-client-operations.md section 6.
+  const isAgency = workspace?.workspace?.type === 'agency';
+  const currentAccountName = workspace?.accounts.find((a) => a.id === workspace.current_account.id)?.name;
 
   const { data: campaign, isLoading } = useQuery({
     queryKey: ['campaign', id],
@@ -182,6 +191,10 @@ export function CampaignFormPage() {
           Campos pendentes antes de solicitar uma cotacao:{' '}
           {campaign.missing_fields.map((f) => MISSING_FIELD_LABELS[f] ?? f).join(', ')}.
         </Alert>
+      )}
+
+      {!isEditing && isAgency && currentAccountName && (
+        <Alert variant="info">Esta campanha sera criada para: {currentAccountName}</Alert>
       )}
 
       <Card>
