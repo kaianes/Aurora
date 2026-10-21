@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { creatorPortalApi, getCreatorToken } from '@/lib/api-client';
@@ -107,6 +107,17 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
           Pagamento liquido: {formatCurrency(opportunity.payout_net)}
         </p>
       </div>
+
+      {opportunity.status === 'accepted' && (
+        <div className="mt-3">
+          <Link
+            to={`/creator-portal/submissions/new?opportunity_id=${opportunity.id}&campaign_id=${opportunity.campaign_id}`}
+            className="text-sm text-primary hover:underline"
+          >
+            Enviar conteudo para verificacao de seguranca
+          </Link>
+        </div>
+      )}
 
       {isPending && (
         <div className="mt-3">
