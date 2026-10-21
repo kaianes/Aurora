@@ -375,6 +375,16 @@ export function CampaignDetailPage() {
         </Card>
       )}
 
+      {/* Dashboard de desempenho (E7, US-21b) */}
+      {['active', 'paused', 'completed'].includes(campaign.state) && (
+        <Card>
+          <h3 className="text-sm font-semibold text-text-dark mb-3">Desempenho</h3>
+          <Link to={`/app/campaigns/${campaign.id}/dashboard`}>
+            <Button variant="outline" size="sm">Ver dashboard de desempenho</Button>
+          </Link>
+        </Card>
+      )}
+
       {/* Briefing, Q&A, and content review (E5, US-18a/US-18b/US-19/US-31) */}
       <Card>
         <h3 className="text-sm font-semibold text-text-dark mb-3">Briefing e revisao de conteudo</h3>

@@ -43,6 +43,10 @@ import { ConfirmPublicationPage } from '@/pages/creator-portal/confirm-publicati
 import { PaymentsPage } from '@/pages/creator-portal/payments-page';
 import { PaymentDetailPage } from '@/pages/creator-portal/payment-detail-page';
 import { InvoicePage } from '@/pages/app/invoice-page';
+import { CampaignDashboardPage } from '@/pages/app/campaign-dashboard-page';
+import { ClientReportPage } from '@/pages/app/client-report-page';
+import { ReportsComparePage } from '@/pages/app/reports-compare-page';
+import { CreatorPerformancePage } from '@/pages/creator-portal/performance-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -111,6 +115,8 @@ export default function App() {
               <Route path="campaigns/:id/content-submissions" element={<ContentSubmissionsPage />} />
               {/* E6 -- Payments and Financial Transparency (US-20, US-42) */}
               <Route path="campaigns/:id/invoice" element={<InvoicePage />} />
+              {/* E7 -- Analytics and Reporting (US-21b, US-43, US-46) */}
+              <Route path="campaigns/:id/dashboard" element={<CampaignDashboardPage />} />
               <Route
                 path="clients"
                 element={
@@ -124,6 +130,22 @@ export default function App() {
                 element={
                   <ProtectedRoute requiredWorkspaceType="agency">
                     <ClientDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="clients/:id/reports"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <ClientReportPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="reports/compare"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <ReportsComparePage />
                   </ProtectedRoute>
                 }
               />
@@ -142,6 +164,8 @@ export default function App() {
               {/* E6 -- Payments and Financial Transparency (US-35a, US-35b, US-35c, US-36a, US-36b) */}
               <Route path="payments" element={<PaymentsPage />} />
               <Route path="payments/:id" element={<PaymentDetailPage />} />
+              {/* E7 -- Analytics and Reporting (US-37) */}
+              <Route path="performance" element={<CreatorPerformancePage />} />
             </Route>
 
             {/* Default redirect */}
