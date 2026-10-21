@@ -52,4 +52,41 @@ describe('ClientReportShareLinkController - US-44', () => {
       expect.objectContaining({ userId: 'user-1' }),
     );
   });
+
+  // ---- NFR-16 / US-44 cross-tenant check: RolesGuard only ever resolves and
+  // authorizes the account named by the request's own X-Account-Id header
+  // (set on req.currentAccountId); it never inspects the :clientAccountId
+  // route param this controller also receives. A caller who sends a
+  // legitimate X-Account-Id for an account they truly hold (e.g. their own
+  // home account, or Client A, which they have operator_client_access for)
+  // can still put an entirely different, unauthorized account's id in the
+  // :clientAccountId path segment, and neither the controller nor
+  // ClientReportShareLinkService.mint/revoke ever compares the two. Minting
+  // a share link for an account the caller cannot otherwise reach is a
+  // genuine cross-tenant data leak (worse than a one-off read, since the
+  // resulting public, unauthenticated link exposes that account's report
+  // indefinitely until revoked or expired). This test documents the
+  // required behavior; it currently fails because no such check exists in
+  // either the controller or the service.
+  it('refuses to mint a share link when clientAccountId does not match the caller\'s RolesGuard-resolved account', async () => {
+    const req = reqWith();
+    (req as any).currentAccountId = 'client-a-authorized';
+
+    await expect(
+      controller.mint('client-b-NOT-authorized', 'rpt-1', req),
+    ).rejects.toThrow();
+
+    expect(shareLinkService.mint).not.toHaveBeenCalled();
+  });
+
+  it('refuses to revoke a share link when clientAccountId does not match the caller\'s RolesGuard-resolved account', async () => {
+    const req = reqWith();
+    (req as any).currentAccountId = 'client-a-authorized';
+
+    await expect(
+      controller.revoke('client-b-NOT-authorized', 'rpt-1', 'link-1', req),
+    ).rejects.toThrow();
+
+    expect(shareLinkService.revoke).not.toHaveBeenCalled();
+  });
 });
