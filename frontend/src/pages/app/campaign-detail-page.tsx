@@ -375,13 +375,18 @@ export function CampaignDetailPage() {
         </Card>
       )}
 
-      {/* Dashboard de desempenho (E7, US-21b) */}
+      {/* Dashboard de desempenho e relatorio de ROI (E7, US-21b, US-22) */}
       {['active', 'paused', 'completed'].includes(campaign.state) && (
         <Card>
           <h3 className="text-sm font-semibold text-text-dark mb-3">Desempenho</h3>
-          <Link to={`/app/campaigns/${campaign.id}/dashboard`}>
-            <Button variant="outline" size="sm">Ver dashboard de desempenho</Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/app/campaigns/${campaign.id}/dashboard`}>
+              <Button variant="outline" size="sm">Ver dashboard de desempenho</Button>
+            </Link>
+            <Link to={`/app/campaigns/${campaign.id}/reports`}>
+              <Button variant="outline" size="sm">Gerar relatorio de ROI</Button>
+            </Link>
+          </div>
         </Card>
       )}
 

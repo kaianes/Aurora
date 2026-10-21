@@ -1083,6 +1083,35 @@ export interface RequestReportResponse {
   poll_url: string;
 }
 
+// US-22 -- spend_source, section 3.4: whether the spend figure came from
+// campaign.locked_price (mid-campaign, no invoice yet) or invoice.total_amount
+// (once one has been generated).
+export type SpendSource = 'locked_price' | 'invoice';
+
+export type CampaignProgressLabel = 'in_progress' | 'final';
+
+// US-22 -- GET /campaigns/:id/reports/:reportId (section 5.3). Matches
+// CampaignReportService#format exactly -- no requested_at on the read side.
+export interface CampaignPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_progress_label: CampaignProgressLabel | null;
+  spend_amount: string | null;
+  spend_source: SpendSource | null;
+  has_deliveries: boolean | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by
+  // (US-22 scenario 3, ADR-0046).
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  resolved_at: string | null;
+  // Only present when status is 'ready' and has_deliveries is false (US-22 scenario 3).
+  message?: string;
+}
+
 // US-43 -- GET /agency/clients/:clientAccountId/reports/:reportId
 export interface ClientPerformanceReport {
   id: string;
