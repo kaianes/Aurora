@@ -13,6 +13,7 @@ import {
   ContentReviewDecision,
 } from '../database/entities';
 import { BrandSafetyModule } from '../brand-safety/brand-safety.module';
+import { PaymentsModule } from '../payments/payments.module';
 import { BriefingService } from './briefing.service';
 import { BriefingController } from './briefing.controller';
 import { BriefingQaService } from './briefing-qa.service';
@@ -54,6 +55,11 @@ import {
     // process -- content-workflow still cannot reach safety_check,
     // safety_rule, or safety_review_queue_item directly (NFR-29).
     BrandSafetyModule,
+    // ADR-0036: imports PaymentsModule to reach its one exported service,
+    // PayoutObligationService, in process -- PublicationService calls
+    // createForConfirmedPublication immediately after confirming
+    // publication, the same mechanism ADR-0032 already established above.
+    PaymentsModule,
   ],
   controllers: [
     BriefingController,

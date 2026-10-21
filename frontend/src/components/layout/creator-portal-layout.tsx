@@ -29,6 +29,11 @@ export function CreatorPortalLayout() {
                 </Link>
               )}
               {hasToken && (
+                <Link to="/creator-portal/payments" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Pagamentos
+                </Link>
+              )}
+              {hasToken && (
                 <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
                   Sair
                 </button>
