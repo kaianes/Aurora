@@ -257,6 +257,81 @@ describe('AuthService - exported methods for creator-network (ADR-0050)', () => 
 
     expect(result).toBe(user);
   });
+
+  // Failure case: a wrong password for an existing, verified account is rejected with the
+  // same generic INVALID_CREDENTIALS code as an unknown email -- never a hint about which
+  // half (email or password) was wrong.
+  it('authenticateCredentials rejects a wrong password for an existing, verified account', async () => {
+    const bcrypt = await import('bcrypt');
+    const passwordHash = await bcrypt.hash('StrongP@ss1', 12);
+    userRepo.findOne.mockResolvedValue({
+      id: 'user-1',
+      email: 'duda@example.com',
+      passwordHash,
+      emailVerified: true,
+    });
+
+    await expect(
+      service.authenticateCredentials('duda@example.com', 'WrongPassword1!'),
+    ).rejects.toThrow();
+  });
+
+  // Failure case: an email that belongs to no user at all is rejected the same way as a
+  // wrong password -- no enumeration signal either way.
+  it('authenticateCredentials rejects an email with no matching user', async () => {
+    userRepo.findOne.mockResolvedValue(null);
+
+    await expect(
+      service.authenticateCredentials('ghost@example.com', 'whatever-password'),
+    ).rejects.toThrow();
+  });
+
+  // verifyEmailToken is the creator-network path's own exported method (distinct from the
+  // brand-facing verifyEmail above, which also issues brand tokens/memberships) -- it needs
+  // its own direct coverage of the normal, expired, and already-used cases.
+  describe('verifyEmailToken', () => {
+    it('verifies a valid, unused token and marks the user as email-verified', async () => {
+      verificationTokenRepo.findOne.mockResolvedValue({
+        id: 'vt-1',
+        userId: 'user-1',
+        used: false,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+      });
+      const user = { id: 'user-1', email: 'duda@example.com', emailVerified: false };
+      userRepo.findOne.mockResolvedValue(user);
+
+      const result = await service.verifyEmailToken('valid-token');
+
+      expect(result.emailVerified).toBe(true);
+      expect(verificationTokenRepo.save).toHaveBeenCalledWith(
+        expect.objectContaining({ used: true }),
+      );
+    });
+
+    it('rejects an unknown or already-used token with INVALID_TOKEN', async () => {
+      verificationTokenRepo.findOne.mockResolvedValue({
+        id: 'vt-1',
+        userId: 'user-1',
+        used: true,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+      });
+
+      await expect(service.verifyEmailToken('used-token')).rejects.toThrow(BadRequestException);
+    });
+
+    it('rejects a genuinely expired token with VERIFICATION_EXPIRED, not a confusing generic error', async () => {
+      verificationTokenRepo.findOne.mockResolvedValue({
+        id: 'vt-1',
+        userId: 'user-1',
+        used: false,
+        expiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(service.verifyEmailToken('expired-token')).rejects.toMatchObject({
+        response: { error: { code: 'VERIFICATION_EXPIRED' } },
+      });
+    });
+  });
 });
 
 // Regression: mfaSetup/mfaConfirm called otplib's v10-12 `authenticator`
