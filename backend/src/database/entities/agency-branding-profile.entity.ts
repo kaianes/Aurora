@@ -30,6 +30,16 @@ export class AgencyBrandingProfile {
   @Column({ type: 'text', nullable: true, name: 'secondary_color_hex' })
   secondaryColorHex: string | null;
 
+  // E9 / US-44, ADR-0061: stored and format-validated only -- no DNS
+  // verification, certificate provisioning, or routing exists in this
+  // pilot. domainStatus never reaches any value but 'pending_activation'
+  // or null (enforced by chk_domain_status_values, section 2.3).
+  @Column({ type: 'text', nullable: true, name: 'custom_domain' })
+  customDomain: string | null;
+
+  @Column({ type: 'text', nullable: true, name: 'domain_status' })
+  domainStatus: string | null;
+
   @Column({ type: 'uuid', nullable: true, name: 'updated_by_user_id' })
   updatedByUserId: string | null;
 

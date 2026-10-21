@@ -10,6 +10,7 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Repository } from 'typeorm';
 import {
+  Account,
   Campaign,
   CampaignState,
   CampaignQuote,
@@ -60,6 +61,8 @@ export class CampaignService {
     private reallocationEventRepo: Repository<CampaignReallocationEvent>,
     @InjectRepository(BrandProfile)
     private brandProfileRepo: Repository<BrandProfile>,
+    @InjectRepository(Account)
+    private accountRepo: Repository<Account>,
     @InjectQueue('campaign')
     private campaignQueue: Queue,
     private auditService: AuditService,
@@ -169,7 +172,11 @@ export class CampaignService {
       userAgent: actor.userAgent,
     });
 
-    return this.formatCampaign(saved, await this.brandProfileStatus(accountId));
+    return this.formatCampaign(
+      saved,
+      await this.brandProfileStatus(accountId),
+      await this.accountName(accountId),
+    );
   }
 
   async update(
@@ -239,7 +246,11 @@ export class CampaignService {
       userAgent: actor.userAgent,
     });
 
-    return this.formatCampaign(saved, await this.brandProfileStatus(accountId));
+    return this.formatCampaign(
+      saved,
+      await this.brandProfileStatus(accountId),
+      await this.accountName(accountId),
+    );
   }
 
   async findOne(id: string, accountId: string) {
@@ -250,7 +261,11 @@ export class CampaignService {
     });
 
     return {
-      ...this.formatCampaign(campaign, await this.brandProfileStatus(accountId)),
+      ...this.formatCampaign(
+        campaign,
+        await this.brandProfileStatus(accountId),
+        await this.accountName(accountId),
+      ),
       latest_quote: latestQuote ? this.formatQuote(latestQuote) : null,
     };
   }
@@ -278,11 +293,18 @@ export class CampaignService {
 
     const rows = await qb.getMany();
     const hasMore = rows.length > limit;
+    // US-39, section 5.2 of the E9 architecture doc: a plain, single-row
+    // join on campaign.accountId -> account.name. Every row in this page
+    // shares the same accountId (the request's own resolved context), so
+    // one lookup covers the whole page -- no N+1, no new query shape.
+    const resolvedAccountName = await this.accountName(accountId);
     const data = rows.slice(0, limit).map((c) => ({
       id: c.id,
       name: c.name,
       state: c.state,
       budget_amount: c.budgetAmount,
+      account_id: c.accountId,
+      account_name: resolvedAccountName,
       created_at: c.createdAt.toISOString(),
     }));
 
@@ -736,10 +758,21 @@ export class CampaignService {
     return profile?.status || 'draft';
   }
 
-  formatCampaign(campaign: Campaign, brandProfileStatus: string) {
+  // US-39, section 5.2 of the E9 architecture doc: present in every
+  // response, for every workspace type -- for a brand workspace this is
+  // simply always the brand's own single account, which costs nothing and
+  // keeps list/detail's shape uniform. The frontend only renders the
+  // attribution badge when workspace.type === 'agency' (section 6).
+  private async accountName(accountId: string): Promise<string | null> {
+    const account = await this.accountRepo.findOne({ where: { id: accountId } });
+    return account?.name ?? null;
+  }
+
+  formatCampaign(campaign: Campaign, brandProfileStatus: string, accountName: string | null = null) {
     return {
       id: campaign.id,
       account_id: campaign.accountId,
+      account_name: accountName,
       template_id: campaign.templateId,
       name: campaign.name,
       state: campaign.state,
