@@ -102,6 +102,40 @@ describe('TaxDocumentService - US-36b', () => {
     });
   });
 
+  // ---- US-36b scenario 2: multiple payouts in the same tax period, each its own document ----
+  it('generates a separate, correctly attributed document for each of two obligations settled in the same tax period', async () => {
+    creatorRepo.findOne.mockResolvedValue({ id: 'creator-1', taxId: '123.456.789-00', taxIdType: 'cpf' });
+
+    // First obligation: no existing document yet.
+    taxDocumentRepo.findOne.mockResolvedValueOnce(undefined);
+    obligationRepo.findOne.mockResolvedValueOnce({
+      id: 'pay-1',
+      creatorId: 'creator-1',
+      status: PayoutObligationStatus.SETTLED,
+      settledAt: new Date('2026-10-15T00:00:00Z'),
+    });
+    const docOne = await service.generateForSettledObligation('pay-1');
+
+    // Second obligation, same creator, same tax period, different campaign/obligation.
+    taxDocumentRepo.findOne.mockResolvedValueOnce(undefined);
+    obligationRepo.findOne.mockResolvedValueOnce({
+      id: 'pay-2',
+      creatorId: 'creator-1',
+      status: PayoutObligationStatus.SETTLED,
+      settledAt: new Date('2026-10-28T00:00:00Z'),
+    });
+    const docTwo = await service.generateForSettledObligation('pay-2');
+
+    expect(docOne.payoutObligationId).toBe('pay-1');
+    expect(docTwo.payoutObligationId).toBe('pay-2');
+    expect(docOne.taxPeriod).toBe('2026-10');
+    expect(docTwo.taxPeriod).toBe('2026-10');
+    // Two distinct documents, never merged into one record for the shared period.
+    expect(docOne.documentUrl).toContain('pay-1');
+    expect(docTwo.documentUrl).toContain('pay-2');
+    expect(docOne.documentUrl).not.toBe(docTwo.documentUrl);
+  });
+
   it('getForCreator returns the blocked-with-message shape for a settled obligation with no tax_id', async () => {
     obligationRepo.findOne
       .mockResolvedValueOnce({ id: 'pay-1', creatorId: 'creator-1', status: PayoutObligationStatus.SETTLED })

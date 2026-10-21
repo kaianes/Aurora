@@ -250,4 +250,129 @@ describe('PayoutObligationService - US-35a/b/c', () => {
       response: { error: { code: 'PAYOUT_OBLIGATION_NOT_FOUND' } },
     });
   });
+
+  // ---- US-36a scenario 3: an empty, accurate result, never an error ----
+  it('listForCreator returns an accurate empty result, never an error, when the creator has no obligations', async () => {
+    const qb: any = {
+      where: vi.fn().mockReturnThis(),
+      andWhere: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      getMany: vi.fn().mockResolvedValue([]),
+    };
+    obligationRepo.createQueryBuilder.mockReturnValue(qb);
+
+    const result = await service.listForCreator('creator-with-nothing', {});
+
+    expect(result).toEqual({ data: [], pagination: { next_cursor: null, has_more: false } });
+  });
+
+  // ---- US-36a scenario 3, the sharper case: a specific campaign filter that matches nothing ----
+  it('listForCreator scoped to a campaign with no obligations returns empty, never another creator\'s data', async () => {
+    const qb: any = {
+      where: vi.fn().mockReturnThis(),
+      andWhere: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      getMany: vi.fn().mockResolvedValue([]),
+    };
+    obligationRepo.createQueryBuilder.mockReturnValue(qb);
+
+    const result = await service.listForCreator('creator-1', { campaignId: 'camp-with-no-record' });
+
+    expect(result.data).toEqual([]);
+    expect(qb.andWhere).toHaveBeenCalledWith('o.campaignId = :campaignId', {
+      campaignId: 'camp-with-no-record',
+    });
+  });
+
+  // ---- recordInstructed: called by attempt-payout-execution on a successful instruction ----
+  it('recordInstructed moves the obligation to in_flight and logs the instruction', async () => {
+    const obligation: any = {
+      id: 'pay-1',
+      status: PayoutObligationStatus.OWED,
+      inFlightSince: null,
+    };
+    obligationRepo.findOne.mockResolvedValue(obligation);
+
+    await service.recordInstructed('pay-1', 'provider-ref-1');
+
+    expect(obligation.status).toBe(PayoutObligationStatus.IN_FLIGHT);
+    expect(obligation.inFlightSince).toBeInstanceOf(Date);
+    expect(attemptRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({ outcome: 'instructed', providerReference: 'provider-ref-1' }),
+    );
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'payout_obligation.execution_instructed' }),
+    );
+  });
+
+  // ---- recordScheduledFailure: US-35c scenario 1, the automated-execution failure path ----
+  it('recordScheduledFailure leaves the obligation owed, sets failure fields, and enqueues notification', async () => {
+    const obligation: any = {
+      id: 'pay-1',
+      status: PayoutObligationStatus.IN_FLIGHT,
+      firstFailureDetectedAt: null,
+    };
+    obligationRepo.findOne.mockResolvedValue(obligation);
+
+    await service.recordScheduledFailure('pay-1', 'provider_declined');
+
+    expect(obligation.status).toBe(PayoutObligationStatus.OWED);
+    expect(obligation.lastFailureReason).toBe('provider_declined');
+    expect(obligation.firstFailureDetectedAt).toBeInstanceOf(Date);
+    expect(paymentsQueue.add).toHaveBeenCalledWith(
+      'notify-payout-failure',
+      expect.objectContaining({ payoutObligationId: 'pay-1', reason: 'provider_declined' }),
+    );
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'payout_obligation.execution_failed' }),
+    );
+  });
+
+  // ---- settleFromPoll: the automated settlement path (unreachable with the stub adapter,
+  // ADR-0033, but the mechanism itself must still be correct for a future real adapter) ----
+  it('settleFromPoll writes the balanced ledger pair and settles the obligation', async () => {
+    const obligation: any = {
+      id: 'pay-1',
+      status: PayoutObligationStatus.IN_FLIGHT,
+      campaignId: 'camp-1',
+      creatorId: 'creator-1',
+      payoutNet: '680.00',
+    };
+    obligationRepo.findOne.mockResolvedValue(obligation);
+
+    await service.settleFromPoll('pay-1');
+
+    expect(ledgerService.recordBalancedEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ campaignId: 'camp-1', amount: '680.00' }),
+    );
+    expect(obligation.status).toBe(PayoutObligationStatus.SETTLED);
+    expect(obligation.settledAt).toBeInstanceOf(Date);
+    expect(paymentsQueue.add).toHaveBeenCalledWith(
+      'generate-tax-document',
+      expect.objectContaining({ payoutObligationId: 'pay-1' }),
+    );
+    expect(auditService.log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: 'payout_obligation.settled' }),
+    );
+  });
+
+  // ---- getStatement: US-36a's downloadable statement, scoped to the caller's own obligation ----
+  it('getStatement returns a document URL only for the caller\'s own obligation', async () => {
+    obligationRepo.findOne.mockResolvedValue({ id: 'pay-1', creatorId: 'creator-1' });
+
+    const result = await service.getStatement('pay-1', 'creator-1');
+
+    expect(result.payout_obligation_id).toBe('pay-1');
+    expect(result.document_url).toContain('pay-1');
+  });
+
+  it('getStatement rejects a request for an obligation that is not the caller\'s own', async () => {
+    obligationRepo.findOne.mockResolvedValue(undefined);
+
+    await expect(service.getStatement('pay-1', 'someone-else')).rejects.toMatchObject({
+      response: { error: { code: 'PAYOUT_OBLIGATION_NOT_FOUND' } },
+    });
+  });
 });
