@@ -19,6 +19,10 @@ function formatCurrency(amount: string) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(amount));
 }
 
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
 const STATUS_BADGE: Record<OpportunityStatus, 'default' | 'success' | 'warning' | 'error'> = {
   pending: 'warning',
   accepted: 'success',
@@ -80,6 +84,10 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
   });
 
   const isPending = opportunity.status === 'pending';
+  // US-29 scenario 3: a closed opportunity (declined/expired) never still looks like a live
+  // offer -- the breakdown below is de-emphasized and the expected payment date (which only
+  // means anything for a decision still open) is omitted entirely.
+  const isClosed = opportunity.status === 'declined' || opportunity.status === 'expired';
 
   return (
     <Card>
@@ -93,7 +101,7 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
         <Badge variant={STATUS_BADGE[opportunity.status]}>{STATUS_LABEL[opportunity.status]}</Badge>
       </div>
 
-      <div className="mt-4 space-y-1.5 border-t border-border pt-3">
+      <div className={`mt-4 space-y-1.5 border-t border-border pt-3 ${isClosed ? 'opacity-50' : ''}`}>
         <p className="flex items-center font-mono text-sm text-text-dark">
           <MetricDot color="var(--color-signal-green)" />
           Pagamento bruto: {formatCurrency(opportunity.payout_gross)}
@@ -107,6 +115,22 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
           Pagamento liquido: {formatCurrency(opportunity.payout_net)}
         </p>
       </div>
+
+      {isClosed ? (
+        <p className="mt-2 text-xs text-muted">
+          Oportunidade encerrada. Estes valores nao estao mais disponiveis para aceite.
+        </p>
+      ) : (
+        opportunity.expected_payment_date && (
+          // Shown with plain, muted styling (no colored data-point dot) so it never carries the
+          // same visual weight as the three locked figures above -- it is a projection, not a
+          // locked figure, per docs/architecture/e6-payments-financial-transparency.md section 4.2.
+          <p className="mt-2 font-mono text-xs text-muted">
+            Previsao de pagamento: {formatDate(opportunity.expected_payment_date)}
+            {opportunity.expected_payment_date_is_estimate !== false && ' (estimativa)'}
+          </p>
+        )
+      )}
 
       {opportunity.status === 'accepted' && (
         <div className="mt-3 flex flex-col gap-1.5">

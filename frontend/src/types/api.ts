@@ -579,6 +579,11 @@ export interface CreatorOpportunity {
   payout_gross: string;
   payout_commission: string;
   payout_net: string;
+  // E6 (US-29): projected from campaign.timeline_end / opportunity.expires_at, always an
+  // estimate on this pre-acceptance surface -- never the same visual weight as the three
+  // locked figures above. See docs/architecture/e6-payments-financial-transparency.md section 4.2.
+  expected_payment_date?: string;
+  expected_payment_date_is_estimate?: boolean;
   expires_at: string;
   status: OpportunityStatus;
   responded_at?: string | null;
@@ -926,4 +931,80 @@ export interface ConfirmPublicationResponse {
   published_url: string;
   published_at: string;
   status: 'confirmed';
+}
+
+// ---------------------------------------------------------------------------
+// E6 -- Payments and Financial Transparency
+// Types mirror docs/architecture/e6-payments-financial-transparency.md sections 3-4.
+// ---------------------------------------------------------------------------
+
+// Failure is deliberately not a fourth status (section 3.2): a failed execution attempt
+// leaves the obligation visibly `owed`, carrying `last_failure_reason` alongside it.
+export type PayoutObligationStatus = 'owed' | 'in_flight' | 'settled';
+
+export interface PayoutObligationListItem {
+  id: string;
+  campaign_id: string;
+  campaign_name: string;
+  buyer_name: string;
+  payout_gross: string;
+  payout_commission: string;
+  payout_net: string;
+  status: PayoutObligationStatus;
+  committed_deadline_at: string;
+  last_failure_reason: string | null;
+  escalated_for_manual_review: boolean;
+  settled_at: string | null;
+  created_at: string;
+}
+
+export type PayoutExecutionAttemptTrigger = 'scheduled' | 'manual';
+export type PayoutExecutionAttemptOutcome = 'instructed' | 'failed';
+
+export interface PayoutExecutionAttempt {
+  id: string;
+  trigger: PayoutExecutionAttemptTrigger;
+  outcome: PayoutExecutionAttemptOutcome;
+  failure_reason: string | null;
+  provider_reference: string | null;
+  created_at: string;
+}
+
+export interface PayoutObligationDetail extends PayoutObligationListItem {
+  payout_execution_attempts: PayoutExecutionAttempt[];
+}
+
+export interface PayoutStatementResponse {
+  payout_obligation_id: string;
+  document_url: string;
+  generated_at: string;
+}
+
+export type TaxDocumentStatus = 'generated' | 'blocked_missing_info';
+
+export interface TaxDocumentResponse {
+  status: TaxDocumentStatus;
+  tax_period?: string;
+  document_url?: string;
+  generated_at?: string;
+  missing_fields?: string[];
+  message?: string;
+}
+
+// US-20 / US-42: no schema difference between a direct brand buyer and an agency client
+// (ADR-0040) -- the same invoice shape serves both.
+export type InvoiceLineType = 'base_price' | 'shortfall_refund_adjustment';
+
+export interface InvoiceLineItem {
+  line_type: InvoiceLineType;
+  description: string;
+  amount: string;
+}
+
+export interface Invoice {
+  id: string;
+  campaign_id: string;
+  total_amount: string;
+  line_items: InvoiceLineItem[];
+  issued_at: string;
 }

@@ -92,3 +92,47 @@ describe('OpportunitiesPage - US-28', () => {
     expect(await screen.findByText(/expirou antes do seu aceite/)).toBeInTheDocument();
   });
 });
+
+describe('OpportunitiesPage - US-29', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  // Normal: the expected payment date is shown alongside the locked figures, flagged as an
+  // estimate, before Duda commits to a decision (US-29 scenario 1).
+  it('shows the expected payment date as an estimate on a pending opportunity', async () => {
+    (creatorPortalApi.listOpportunities as any).mockResolvedValue({
+      data: [
+        {
+          ...pendingOpportunity,
+          expected_payment_date: '2026-12-05T00:00:00Z',
+          expected_payment_date_is_estimate: true,
+        },
+      ],
+    });
+
+    renderPage();
+
+    expect(await screen.findByText(/Previsao de pagamento/)).toBeInTheDocument();
+    expect(screen.getByText(/\(estimativa\)/)).toBeInTheDocument();
+  });
+
+  // Failure: a closed opportunity (declined/expired) never still looks like a live offer, and
+  // its moot expected payment date is not shown (US-29 scenario 3).
+  it('shows a closed opportunity as closed, without a live expected payment date', async () => {
+    (creatorPortalApi.listOpportunities as any).mockResolvedValue({
+      data: [
+        {
+          ...pendingOpportunity,
+          status: 'expired' as const,
+          expected_payment_date: '2026-12-05T00:00:00Z',
+          expected_payment_date_is_estimate: true,
+        },
+      ],
+    });
+
+    renderPage();
+
+    expect(await screen.findByText(/Oportunidade encerrada/)).toBeInTheDocument();
+    expect(screen.queryByText(/Previsao de pagamento/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Aceitar' })).not.toBeInTheDocument();
+  });
+});

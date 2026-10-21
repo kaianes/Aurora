@@ -40,6 +40,9 @@ import { CreatorBriefingQaPage } from '@/pages/creator-portal/briefing-qa-page';
 import { NewDraftPage } from '@/pages/creator-portal/new-draft-page';
 import { DraftsPage } from '@/pages/creator-portal/drafts-page';
 import { ConfirmPublicationPage } from '@/pages/creator-portal/confirm-publication-page';
+import { PaymentsPage } from '@/pages/creator-portal/payments-page';
+import { PaymentDetailPage } from '@/pages/creator-portal/payment-detail-page';
+import { InvoicePage } from '@/pages/app/invoice-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +109,8 @@ export default function App() {
               <Route path="campaigns/:id/briefing/distribution" element={<BriefingDistributionPage />} />
               <Route path="campaigns/:id/briefing/qa" element={<BriefingQaPage />} />
               <Route path="campaigns/:id/content-submissions" element={<ContentSubmissionsPage />} />
+              {/* E6 -- Payments and Financial Transparency (US-20, US-42) */}
+              <Route path="campaigns/:id/invoice" element={<InvoicePage />} />
               <Route
                 path="clients"
                 element={
@@ -134,6 +139,9 @@ export default function App() {
               <Route path="drafts/new" element={<NewDraftPage />} />
               <Route path="drafts" element={<DraftsPage />} />
               <Route path="drafts/:id/confirm-publication" element={<ConfirmPublicationPage />} />
+              {/* E6 -- Payments and Financial Transparency (US-35a, US-35b, US-35c, US-36a, US-36b) */}
+              <Route path="payments" element={<PaymentsPage />} />
+              <Route path="payments/:id" element={<PaymentDetailPage />} />
             </Route>
 
             {/* Default redirect */}
