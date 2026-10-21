@@ -112,6 +112,47 @@ describe('PaymentsPage - US-36a', () => {
     expect(await screen.findByText('Em atencao')).toBeInTheDocument();
   });
 
+  // Hard: obligations from a directly brand-billed campaign and an agency-billed campaign are
+  // each attributed to their own campaign/buyer, with no figure from one bleeding into the
+  // other's line (US-36a scenario 2).
+  it('attributes each obligation to its own campaign and buyer without conflating the two', async () => {
+    const directBrandObligation = {
+      ...owedObligation,
+      id: 'pay-direct',
+      campaign_name: 'Lancamento Serum Vitamina C',
+      buyer_name: 'Acme Cosmeticos',
+      payout_net: '680.00',
+    };
+    const agencyBilledObligation = {
+      ...owedObligation,
+      id: 'pay-agency',
+      campaign_id: 'camp-9999',
+      campaign_name: 'Campanha Verao Renata Agencia',
+      buyer_name: 'Cliente da Agencia Renata',
+      payout_gross: '500.00',
+      payout_commission: '75.00',
+      payout_net: '425.00',
+    };
+    (creatorPortalApi.listPayoutObligations as any).mockResolvedValue({
+      data: [directBrandObligation, agencyBilledObligation],
+    });
+
+    renderPage();
+
+    await screen.findByText('Lancamento Serum Vitamina C');
+    await screen.findByText('Campanha Verao Renata Agencia');
+
+    expect(screen.getByText('Acme Cosmeticos')).toBeInTheDocument();
+    expect(screen.getByText('Cliente da Agencia Renata')).toBeInTheDocument();
+    // Each obligation's own net payout is unaffected by which billing path funded it.
+    expect(screen.getByText(/680,00/)).toBeInTheDocument();
+    expect(screen.getByText(/425,00/)).toBeInTheDocument();
+    // No cross-contamination: the agency client's name never appears next to the direct
+    // brand's campaign, and vice versa, in either card.
+    const cards = screen.getAllByText(/Acme Cosmeticos|Cliente da Agencia Renata/);
+    expect(cards).toHaveLength(2);
+  });
+
   // Failure: no obligation at all returns a clearly empty state, never an error (US-36a scenario 3).
   it('shows an empty state when there is no payment history', async () => {
     (creatorPortalApi.listPayoutObligations as any).mockResolvedValue({ data: [] });

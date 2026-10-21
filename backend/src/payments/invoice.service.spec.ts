@@ -130,4 +130,33 @@ describe('InvoiceService - US-20/US-42', () => {
 
     await expect(service.generate('camp-1', 'acct-1', actor)).rejects.toBeInstanceOf(ConflictException);
   });
+
+  // ---- US-42 scenario 2: billing never bleeds across two different clients ----
+  // findCampaignOrFail scopes the campaign lookup to (id, accountId) together -- a client
+  // account that does not own this campaign gets the same CAMPAIGN_NOT_FOUND as a campaign
+  // that does not exist at all, never that campaign's own figures.
+  it('never returns another account\'s campaign figures: a mismatched accountId is treated as not found', async () => {
+    campaignRepo.findOne.mockImplementation(({ where }: any) =>
+      where.accountId === 'acct-1'
+        ? Promise.resolve({ id: 'camp-1', accountId: 'acct-1', state: CampaignState.ACTIVE, lockedPrice: '45000.00' })
+        : Promise.resolve(undefined),
+    );
+
+    await expect(service.generate('camp-1', 'acct-other-client', actor)).rejects.toMatchObject({
+      response: { error: { code: 'CAMPAIGN_NOT_FOUND' } },
+    });
+    expect(invoiceRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('getForCampaign never returns another account\'s invoice for a campaign that is not theirs', async () => {
+    campaignRepo.findOne.mockImplementation(({ where }: any) =>
+      where.accountId === 'acct-1'
+        ? Promise.resolve({ id: 'camp-1', accountId: 'acct-1', state: CampaignState.ACTIVE, lockedPrice: '45000.00' })
+        : Promise.resolve(undefined),
+    );
+
+    await expect(service.getForCampaign('camp-1', 'acct-other-client')).rejects.toMatchObject({
+      response: { error: { code: 'CAMPAIGN_NOT_FOUND' } },
+    });
+  });
 });

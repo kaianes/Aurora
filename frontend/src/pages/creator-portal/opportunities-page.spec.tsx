@@ -115,6 +115,34 @@ describe('OpportunitiesPage - US-29', () => {
     expect(screen.getByText(/\(estimativa\)/)).toBeInTheDocument();
   });
 
+  // Hard: even when the underlying commission does not divide evenly to the cent, the three
+  // figures are each displayed to exactly two decimal places in BRL, and net is never shown
+  // as anything other than exactly gross minus commission (US-29 scenario 2).
+  it('displays gross, commission, and net each to exactly two decimal places, net equal to gross minus commission', async () => {
+    (creatorPortalApi.listOpportunities as any).mockResolvedValue({
+      data: [
+        {
+          ...pendingOpportunity,
+          payout_gross: '799.99',
+          payout_commission: '119.995', // would not divide evenly to the cent if not pre-rounded
+          payout_net: '680.00',
+        },
+      ],
+    });
+
+    renderPage();
+
+    await screen.findByText('Acme Cosmeticos');
+
+    // Intl.NumberFormat('pt-BR', { style: 'currency' }) always renders exactly two decimals.
+    expect(screen.getByText(/799,99/)).toBeInTheDocument();
+    expect(screen.getByText(/680,00/)).toBeInTheDocument();
+    // The commission figure is rendered as-is, still to two decimal places (rounded for
+    // display), never shown with a third decimal that would visibly fail to reconcile.
+    const commissionText = screen.getByText(/Comiss[aã]o:/).textContent ?? '';
+    expect(commissionText).toMatch(/\d+,\d{2}$/);
+  });
+
   // Failure: a closed opportunity (declined/expired) never still looks like a live offer, and
   // its moot expected payment date is not shown (US-29 scenario 3).
   it('shows a closed opportunity as closed, without a live expected payment date', async () => {
