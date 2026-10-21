@@ -98,7 +98,7 @@ describe('CampaignDetailPage - US-39 scenario 2, switching client context withou
     vi.mocked(campaignApi.get).mockResolvedValueOnce(draftCampaign);
 
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const tree = (
+    const renderTree = () => (
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={['/app/campaigns/camp-1']}>
           <Routes>
@@ -107,7 +107,7 @@ describe('CampaignDetailPage - US-39 scenario 2, switching client context withou
         </MemoryRouter>
       </QueryClientProvider>
     );
-    const { rerender } = render(tree);
+    const { rerender } = render(renderTree());
 
     expect(await screen.findByText('Lancamento Serum')).toBeInTheDocument();
 
@@ -120,7 +120,7 @@ describe('CampaignDetailPage - US-39 scenario 2, switching client context withou
       workspace: { current_account: { id: 'acct-client-b' } },
     } as any);
 
-    rerender(tree);
+    rerender(renderTree());
 
     await vi.waitFor(() => {
       expect(campaignApi.get).toHaveBeenCalledTimes(2);
