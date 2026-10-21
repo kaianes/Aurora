@@ -41,6 +41,11 @@ export function ClientReportPage() {
   const { workspace } = useAuth();
   const originalAccountId = workspace?.current_account?.id;
   const [reportId, setReportId] = useState<string | null>(null);
+  const [mintedLink, setMintedLink] = useState<{
+    share_url: string;
+    display_url: string;
+    expires_at: string;
+  } | null>(null);
 
   const { data: clients } = useQuery({
     queryKey: ['agency-clients'],
@@ -70,6 +75,28 @@ export function ClientReportPage() {
     enabled: !!clientId && !!reportId,
     refetchInterval: (query) => (query.state.data?.status === 'pending' ? 2000 : false),
   });
+
+  // US-44 (E9): mint a token-gated, unauthenticated-readable share link for this report, per
+  // docs/architecture/e9-agency-multi-client-operations.md section 5.5. Same account-context
+  // switching discipline as the request/get calls above -- the request must carry
+  // X-Account-Id set to the client account itself.
+  const shareLinkMutation = useMutation({
+    mutationFn: () => {
+      if (clientId) setCurrentAccountId(clientId);
+      return agencyApi.mintShareLink(clientId!, reportId!);
+    },
+    onSuccess: (data) => setMintedLink(data),
+    onSettled: () => {
+      if (originalAccountId) setCurrentAccountId(originalAccountId);
+    },
+  });
+
+  const shareLinkErrorMessage =
+    isAxiosError(shareLinkMutation.error) && shareLinkMutation.error.response?.data?.error?.message
+      ? shareLinkMutation.error.response.data.error.message
+      : shareLinkMutation.isError
+        ? 'Nao foi possivel gerar o link compartilhavel agora.'
+        : null;
 
   const requestErrorMessage =
     isAxiosError(requestMutation.error) && requestMutation.error.response?.data?.error?.message
@@ -179,8 +206,44 @@ export function ClientReportPage() {
             )}
           </div>
 
+          {/* US-44 (E9): share link for the agency's actual client company, who has no
+              Aurora login at all -- section 5.5. */}
+          <div className="mt-4 border-t border-border pt-4">
+            <h4 className="text-xs font-semibold text-muted uppercase mb-2">Link compartilhavel</h4>
+            {shareLinkErrorMessage && <Alert variant="error" className="mb-2">{shareLinkErrorMessage}</Alert>}
+            {!mintedLink ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => shareLinkMutation.mutate()}
+                loading={shareLinkMutation.isPending}
+              >
+                Gerar link compartilhavel
+              </Button>
+            ) : (
+              <div className="space-y-1 font-mono text-xs text-text-dark">
+                <p className="break-all">
+                  <span className="text-muted">Link: </span>
+                  <a href={mintedLink.share_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                    {mintedLink.display_url}
+                  </a>
+                </p>
+                <p className="text-muted">
+                  Expira em: {new Date(mintedLink.expires_at).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+            )}
+          </div>
+
           <div className="mt-4">
-            <Button variant="ghost" size="sm" onClick={() => setReportId(null)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setReportId(null);
+                setMintedLink(null);
+              }}
+            >
               Gerar novo relatorio
             </Button>
           </div>

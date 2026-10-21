@@ -44,7 +44,13 @@ describe('AgencyBrandingService - ADR-0048 / US-43 branding configuration', () =
 
     const result = await service.getBrandingForAccount('acct-1');
 
-    expect(result).toEqual({ logo_url: null, primary_color_hex: null, secondary_color_hex: null });
+    expect(result).toEqual({
+      logo_url: null,
+      primary_color_hex: null,
+      secondary_color_hex: null,
+      custom_domain: null,
+      domain_status: null,
+    });
   });
 
   it('getBrandingForAccount throws NotFoundException when the account itself does not resolve', async () => {

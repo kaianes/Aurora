@@ -29,11 +29,19 @@ function renderPage() {
   );
 }
 
-const unconfiguredProfile = { logo_url: null, primary_color_hex: null, secondary_color_hex: null };
+const unconfiguredProfile = {
+  logo_url: null,
+  primary_color_hex: null,
+  secondary_color_hex: null,
+  custom_domain: null,
+  domain_status: null,
+};
 const configuredProfile = {
   logo_url: 'https://cdn.example.com/logo.png',
   primary_color_hex: '#3ddc97',
   secondary_color_hex: '#7f77dd',
+  custom_domain: 'relatorios.agenciacriativa.com.br',
+  domain_status: 'pending_activation' as const,
   updated_at: '2026-10-21T10:00:00Z',
 };
 
@@ -169,5 +177,60 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     renderPage();
 
     expect(await screen.findByText('Nao foi possivel carregar a marca da agencia.')).toBeInTheDocument();
+  });
+
+  // ---- US-44 (ADR-0061): the domain field is format-validated only, and reference-only
+  // help text is shown -- never implying real-time self-service activation. ----
+  describe('custom domain (US-44)', () => {
+    it('pre-fills the custom domain and shows a pending-activation badge once one is configured', async () => {
+      (agencyApi.getBranding as any).mockResolvedValue(configuredProfile);
+
+      renderPage();
+
+      expect(await screen.findByLabelText('Dominio personalizado')).toHaveValue(
+        'relatorios.agenciacriativa.com.br',
+      );
+      expect(screen.getByText('Ativacao pendente')).toBeInTheDocument();
+    });
+
+    it('shows no pending-activation badge and an empty field before any domain is configured', async () => {
+      (agencyApi.getBranding as any).mockResolvedValue(unconfiguredProfile);
+
+      renderPage();
+
+      expect(await screen.findByLabelText('Dominio personalizado')).toHaveValue('');
+      expect(screen.queryByText('Ativacao pendente')).not.toBeInTheDocument();
+    });
+
+    it('rejects an invalid domain format and does not call the API', async () => {
+      (agencyApi.getBranding as any).mockResolvedValue(unconfiguredProfile);
+
+      renderPage();
+
+      await screen.findByLabelText('Dominio personalizado');
+      await userEvent.type(screen.getByLabelText('Dominio personalizado'), 'Not A Domain!!');
+      await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
+
+      expect(
+        await screen.findByText('Use um dominio valido, em letras minusculas (ex: relatorios.suaagencia.com.br).'),
+      ).toBeInTheDocument();
+      expect(agencyApi.configureBranding).not.toHaveBeenCalled();
+    });
+
+    it('saves a valid custom domain along with the rest of the branding profile', async () => {
+      (agencyApi.getBranding as any).mockResolvedValue(unconfiguredProfile);
+      (agencyApi.configureBranding as any).mockResolvedValue(configuredProfile);
+
+      renderPage();
+
+      await screen.findByLabelText('Dominio personalizado');
+      await userEvent.type(screen.getByLabelText('Dominio personalizado'), 'relatorios.agenciacriativa.com.br');
+      await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
+
+      expect(await screen.findByText('Marca da agencia salva com sucesso.')).toBeInTheDocument();
+      expect(agencyApi.configureBranding).toHaveBeenCalledWith(
+        expect.objectContaining({ custom_domain: 'relatorios.agenciacriativa.com.br' }),
+      );
+    });
   });
 });

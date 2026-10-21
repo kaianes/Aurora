@@ -8,6 +8,7 @@ import type {
   AnswerBriefingQuestionRequest,
   AskBriefingQuestionRequest,
   AskBriefingQuestionResponse,
+  AuditLogEntry,
   Briefing,
   BriefingDistribution,
   BriefingQaThreadDetail,
@@ -28,6 +29,7 @@ import type {
   ConfigureBrandingRequest,
   ConfirmInvitationRequest,
   ConfirmInvitationResponse,
+  CopyTemplateRequest,
   CreatorInvitationPreview,
   CreatorLoginRequest,
   CreatorLoginResponse,
@@ -80,6 +82,7 @@ import type {
   MfaConfirmRequest,
   MfaConfirmResponse,
   MfaSetupResponse,
+  MintShareLinkResponse,
   MonitoringSnapshot,
   MonitoringSnapshotDetail,
   OperatorAccess,
@@ -89,6 +92,7 @@ import type {
   PayoutObligationStatus,
   PayoutStatementResponse,
   PricingResponse,
+  PublicClientReportResponse,
   CampaignQuote,
   ReallocationBounds,
   ReallocationEvent,
@@ -358,6 +362,42 @@ export const agencyApi = {
 
   configureBranding: (data: ConfigureBrandingRequest) =>
     api.put<AgencyBrandingProfile>('/agency/branding', data).then((r) => r.data),
+
+  // E9 -- client report share link (US-44), per
+  // docs/architecture/e9-agency-multi-client-operations.md section 5.5. Caller's X-Account-Id
+  // must be the client account itself, same convention as requestClientReport/getClientReport
+  // above -- the page calling this is responsible for switching account context around the call.
+  mintShareLink: (clientAccountId: string, reportId: string) =>
+    api
+      .post<MintShareLinkResponse>(`/agency/clients/${clientAccountId}/reports/${reportId}/share-link`)
+      .then((r) => r.data),
+
+  revokeShareLink: (clientAccountId: string, reportId: string, linkId: string) =>
+    api
+      .delete(`/agency/clients/${clientAccountId}/reports/${reportId}/share-link/${linkId}`)
+      .then(() => undefined),
+};
+
+// FR-60 (E9) -- audit log read (shared addendum to US-38/US-45), per
+// docs/architecture/e9-agency-multi-client-operations.md section 5.4. X-Account-Id resolves
+// the one client account whose log is requested -- there is no cross-client aggregate; Renata
+// switches context (the same US-39 selector) to view a different client's log.
+export const auditApi = {
+  list: (params?: { cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<AuditLogEntry>>('/audit-log', { params }).then((r) => r.data),
+};
+
+// E9 -- public, token-gated client report view (US-44), per section 5.5. No authentication,
+// no X-Account-Id: a separate axios instance with none of the token/account interceptors above,
+// since the agency's actual client company has no Aurora login at all.
+const publicClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+export const publicApi = {
+  getClientReport: (token: string) =>
+    publicClient.get<PublicClientReportResponse>(`/public/client-reports/${token}`).then((r) => r.data),
 };
 
 export const campaignApi = {
@@ -452,6 +492,13 @@ export const templateApi = {
 
   instantiate: (id: string, data: InstantiateTemplateRequest) =>
     api.post<Campaign>(`/campaign-templates/${id}/instantiate`, data).then((r) => r.data),
+
+  // E9 -- cross-client template copy (US-41), per
+  // docs/architecture/e9-agency-multi-client-operations.md section 4.2. The caller's own
+  // X-Account-Id must already resolve to the source template's account; no account switching
+  // is needed here, unlike the client-report-page pattern.
+  copy: (id: string, data: CopyTemplateRequest) =>
+    api.post<CampaignTemplate>(`/campaign-templates/${id}/copy`, data).then((r) => r.data),
 };
 
 // E3 -- shortlist, metrics, exclusions, agency override (per docs/architecture/e3-creator-matching-curation.md section 3)

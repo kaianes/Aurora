@@ -11,6 +11,7 @@ vi.mock('@/lib/api-client', () => ({
     listClients: vi.fn(),
     requestClientReport: vi.fn(),
     getClientReport: vi.fn(),
+    mintShareLink: vi.fn(),
   },
   setCurrentAccountId: vi.fn(),
 }));
@@ -134,5 +135,59 @@ describe('ClientReportPage - US-43', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
 
     expect(await screen.findByText('Conta de cliente nao encontrada.')).toBeInTheDocument();
+  });
+
+  // ---- US-44 (E9): minting a public, token-gated share link for a ready report, per
+  // docs/architecture/e9-agency-multi-client-operations.md section 5.5. ----
+  describe('share link (US-44)', () => {
+    it('mints a share link and shows the resulting display URL and expiration', async () => {
+      const { setCurrentAccountId } = await import('@/lib/api-client');
+      (agencyApi.listClients as any).mockResolvedValue({ data: [{ id: 'acct-client-1', name: 'Loja A' }] });
+      (agencyApi.requestClientReport as any).mockResolvedValue({ report_id: 'rpt-001', status: 'pending' });
+      (agencyApi.getClientReport as any).mockResolvedValue(readyReportUnbranded);
+      (agencyApi.mintShareLink as any).mockResolvedValue({
+        token: 'pR3x-token',
+        share_url: 'https://app.aurora.com.br/public/client-reports/pR3x-token',
+        display_url: 'https://relatorios.agenciacriativa.com.br/public/client-reports/pR3x-token',
+        expires_at: '2026-11-20T10:00:00Z',
+      });
+
+      renderPage();
+
+      await screen.findByText('Loja A');
+      await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
+      await screen.findByText('Sem marca configurada');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Gerar link compartilhavel' }));
+
+      expect(
+        await screen.findByRole('link', {
+          name: 'https://relatorios.agenciacriativa.com.br/public/client-reports/pR3x-token',
+        }),
+      ).toHaveAttribute('href', 'https://app.aurora.com.br/public/client-reports/pR3x-token');
+      expect(agencyApi.mintShareLink).toHaveBeenCalledWith('acct-client-1', 'rpt-001');
+      expect(setCurrentAccountId).toHaveBeenCalledWith('acct-client-1');
+      expect(setCurrentAccountId).toHaveBeenCalledWith('acct-agency-home');
+    });
+
+    it('shows an explicit error when minting the share link fails', async () => {
+      (agencyApi.listClients as any).mockResolvedValue({ data: [{ id: 'acct-client-1', name: 'Loja A' }] });
+      (agencyApi.requestClientReport as any).mockResolvedValue({ report_id: 'rpt-001', status: 'pending' });
+      (agencyApi.getClientReport as any).mockResolvedValue(readyReportUnbranded);
+      (agencyApi.mintShareLink as any).mockRejectedValue({
+        isAxiosError: true,
+        response: { data: { error: { message: 'O relatorio ainda nao esta pronto para compartilhamento.' } } },
+      });
+
+      renderPage();
+
+      await screen.findByText('Loja A');
+      await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
+      await screen.findByText('Sem marca configurada');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Gerar link compartilhavel' }));
+
+      expect(await screen.findByText('O relatorio ainda nao esta pronto para compartilhamento.')).toBeInTheDocument();
+    });
   });
 });

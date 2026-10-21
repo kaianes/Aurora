@@ -114,6 +114,7 @@ export {
 } from './campaign-performance-report.entity';
 export { ClientPerformanceReport } from './client-performance-report.entity';
 export { AgencyBrandingProfile } from './agency-branding-profile.entity';
+export { ClientReportShareLink } from './client-report-share-link.entity';
 
 // E8 -- Creator Recruitment and Growth (section 2 of the E8 architecture doc)
 export { CreatorPublicImport } from './creator-public-import.entity';

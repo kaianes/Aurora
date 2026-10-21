@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account, AgencyBrandingProfile } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 import { ConfigureBrandingDto } from './dto/configure-branding.dto';
+
+// Lowercase, RFC 1123-compatible hostname syntax only -- no DNS lookup, no
+// ownership proof (US-44, ADR-0061). Rejects a leading/trailing hyphen on
+// any label and requires at least one dot (a bare, single-label host is
+// never a usable public hostname for this purpose).
+const HOSTNAME_RE =
+  /^(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$/;
 
 // ADR-0048, section 2.3 of the E7 architecture document. Lives in the
 // agency module (owned long-term by E9). getBrandingProfile is the one
@@ -49,6 +56,26 @@ export class AgencyBrandingService {
     if (dto.logo_url !== undefined) profile.logoUrl = dto.logo_url;
     if (dto.primary_color_hex !== undefined) profile.primaryColorHex = dto.primary_color_hex;
     if (dto.secondary_color_hex !== undefined) profile.secondaryColorHex = dto.secondary_color_hex;
+
+    // US-44 / ADR-0061, section 2.3/5.3: setting a non-null custom_domain
+    // always sets domain_status = 'pending_activation'. domain_status never
+    // reaches any other value in this pilot (chk_domain_status_values).
+    let domainConfigured = false;
+    if (dto.custom_domain !== undefined) {
+      if (!HOSTNAME_RE.test(dto.custom_domain)) {
+        throw new UnprocessableEntityException({
+          error: {
+            code: 'INVALID_DOMAIN_FORMAT',
+            message: 'O dominio informado nao e valido.',
+            details: {},
+          },
+        });
+      }
+      profile.customDomain = dto.custom_domain;
+      profile.domainStatus = 'pending_activation';
+      domainConfigured = true;
+    }
+
     profile.updatedByUserId = actorUserId;
 
     const saved = await this.brandingRepo.save(profile);
@@ -61,6 +88,17 @@ export class AgencyBrandingService {
       ipAddress,
       userAgent,
     });
+
+    if (domainConfigured) {
+      await this.auditService.log({
+        actorUserId,
+        targetAccountId: currentAccountId,
+        action: 'agency_branding_profile.domain_configured',
+        metadata: { workspace_id: account.workspaceId, custom_domain: saved.customDomain },
+        ipAddress,
+        userAgent,
+      });
+    }
 
     return this.format(saved);
   }
@@ -75,7 +113,13 @@ export class AgencyBrandingService {
     const profile = await this.getBrandingProfile(account.workspaceId);
     return profile
       ? this.format(profile)
-      : { logo_url: null, primary_color_hex: null, secondary_color_hex: null };
+      : {
+          logo_url: null,
+          primary_color_hex: null,
+          secondary_color_hex: null,
+          custom_domain: null,
+          domain_status: null,
+        };
   }
 
   private format(profile: AgencyBrandingProfile) {
@@ -83,6 +127,8 @@ export class AgencyBrandingService {
       logo_url: profile.logoUrl,
       primary_color_hex: profile.primaryColorHex,
       secondary_color_hex: profile.secondaryColorHex,
+      custom_domain: profile.customDomain,
+      domain_status: profile.domainStatus,
       updated_at: profile.updatedAt.toISOString(),
     };
   }
