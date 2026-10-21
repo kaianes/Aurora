@@ -29,6 +29,15 @@ interface ActorContext {
   userAgent: string;
 }
 
+// E5's additive extension (ADR-0025, ADR-0030, ADR-0032): the version-
+// lineage and review-deadline fields content-workflow's own intake endpoint
+// needs, resolved and validated entirely by content-workflow before this
+// call -- this service only writes what it is given.
+export interface CreateSubmissionOptions {
+  supersedesSubmissionId?: string | null;
+  reviewDeadlineAt?: Date | null;
+}
+
 export interface CheckStatusActor {
   isCreator: boolean;
   creatorId?: string;
@@ -65,6 +74,7 @@ export class ContentSubmissionService {
     dto: CreateContentSubmissionDto,
     creatorId: string,
     actor: ActorContext,
+    options?: CreateSubmissionOptions,
   ) {
     if (!dto.caption_text || dto.caption_text.trim().length === 0) {
       throw new UnprocessableEntityException({
@@ -110,6 +120,21 @@ export class ContentSubmissionService {
     const extractionNeeded = !hasDirectText && !!dto.media_asset_url;
     const extractionStatus = extractionNeeded ? ExtractionStatus.PENDING : ExtractionStatus.NOT_REQUIRED;
 
+    // ADR-0025/ADR-0032: version_number and root_submission_id are computed
+    // from supersedesSubmissionId when present, defaulting to a first-
+    // version shape when absent -- preserving E4's original, single-version
+    // behavior exactly for any caller that does not pass the new option.
+    const supersedesSubmissionId = options?.supersedesSubmissionId || null;
+    let versionNumber = 1;
+    let rootSubmissionId: string | null = null;
+    if (supersedesSubmissionId) {
+      const previous = await this.submissionRepo.findOne({ where: { id: supersedesSubmissionId } });
+      if (previous) {
+        versionNumber = previous.versionNumber + 1;
+        rootSubmissionId = previous.rootSubmissionId || previous.id;
+      }
+    }
+
     const submission = await this.submissionRepo.save(
       this.submissionRepo.create({
         campaignId: dto.campaign_id,
@@ -120,8 +145,19 @@ export class ContentSubmissionService {
         audioTranscript: dto.audio_transcript || null,
         mediaAssetUrl: dto.media_asset_url || null,
         extractionStatus,
+        supersedesSubmissionId,
+        rootSubmissionId,
+        versionNumber,
+        reviewDeadlineAt: options?.reviewDeadlineAt || null,
       }),
     );
+
+    // The first version in a lineage denormalizes its own id as the root
+    // (ADR-0025) -- this cannot be known until after the insert assigns one.
+    if (!rootSubmissionId) {
+      submission.rootSubmissionId = submission.id;
+      await this.submissionRepo.save(submission);
+    }
 
     const rulesetId = await this.rulesetService.resolveGoverningRulesetId(
       dto.campaign_id,
@@ -155,15 +191,23 @@ export class ContentSubmissionService {
       actorUserId: null,
       targetAccountId: campaign.accountId,
       action: 'content_submission.created',
-      metadata: { content_submission_id: submission.id, campaign_id: dto.campaign_id, creator_id: creatorId },
+      metadata: {
+        content_submission_id: submission.id,
+        campaign_id: dto.campaign_id,
+        creator_id: creatorId,
+        version_number: submission.versionNumber,
+        ...(supersedesSubmissionId ? { supersedes_submission_id: supersedesSubmissionId } : {}),
+      },
       ipAddress: actor.ipAddress,
       userAgent: actor.userAgent,
     });
 
     return {
       content_submission_id: submission.id,
+      version_number: submission.versionNumber,
       safety_check_id: check.id,
       status: check.status,
+      review_deadline_at: submission.reviewDeadlineAt ? submission.reviewDeadlineAt.toISOString() : null,
       poll_url: `/v1/safety/submissions/${submission.id}/check`,
     };
   }
