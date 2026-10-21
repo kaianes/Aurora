@@ -47,4 +47,48 @@ export class CreatorPerformanceService {
 
     return { data };
   }
+
+  // ADR-0057 (E8, US-25): the only new cross-module read creator-network
+  // introduces outside its own tables. Returns exactly the same rows and
+  // the same join path getOwnPerformance already computes -- extracted into
+  // a reusable, in-process method rather than reimplemented a second time,
+  // so the media kit's campaign-history section can never drift from what
+  // GET /creator-portal/performance itself shows a creator.
+  async getCreatorDeliveredPerformance(creatorId: string): Promise<
+    Array<{
+      campaignId: string;
+      campaignName: string;
+      publishedUrl: string | null;
+      publishedAt: Date;
+      reach: number | null;
+      engagement: number | null;
+      impressions: number | null;
+      ingestionStatus: string | null;
+    }>
+  > {
+    const submissions = await this.submissionRepo.find({
+      where: { creatorId, publishedAt: Not(IsNull()) },
+    });
+
+    const data = [];
+    for (const submission of submissions) {
+      const campaign = await this.campaignRepo.findOne({ where: { id: submission.campaignId } });
+      const snapshot = await this.snapshotRepo.findOne({
+        where: { contentSubmissionId: submission.id },
+      });
+
+      data.push({
+        campaignId: submission.campaignId,
+        campaignName: campaign?.name ?? '',
+        publishedUrl: submission.publishedUrl,
+        publishedAt: submission.publishedAt as Date,
+        reach: snapshot?.reach ?? null,
+        engagement: snapshot?.engagement ?? null,
+        impressions: snapshot?.impressions ?? null,
+        ingestionStatus: snapshot?.ingestionStatus ?? null,
+      });
+    }
+
+    return data;
+  }
 }

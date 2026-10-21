@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, EntityManager } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -41,6 +41,118 @@ export class AuthService {
     private auditService: AuditService,
     @InjectQueue('email') private emailQueue: Queue,
   ) {}
+
+  // Exported for creator-network (E8, ADR-0050): a creator's credential is a
+  // user row created through this same code path, with no workspace,
+  // account, or membership row. These three methods -- createUser,
+  // verifyEmailToken, authenticateCredentials -- are the narrow surface
+  // creator-network calls into rather than reimplementing password hashing,
+  // verification-token lifecycle, or credential checks a second time.
+  async createUser(
+    manager: EntityManager,
+    input: { email: string; password: string; name: string },
+  ): Promise<{ user: User; isNew: boolean }> {
+    const email = input.email.toLowerCase().trim();
+    const existingUser = await manager.findOne(User, { where: { email } });
+    if (existingUser) {
+      return { user: existingUser, isNew: false };
+    }
+
+    const passwordHash = await bcrypt.hash(input.password, 12);
+    const user = manager.create(User, { email, passwordHash, name: input.name });
+    await manager.save(user);
+    return { user, isNew: true };
+  }
+
+  async issueVerificationToken(manager: EntityManager, userId: string): Promise<string> {
+    const token = crypto.randomBytes(32).toString('base64url');
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verificationToken = manager.create(VerificationToken, {
+      userId,
+      token,
+      purpose: TokenPurpose.EMAIL_VERIFICATION,
+      expiresAt,
+    });
+    await manager.save(verificationToken);
+    return token;
+  }
+
+  async enqueueVerificationEmail(email: string, name: string, token: string): Promise<void> {
+    await this.emailQueue.add('send-email', {
+      template: 'email_verification',
+      to: email,
+      subject: 'Ative sua conta Aurora',
+      data: {
+        name,
+        verification_url: `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`,
+      },
+    });
+  }
+
+  async verifyEmailToken(token: string): Promise<User> {
+    const verificationToken = await this.verificationTokenRepo.findOne({
+      where: { token, purpose: TokenPurpose.EMAIL_VERIFICATION },
+    });
+
+    if (!verificationToken || verificationToken.used) {
+      throw new BadRequestException({
+        error: {
+          code: 'INVALID_TOKEN',
+          message: 'Token invalido ou ja utilizado.',
+          details: {},
+        },
+      });
+    }
+
+    if (new Date() > verificationToken.expiresAt) {
+      throw new BadRequestException({
+        error: {
+          code: 'VERIFICATION_EXPIRED',
+          message: 'O link de verificacao expirou. Solicite um novo link.',
+          details: { resend_url: '/auth/resend-verification' },
+        },
+      });
+    }
+
+    verificationToken.used = true;
+    await this.verificationTokenRepo.save(verificationToken);
+
+    const user = await this.userRepo.findOne({ where: { id: verificationToken.userId } });
+    if (!user) {
+      throw new BadRequestException({
+        error: { code: 'INVALID_TOKEN', message: 'Token invalido.', details: {} },
+      });
+    }
+
+    user.emailVerified = true;
+    user.emailVerifiedAt = new Date();
+    await this.userRepo.save(user);
+
+    return user;
+  }
+
+  async authenticateCredentials(email: string, password: string): Promise<User> {
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await this.userRepo.findOne({ where: { email: normalizedEmail } });
+
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+      throw new UnauthorizedException({
+        error: { code: 'INVALID_CREDENTIALS', message: 'Email ou senha invalidos.', details: {} },
+      });
+    }
+
+    if (!user.emailVerified) {
+      throw new ForbiddenException({
+        error: {
+          code: 'EMAIL_NOT_VERIFIED',
+          message: 'Sua conta ainda nao foi verificada. Verifique seu email.',
+          details: {},
+        },
+      });
+    }
+
+    return user;
+  }
 
   async register(
     dto: RegisterDto,

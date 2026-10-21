@@ -20,6 +20,7 @@ import { BrandSafetyModule } from './brand-safety/brand-safety.module';
 import { ContentWorkflowModule } from './content-workflow/content-workflow.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { CreatorNetworkModule } from './creator-network/creator-network.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -72,6 +73,13 @@ import {
   CampaignPerformanceReport,
   ClientPerformanceReport,
   AgencyBrandingProfile,
+  CreatorPublicImport,
+  CreatorInvitation,
+  CreatorConsentRecord,
+  CreatorSocialAccount,
+  CreatorRatePreference,
+  CreatorMediaKitExport,
+  CreatorDataSubjectRequest,
 } from './database/entities';
 
 @Module({
@@ -137,6 +145,13 @@ import {
           CampaignPerformanceReport,
           ClientPerformanceReport,
           AgencyBrandingProfile,
+          CreatorPublicImport,
+          CreatorInvitation,
+          CreatorConsentRecord,
+          CreatorSocialAccount,
+          CreatorRatePreference,
+          CreatorMediaKitExport,
+          CreatorDataSubjectRequest,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -170,6 +185,7 @@ import {
     ContentWorkflowModule,
     PaymentsModule,
     AnalyticsModule,
+    CreatorNetworkModule,
   ],
   providers: [
     {
