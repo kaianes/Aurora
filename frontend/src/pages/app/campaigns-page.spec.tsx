@@ -121,14 +121,14 @@ describe('CampaignsPage - US-39 scenario 2, switching client context without nav
     });
 
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-    const tree = (
+    const renderTree = () => (
       <QueryClientProvider client={queryClient}>
         <MemoryRouter>
           <CampaignsPage />
         </MemoryRouter>
       </QueryClientProvider>
     );
-    const { rerender } = render(tree);
+    const { rerender } = render(renderTree());
 
     expect(await screen.findByText('Campanha Cliente A')).toBeInTheDocument();
 
@@ -154,7 +154,7 @@ describe('CampaignsPage - US-39 scenario 2, switching client context without nav
       pagination: { next_cursor: null, has_more: false },
     });
 
-    rerender(tree);
+    rerender(renderTree());
 
     expect(await screen.findByText('Campanha Cliente B')).toBeInTheDocument();
     expect(screen.queryByText('Campanha Cliente A')).not.toBeInTheDocument();
