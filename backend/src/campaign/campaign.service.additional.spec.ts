@@ -22,6 +22,7 @@ describe('CampaignService - additional coverage for US-05, US-06, US-07, US-09',
   let shortfallRepo: ReturnType<typeof mockRepo>;
   let reallocationEventRepo: ReturnType<typeof mockRepo>;
   let brandProfileRepo: ReturnType<typeof mockRepo>;
+  let accountRepo: ReturnType<typeof mockRepo>;
   let auditService: { log: ReturnType<typeof vi.fn> };
   let campaignQueue: { add: ReturnType<typeof vi.fn> };
 
@@ -35,6 +36,7 @@ describe('CampaignService - additional coverage for US-05, US-06, US-07, US-09',
     shortfallRepo = mockRepo();
     reallocationEventRepo = mockRepo();
     brandProfileRepo = mockRepo();
+    accountRepo = mockRepo();
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
     campaignQueue = { add: vi.fn().mockResolvedValue(undefined) };
 
@@ -46,6 +48,7 @@ describe('CampaignService - additional coverage for US-05, US-06, US-07, US-09',
       shortfallRepo as any,
       reallocationEventRepo as any,
       brandProfileRepo as any,
+      accountRepo as any,
       campaignQueue as any,
       auditService as any,
     );

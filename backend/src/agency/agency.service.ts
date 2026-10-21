@@ -17,6 +17,7 @@ import {
 } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 import { CreateClientDto } from './dto/create-client.dto';
+import { TemplateCopyService } from './template-copy.service';
 
 @Injectable()
 export class AgencyService {
@@ -29,6 +30,7 @@ export class AgencyService {
     @InjectRepository(BrandProfile)
     private brandProfileRepo: Repository<BrandProfile>,
     private auditService: AuditService,
+    private templateCopyService: TemplateCopyService,
   ) {}
 
   async createClient(
@@ -80,7 +82,7 @@ export class AgencyService {
     }
 
     // Validate copy_templates_from if provided
-    let templatesCopied = 0;
+    let sourceAccountId: string | null = null;
     if (dto.copy_templates_from) {
       const sourceAccount = await this.accountRepo.findOne({
         where: { id: dto.copy_templates_from, workspaceId: workspace.id },
@@ -94,9 +96,7 @@ export class AgencyService {
           },
         });
       }
-      // Template copying would happen here in future epics
-      // For E1, we acknowledge the parameter but no campaign templates exist yet
-      templatesCopied = 0;
+      sourceAccountId = sourceAccount.id;
     }
 
     // Create the client account
@@ -105,6 +105,21 @@ export class AgencyService {
       name: dto.name,
     });
     const saved = await this.accountRepo.save(clientAccount);
+
+    // US-41 / FR-22, section 4.1 of the E9 architecture doc: the
+    // onboarding-time bulk copy. POST /agency/clients is already
+    // agency_admin-only, and an agency_admin has implicit access to every
+    // client in their own workspace, source and target alike -- no
+    // per-account operator check is needed here (unlike the ongoing,
+    // standalone copy action, section 4.2).
+    let templatesCopied = 0;
+    if (sourceAccountId) {
+      templatesCopied = await this.templateCopyService.copyAllTemplates(
+        sourceAccountId,
+        saved.id,
+        workspace.id,
+      );
+    }
 
     await this.auditService.log({
       actorUserId,

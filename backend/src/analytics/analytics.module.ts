@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import {
@@ -60,8 +60,11 @@ import { AgencyReportCompareController } from './agency-report-compare.controlle
     // ADR-0048: imports AgencyModule to reach its one exported read method,
     // AgencyBrandingService.getBrandingProfile, in process -- the per-
     // client report renderer calls it, never reaching into agency's table
-    // directly.
-    AgencyModule,
+    // directly. E9 adds the reverse edge (AgencyModule imports
+    // AnalyticsModule for ClientReportService), so this is a circular
+    // module dependency resolved with forwardRef on both sides; neither
+    // module's providers inject each other circularly.
+    forwardRef(() => AgencyModule),
   ],
   controllers: [
     CampaignDashboardController,
@@ -95,6 +98,10 @@ import { AgencyReportCompareController } from './agency-report-compare.controlle
   // CreatorPerformanceService is additionally exported so creator-network's
   // media kit can call getCreatorDeliveredPerformance (ADR-0057) rather
   // than re-deriving the same join logic against this module's own tables.
-  exports: [PerformanceScoringService, CreatorPerformanceService],
+  // ClientReportService is additionally exported so agency's public
+  // share-link read (US-44, section 3.3/5.5 of the E9 architecture doc) can
+  // call getReportForSharing in process rather than agency querying
+  // client_performance_report directly.
+  exports: [PerformanceScoringService, CreatorPerformanceService, ClientReportService],
 })
 export class AnalyticsModule {}
