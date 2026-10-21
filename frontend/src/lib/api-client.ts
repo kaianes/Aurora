@@ -4,6 +4,7 @@ import type {
   AcceptInvitationResponse,
   AcknowledgeDriftRequest,
   AddOperatorRequest,
+  AgencyBrandingProfile,
   AnswerBriefingQuestionRequest,
   AskBriefingQuestionRequest,
   AskBriefingQuestionResponse,
@@ -23,6 +24,7 @@ import type {
   ClientListResponse,
   ClientPerformanceReport,
   CompareClientReportsResponse,
+  ConfigureBrandingRequest,
   CreatorPerformanceResponse,
   ConfirmPublicationRequest,
   ConfirmPublicationResponse,
@@ -330,6 +332,14 @@ export const agencyApi = {
         params: { client_account_ids: clientAccountIds.join(',') },
       })
       .then((r) => r.data),
+
+  // E7 -- agency branding profile (ADR-0048, section 2.3), closing the US-43 gap: an
+  // agency_admin needs a way to actually configure the logo/colors a per-client report
+  // renders under. Runs under the agency's own home account context, never a client account.
+  getBranding: () => api.get<AgencyBrandingProfile>('/agency/branding').then((r) => r.data),
+
+  configureBranding: (data: ConfigureBrandingRequest) =>
+    api.put<AgencyBrandingProfile>('/agency/branding', data).then((r) => r.data),
 };
 
 export const campaignApi = {

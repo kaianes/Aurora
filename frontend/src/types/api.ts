@@ -1122,3 +1122,20 @@ export interface CompareClientReportsResponse {
   data: ClientComparisonEntry[];
   refused: RefusedClient[];
 }
+
+// Agency branding profile (ADR-0048, section 2.3): the logo and two colors a per-client
+// report (US-43) renders under when branding_applied is true. GET/PUT /agency/branding,
+// agency_admin only. A row with all three fields null is "not yet configured", same as a
+// missing row -- the UI treats them identically.
+export interface AgencyBrandingProfile {
+  logo_url: string | null;
+  primary_color_hex: string | null;
+  secondary_color_hex: string | null;
+  updated_at?: string;
+}
+
+export interface ConfigureBrandingRequest {
+  logo_url?: string;
+  primary_color_hex?: string;
+  secondary_color_hex?: string;
+}
