@@ -69,3 +69,15 @@ export {
   MonitoringStatus,
   MonitoringResult,
 } from './published-content-snapshot.entity';
+export { Briefing, BriefingStatus } from './briefing.entity';
+export type { DeliverableSpec } from './briefing.entity';
+export {
+  BriefingDistributionRecipient,
+  DistributionRecipientStatus,
+} from './briefing-distribution-recipient.entity';
+export { BriefingQaThread } from './briefing-qa-thread.entity';
+export { BriefingQaMessage, QaSenderType } from './briefing-qa-message.entity';
+export {
+  ContentReviewDecision,
+  ContentReviewDecisionValue,
+} from './content-review-decision.entity';

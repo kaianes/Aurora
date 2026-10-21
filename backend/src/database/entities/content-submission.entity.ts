@@ -55,6 +55,41 @@ export class ContentSubmission {
   })
   extractionStatus: ExtractionStatus;
 
+  // ---- E5 additive extension (ADR-0025, ADR-0030, ADR-0027) ----
+
+  // Self-referencing version lineage (ADR-0025). The first submission in a
+  // lineage has supersedesSubmissionId = null and rootSubmissionId = its own
+  // id. A resubmission sets supersedesSubmissionId to the version it
+  // replaces, versionNumber to that version's versionNumber + 1, and copies
+  // rootSubmissionId forward unchanged.
+  @Column({ type: 'uuid', nullable: true, name: 'supersedes_submission_id' })
+  supersedesSubmissionId: string | null;
+
+  @Column({ type: 'uuid', nullable: true, name: 'root_submission_id' })
+  rootSubmissionId: string | null;
+
+  @Column({ type: 'int', default: 1, name: 'version_number' })
+  versionNumber: number;
+
+  // FR-41's deadline/escalation fields (ADR-0030). Set once at submission
+  // time; reviewEscalated flips exactly once, by the sweeper job, and is
+  // never un-set.
+  @Column({ type: 'timestamptz', nullable: true, name: 'review_deadline_at' })
+  reviewDeadlineAt: Date | null;
+
+  @Column({ type: 'boolean', default: false, name: 'review_escalated' })
+  reviewEscalated: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true, name: 'review_escalated_at' })
+  reviewEscalatedAt: Date | null;
+
+  // FR-42's completion marker on the exact version confirmed (ADR-0027).
+  @Column({ type: 'text', nullable: true, name: 'published_url' })
+  publishedUrl: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true, name: 'published_at' })
+  publishedAt: Date | null;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'submitted_at' })
   submittedAt: Date;
 

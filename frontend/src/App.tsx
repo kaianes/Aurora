@@ -31,7 +31,15 @@ import { CampaignSafetyRulesetPage } from '@/pages/app/campaign-safety-ruleset-p
 import { ReviewQueuePage } from '@/pages/app/review-queue-page';
 import { ReviewQueueDetailPage } from '@/pages/app/review-queue-detail-page';
 import { MonitoringPage } from '@/pages/app/monitoring-page';
-import { NewSubmissionPage } from '@/pages/creator-portal/new-submission-page';
+import { BriefingComposerPage } from '@/pages/app/briefing-composer-page';
+import { BriefingDistributionPage } from '@/pages/app/briefing-distribution-page';
+import { BriefingQaPage } from '@/pages/app/briefing-qa-page';
+import { ContentSubmissionsPage } from '@/pages/app/content-submissions-page';
+import { CreatorBriefingPage } from '@/pages/creator-portal/briefing-page';
+import { CreatorBriefingQaPage } from '@/pages/creator-portal/briefing-qa-page';
+import { NewDraftPage } from '@/pages/creator-portal/new-draft-page';
+import { DraftsPage } from '@/pages/creator-portal/drafts-page';
+import { ConfirmPublicationPage } from '@/pages/creator-portal/confirm-publication-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -93,6 +101,11 @@ export default function App() {
               <Route path="safety/review-queue" element={<ReviewQueuePage />} />
               <Route path="safety/review-queue/:id" element={<ReviewQueueDetailPage />} />
               <Route path="safety/monitoring" element={<MonitoringPage />} />
+              {/* E5 -- Briefing and Content Workflow (US-18a, US-18b, US-19, US-31) */}
+              <Route path="campaigns/:id/briefing" element={<BriefingComposerPage />} />
+              <Route path="campaigns/:id/briefing/distribution" element={<BriefingDistributionPage />} />
+              <Route path="campaigns/:id/briefing/qa" element={<BriefingQaPage />} />
+              <Route path="campaigns/:id/content-submissions" element={<ContentSubmissionsPage />} />
               <Route
                 path="clients"
                 element={
@@ -115,7 +128,12 @@ export default function App() {
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>
               <Route path="access" element={<CreatorAccessPage />} />
               <Route path="opportunities" element={<OpportunitiesPage />} />
-              <Route path="submissions/new" element={<NewSubmissionPage />} />
+              {/* E5 -- Briefing and Content Workflow (US-30, US-31, US-32a, US-32b, US-34) */}
+              <Route path="briefing" element={<CreatorBriefingPage />} />
+              <Route path="briefing/qa" element={<CreatorBriefingQaPage />} />
+              <Route path="drafts/new" element={<NewDraftPage />} />
+              <Route path="drafts" element={<DraftsPage />} />
+              <Route path="drafts/:id/confirm-publication" element={<ConfirmPublicationPage />} />
             </Route>
 
             {/* Default redirect */}
