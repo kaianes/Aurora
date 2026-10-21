@@ -44,6 +44,7 @@ import { PaymentsPage } from '@/pages/creator-portal/payments-page';
 import { PaymentDetailPage } from '@/pages/creator-portal/payment-detail-page';
 import { InvoicePage } from '@/pages/app/invoice-page';
 import { CampaignDashboardPage } from '@/pages/app/campaign-dashboard-page';
+import { CampaignReportPage } from '@/pages/app/campaign-report-page';
 import { ClientReportPage } from '@/pages/app/client-report-page';
 import { ReportsComparePage } from '@/pages/app/reports-compare-page';
 import { AgencyBrandingPage } from '@/pages/app/agency-branding-page';
@@ -116,8 +117,9 @@ export default function App() {
               <Route path="campaigns/:id/content-submissions" element={<ContentSubmissionsPage />} />
               {/* E6 -- Payments and Financial Transparency (US-20, US-42) */}
               <Route path="campaigns/:id/invoice" element={<InvoicePage />} />
-              {/* E7 -- Analytics and Reporting (US-21b, US-43, US-46) */}
+              {/* E7 -- Analytics and Reporting (US-21b, US-22, US-43, US-46) */}
               <Route path="campaigns/:id/dashboard" element={<CampaignDashboardPage />} />
+              <Route path="campaigns/:id/reports" element={<CampaignReportPage />} />
               <Route
                 path="clients"
                 element={

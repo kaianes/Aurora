@@ -17,6 +17,7 @@ import type {
   BulkShortlistDecisionRequest,
   Campaign,
   CampaignDashboard,
+  CampaignPerformanceReport,
   CampaignSafetyRuleset,
   CampaignShortlist,
   CampaignSummary,
@@ -396,6 +397,17 @@ export const campaignApi = {
   // 5.2. A direct read of campaign_performance_aggregate, never recomputed at request time.
   getDashboard: (id: string) =>
     api.get<CampaignDashboard>(`/campaigns/${id}/dashboard`).then((r) => r.data),
+
+  // E7 -- single-campaign report export (US-22), per
+  // docs/architecture/e7-analytics-reporting.md section 5.3. Request/poll, same pattern as
+  // the quote/shortlist/client-report flows above.
+  requestReport: (id: string) =>
+    api.post<RequestReportResponse>(`/campaigns/${id}/reports`).then((r) => r.data),
+
+  getReport: (campaignId: string, reportId: string) =>
+    api
+      .get<CampaignPerformanceReport>(`/campaigns/${campaignId}/reports/${reportId}`)
+      .then((r) => r.data),
 };
 
 // E6 -- Campaign invoice, one per campaign, serving both a direct brand buyer (US-20) and an
