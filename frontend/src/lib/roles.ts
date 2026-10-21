@@ -88,3 +88,12 @@ export function canAnswerBriefingQa(role: Role): boolean {
 export function canDecideContentSubmission(role: Role): boolean {
   return CONTENT_WORKFLOW_WRITE_ROLES.includes(role);
 }
+
+// Invoice generation (US-20, US-42) permissions, per
+// docs/architecture/e6-payments-financial-transparency.md section 3.5. brand_analyst can view
+// an invoice (any authenticated account member can, section 4.4) but never generate one.
+const INVOICE_GENERATE_ROLES: Role[] = ['brand_owner', 'brand_manager', 'agency_admin', 'agency_operator'];
+
+export function canGenerateInvoice(role: Role): boolean {
+  return INVOICE_GENERATE_ROLES.includes(role);
+}

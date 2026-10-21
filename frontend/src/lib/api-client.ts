@@ -23,6 +23,7 @@ import type {
   ConfirmPublicationRequest,
   ConfirmPublicationResponse,
   ContentSubmissionVersion,
+  Invoice,
   CreateBrandProfileRequest,
   CreateCampaignOverrideRequest,
   CreateCampaignRequest,
@@ -59,6 +60,10 @@ import type {
   MonitoringSnapshotDetail,
   OperatorAccess,
   PaginatedResponse,
+  PayoutObligationDetail,
+  PayoutObligationListItem,
+  PayoutObligationStatus,
+  PayoutStatementResponse,
   PricingResponse,
   CampaignQuote,
   ReallocationBounds,
@@ -85,6 +90,7 @@ import type {
   ShortlistDecisionResponse,
   ShortlistOverrideRequest,
   ShortlistOverrideResponse,
+  TaxDocumentResponse,
   UpdateBrandProfileRequest,
   UpdateCampaignRequest,
   UpdateMemberRequest,
@@ -350,6 +356,25 @@ export const campaignApi = {
     api.post<Campaign>(`/campaigns/${id}/acknowledge-drift`, data).then((r) => r.data),
 };
 
+// E6 -- Campaign invoice, one per campaign, serving both a direct brand buyer (US-20) and an
+// agency client (US-42) with no shape difference (ADR-0040), per
+// docs/architecture/e6-payments-financial-transparency.md section 4.4.
+
+export const invoiceApi = {
+  get: (campaignId: string) =>
+    api
+      .get<Invoice>(`/campaigns/${campaignId}/invoice`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 INVOICE_NOT_YET_GENERATED: no invoice exists yet, not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  generate: (campaignId: string) =>
+    api.post<Invoice>(`/campaigns/${campaignId}/invoice`).then((r) => r.data),
+};
+
 export const templateApi = {
   list: (params?: { cursor?: string; limit?: number }) =>
     api.get<PaginatedResponse<CampaignTemplate>>('/campaign-templates', { params }).then((r) => r.data),
@@ -606,6 +631,33 @@ export const creatorPortalApi = {
     creatorPortalClient
       .post<ConfirmPublicationResponse>(`/creator-portal/content-submissions/${submissionId}/confirm-publication`, data)
       .then((r) => r.data),
+
+  // E6 -- payment history, statements, tax documents (US-35a/b/c, US-36a, US-36b), per
+  // docs/architecture/e6-payments-financial-transparency.md section 4.3.
+  listPayoutObligations: (params?: { status?: PayoutObligationStatus; campaign_id?: string; cursor?: string; limit?: number }) =>
+    creatorPortalClient
+      .get<PaginatedResponse<PayoutObligationListItem>>('/creator-portal/payout-obligations', { params })
+      .then((r) => r.data),
+
+  getPayoutObligation: (id: string) =>
+    creatorPortalClient
+      .get<PayoutObligationDetail>(`/creator-portal/payout-obligations/${id}`)
+      .then((r) => r.data),
+
+  getPayoutStatement: (id: string) =>
+    creatorPortalClient
+      .get<PayoutStatementResponse>(`/creator-portal/payout-obligations/${id}/statement`)
+      .then((r) => r.data),
+
+  getTaxDocument: (id: string) =>
+    creatorPortalClient
+      .get<TaxDocumentResponse>(`/creator-portal/payout-obligations/${id}/tax-document`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 TAX_DOCUMENT_NOT_AVAILABLE: the obligation has not settled yet, not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
 };
 
 export default api;

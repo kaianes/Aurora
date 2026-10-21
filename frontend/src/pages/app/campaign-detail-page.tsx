@@ -365,6 +365,16 @@ export function CampaignDetailPage() {
         </Link>
       </Card>
 
+      {/* Invoice (E6, US-20/US-42) */}
+      {['active', 'paused', 'completed'].includes(campaign.state) && (
+        <Card>
+          <h3 className="text-sm font-semibold text-text-dark mb-3">Faturamento</h3>
+          <Link to={`/app/campaigns/${campaign.id}/invoice`}>
+            <Button variant="outline" size="sm">Ver fatura</Button>
+          </Link>
+        </Card>
+      )}
+
       {/* Briefing, Q&A, and content review (E5, US-18a/US-18b/US-19/US-31) */}
       <Card>
         <h3 className="text-sm font-semibold text-text-dark mb-3">Briefing e revisao de conteudo</h3>
