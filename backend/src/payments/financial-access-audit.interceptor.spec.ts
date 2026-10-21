@@ -42,7 +42,7 @@ describe('FinancialAccessAuditInterceptor - NFR-23', () => {
     (interceptor as any).reflector = reflector;
 
     const observable = interceptor.intercept(context, callHandler({ id: 'pay-001' }));
-    await new Promise((resolve) => observable.subscribe({ complete: resolve }));
+    await new Promise<void>((resolve) => observable.subscribe({ complete: () => resolve() }));
 
     expect(auditService.log).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -60,7 +60,7 @@ describe('FinancialAccessAuditInterceptor - NFR-23', () => {
     (interceptor as any).reflector = reflector;
 
     const observable = interceptor.intercept(context, callHandler());
-    await new Promise((resolve) => observable.subscribe({ complete: resolve }));
+    await new Promise<void>((resolve) => observable.subscribe({ complete: () => resolve() }));
 
     expect(auditService.log).not.toHaveBeenCalled();
   });
@@ -72,7 +72,7 @@ describe('FinancialAccessAuditInterceptor - NFR-23', () => {
     (interceptor as any).reflector = reflector;
 
     const observable = interceptor.intercept(context, callHandler());
-    await new Promise((resolve) => observable.subscribe({ complete: resolve }));
+    await new Promise<void>((resolve) => observable.subscribe({ complete: () => resolve() }));
 
     expect(auditService.log).not.toHaveBeenCalled();
   });
@@ -91,7 +91,7 @@ describe('FinancialAccessAuditInterceptor - NFR-23', () => {
     (interceptor as any).reflector = reflector;
 
     const observable = interceptor.intercept(context, callHandler());
-    await new Promise((resolve) => observable.subscribe({ complete: resolve }));
+    await new Promise<void>((resolve) => observable.subscribe({ complete: () => resolve() }));
 
     expect(auditService.log).toHaveBeenCalledWith(
       expect.objectContaining({ actorUserId: 'operator-1' }),
@@ -107,8 +107,8 @@ describe('FinancialAccessAuditInterceptor - NFR-23', () => {
 
     const observable = interceptor.intercept(context, callHandler({ id: 'pay-001' }));
     const emitted: any[] = [];
-    await new Promise((resolve) =>
-      observable.subscribe({ next: (v) => emitted.push(v), complete: resolve }),
+    await new Promise<void>((resolve) =>
+      observable.subscribe({ next: (v) => emitted.push(v), complete: () => resolve() }),
     );
 
     expect(emitted).toEqual([{ id: 'pay-001' }]);
