@@ -23,6 +23,12 @@ export function canManageClients(role: Role): boolean {
   return role === 'agency_admin';
 }
 
+// Agency branding profile (ADR-0048), per the agency controller's @Roles(Role.AGENCY_ADMIN)
+// on both GET and PUT /agency/branding.
+export function canManageAgencyBranding(role: Role): boolean {
+  return role === 'agency_admin';
+}
+
 export function getInvitableRoles(workspaceType: 'brand' | 'agency'): Role[] {
   return workspaceType === 'brand' ? BRAND_INVITABLE_ROLES : AGENCY_INVITABLE_ROLES;
 }

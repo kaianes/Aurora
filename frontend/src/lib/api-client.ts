@@ -4,6 +4,7 @@ import type {
   AcceptInvitationResponse,
   AcknowledgeDriftRequest,
   AddOperatorRequest,
+  AgencyBrandingProfile,
   AnswerBriefingQuestionRequest,
   AskBriefingQuestionRequest,
   AskBriefingQuestionResponse,
@@ -15,11 +16,17 @@ import type {
   BrandProfile,
   BulkShortlistDecisionRequest,
   Campaign,
+  CampaignDashboard,
+  CampaignPerformanceReport,
   CampaignSafetyRuleset,
   CampaignShortlist,
   CampaignSummary,
   CampaignTemplate,
   ClientListResponse,
+  ClientPerformanceReport,
+  CompareClientReportsResponse,
+  ConfigureBrandingRequest,
+  CreatorPerformanceResponse,
   ConfirmPublicationRequest,
   ConfirmPublicationResponse,
   ContentSubmissionVersion,
@@ -73,6 +80,7 @@ import type {
   RegisterResponse,
   RequestAdditionalCandidatesResponse,
   RequestQuoteResponse,
+  RequestReportResponse,
   RequestShortlistResponse,
   ResendInvitationResponse,
   ResendVerificationRequest,
@@ -303,6 +311,36 @@ export const agencyApi = {
 
   removeOperator: (clientId: string, userId: string) =>
     api.delete(`/agency/clients/${clientId}/operators/${userId}`).then(() => undefined),
+
+  // E7 -- per-client report (US-43), per docs/architecture/e7-analytics-reporting.md section
+  // 5.5. The caller's X-Account-Id must be the client account itself (section 2.5) -- the page
+  // calling these is responsible for switching account context around each call, the same
+  // pattern client-detail-page already uses for brand-profile operations on a client account.
+  requestClientReport: (clientAccountId: string) =>
+    api.post<RequestReportResponse>(`/agency/clients/${clientAccountId}/reports`).then((r) => r.data),
+
+  getClientReport: (clientAccountId: string, reportId: string) =>
+    api
+      .get<ClientPerformanceReport>(`/agency/clients/${clientAccountId}/reports/${reportId}`)
+      .then((r) => r.data),
+
+  // E7 -- cross-client comparison (US-46), per section 5.6. Runs under the agency's own home
+  // account context; the backend's app.agency_cross_client_read escape hatch (section 2.5)
+  // scopes the read, not X-Account-Id.
+  compareReports: (clientAccountIds: string[]) =>
+    api
+      .get<CompareClientReportsResponse>('/agency/reports/compare', {
+        params: { client_account_ids: clientAccountIds.join(',') },
+      })
+      .then((r) => r.data),
+
+  // E7 -- agency branding profile (ADR-0048, section 2.3), closing the US-43 gap: an
+  // agency_admin needs a way to actually configure the logo/colors a per-client report
+  // renders under. Runs under the agency's own home account context, never a client account.
+  getBranding: () => api.get<AgencyBrandingProfile>('/agency/branding').then((r) => r.data),
+
+  configureBranding: (data: ConfigureBrandingRequest) =>
+    api.put<AgencyBrandingProfile>('/agency/branding', data).then((r) => r.data),
 };
 
 export const campaignApi = {
@@ -354,6 +392,22 @@ export const campaignApi = {
 
   acknowledgeDrift: (id: string, data: AcknowledgeDriftRequest) =>
     api.post<Campaign>(`/campaigns/${id}/acknowledge-drift`, data).then((r) => r.data),
+
+  // E7 -- unified dashboard (US-21b), per docs/architecture/e7-analytics-reporting.md section
+  // 5.2. A direct read of campaign_performance_aggregate, never recomputed at request time.
+  getDashboard: (id: string) =>
+    api.get<CampaignDashboard>(`/campaigns/${id}/dashboard`).then((r) => r.data),
+
+  // E7 -- single-campaign report export (US-22), per
+  // docs/architecture/e7-analytics-reporting.md section 5.3. Request/poll, same pattern as
+  // the quote/shortlist/client-report flows above.
+  requestReport: (id: string) =>
+    api.post<RequestReportResponse>(`/campaigns/${id}/reports`).then((r) => r.data),
+
+  getReport: (campaignId: string, reportId: string) =>
+    api
+      .get<CampaignPerformanceReport>(`/campaigns/${campaignId}/reports/${reportId}`)
+      .then((r) => r.data),
 };
 
 // E6 -- Campaign invoice, one per campaign, serving both a direct brand buyer (US-20) and an
@@ -658,6 +712,11 @@ export const creatorPortalApi = {
         if (isAxiosError(err) && err.response?.status === 404) return null;
         throw err;
       }),
+
+  // E7 -- Duda's own performance (US-37), per docs/architecture/e7-analytics-reporting.md
+  // section 5.4. Scoped server-side to her creator ID from the JWT, never a parameter.
+  listPerformance: () =>
+    creatorPortalClient.get<CreatorPerformanceResponse>('/creator-portal/performance').then((r) => r.data),
 };
 
 export default api;
