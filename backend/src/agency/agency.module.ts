@@ -6,9 +6,11 @@ import {
   Membership,
   OperatorClientAccess,
   BrandProfile,
+  AgencyBrandingProfile,
 } from '../database/entities';
 import { AgencyController } from './agency.controller';
 import { AgencyService } from './agency.service';
+import { AgencyBrandingService } from './agency-branding.service';
 
 @Module({
   imports: [
@@ -18,10 +20,14 @@ import { AgencyService } from './agency.service';
       Membership,
       OperatorClientAccess,
       BrandProfile,
+      AgencyBrandingProfile,
     ]),
   ],
   controllers: [AgencyController],
-  providers: [AgencyService],
-  exports: [AgencyService],
+  providers: [AgencyService, AgencyBrandingService],
+  // AgencyBrandingService.getBrandingProfile is the one method analytics's
+  // report renderer calls in-process (ADR-0048, section 2.3 of the E7
+  // architecture doc).
+  exports: [AgencyService, AgencyBrandingService],
 })
 export class AgencyModule {}
