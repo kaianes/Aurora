@@ -75,6 +75,16 @@ export class Creator {
   @Column({ type: 'numeric', nullable: true, name: 'historical_reliability' })
   historicalReliability: string | null;
 
+  // E6 additive extension (ADR-0013's "extend, not replace" precedent):
+  // US-36b's tax-documentation fields. Nullable, no backfill required, no
+  // existing row or code path that reads creator needs to change. No
+  // validation beyond presence is performed at the pilot stage (ADR-0041).
+  @Column({ type: 'text', nullable: true, name: 'tax_id' })
+  taxId: string | null;
+
+  @Column({ type: 'text', nullable: true, name: 'tax_id_type' })
+  taxIdType: string | null; // 'cpf' | 'cnpj'
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 

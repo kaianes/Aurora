@@ -94,4 +94,62 @@ describe('OpportunityService - US-28', () => {
 
     await expect(service.accept('opp-1', 'creator-2', actor)).rejects.toThrow(NotFoundException);
   });
+
+  // ---- US-29 (E6, ADR-0035): expected_payment_date is a projection, added
+  // to the existing list and accept responses. ----
+  describe('US-29 -- expected_payment_date projection', () => {
+    it('list() projects from campaign.timeline_end when present', async () => {
+      opportunityRepo.find.mockResolvedValue([
+        {
+          id: 'opp-1', campaignId: 'camp-1', creatorId: 'creator-1',
+          expiresAt: new Date('2026-11-01T00:00:00Z'),
+          payoutGross: '800.00', payoutCommission: '120.00', payoutNet: '680.00',
+          deliverable: {}, status: OpportunityStatus.PENDING, respondedAt: null,
+        },
+      ]);
+      campaignRepo.findOne.mockResolvedValue({
+        id: 'camp-1', accountId: 'acct-1', timelineEnd: new Date('2026-11-30T00:00:00Z'),
+      });
+      accountRepo.findOne.mockResolvedValue({ id: 'acct-1', name: 'Acme' });
+
+      const { data } = await service.listForCreator('creator-1');
+
+      expect(data[0].expected_payment_date_is_estimate).toBe(true);
+      expect(data[0].expected_payment_date).toBe(new Date('2026-12-05T00:00:00Z').toISOString());
+    });
+
+    it('list() falls back to opportunity.expires_at when campaign.timeline_end is null', async () => {
+      opportunityRepo.find.mockResolvedValue([
+        {
+          id: 'opp-1', campaignId: 'camp-1', creatorId: 'creator-1',
+          expiresAt: new Date('2026-11-01T00:00:00Z'),
+          payoutGross: '800.00', payoutCommission: '120.00', payoutNet: '680.00',
+          deliverable: {}, status: OpportunityStatus.PENDING, respondedAt: null,
+        },
+      ]);
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'acct-1', timelineEnd: null });
+      accountRepo.findOne.mockResolvedValue(null);
+
+      const { data } = await service.listForCreator('creator-1');
+
+      expect(data[0].expected_payment_date).toBe(new Date('2026-11-06T00:00:00Z').toISOString());
+    });
+
+    it('accept() response also carries the expected_payment_date projection', async () => {
+      const future = new Date(Date.now() + 60_000);
+      opportunityRepo.findOne.mockResolvedValue({
+        id: 'opp-1', creatorId: 'creator-1', status: OpportunityStatus.PENDING,
+        expiresAt: future, shortlistEntryId: 'entry-1',
+        payoutGross: '800.00', payoutCommission: '120.00', payoutNet: '680.00',
+        deliverable: { format: 'instagram_reel', quantity: 1 }, campaignId: 'camp-1',
+      });
+      entryRepo.findOne.mockResolvedValue({ id: 'entry-1', included: true });
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', timelineEnd: null });
+
+      const result = await service.accept('opp-1', 'creator-1', actor);
+
+      expect(result.expected_payment_date_is_estimate).toBe(true);
+      expect(result.expected_payment_date).toBeDefined();
+    });
+  });
 });
