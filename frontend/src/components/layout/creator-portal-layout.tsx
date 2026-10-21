@@ -11,7 +11,7 @@ export function CreatorPortalLayout() {
 
   const handleLogout = () => {
     clearCreatorToken();
-    navigate('/creator-portal/access');
+    navigate('/creator-portal/login');
   };
 
   return (
@@ -36,6 +36,21 @@ export function CreatorPortalLayout() {
               {hasToken && (
                 <Link to="/creator-portal/performance" className="text-sm text-muted hover:text-text-dark transition-colors">
                   Desempenho
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/social-accounts" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Redes
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/rate-preferences" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Valores
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/media-kit" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Media kit
                 </Link>
               )}
               {hasToken && (

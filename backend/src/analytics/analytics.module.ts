@@ -91,8 +91,10 @@ import { AgencyReportCompareController } from './agency-report-compare.controlle
     },
   ],
   // PerformanceScoringService.getReallocationInputs is the only method
-  // campaign's CampaignScheduledTasksService calls (ADR-0047); nothing else
-  // in this module is exported.
-  exports: [PerformanceScoringService],
+  // campaign's CampaignScheduledTasksService calls (ADR-0047).
+  // CreatorPerformanceService is additionally exported so creator-network's
+  // media kit can call getCreatorDeliveredPerformance (ADR-0057) rather
+  // than re-deriving the same join logic against this module's own tables.
+  exports: [PerformanceScoringService, CreatorPerformanceService],
 })
 export class AnalyticsModule {}

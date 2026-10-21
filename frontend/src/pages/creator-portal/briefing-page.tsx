@@ -23,7 +23,7 @@ export function CreatorBriefingPage() {
   const campaignId = searchParams.get('campaign_id') ?? '';
 
   useEffect(() => {
-    if (!getCreatorToken()) navigate('/creator-portal/access');
+    if (!getCreatorToken()) navigate('/creator-portal/login');
   }, [navigate]);
 
   const { data: briefing, isLoading, error } = useQuery({

@@ -25,7 +25,13 @@ export {
   ShortfallResolutionType,
   ShortfallChosenBy,
 } from './pool-shortfall-resolution.entity';
-export { Creator, CreatorStatus, CreatorOnboardingStatus } from './creator.entity';
+export {
+  Creator,
+  CreatorStatus,
+  CreatorOnboardingStatus,
+  CreatorRecruitmentOrigin,
+  CreatorAuthenticityStatus,
+} from './creator.entity';
 export type { DemographicComposition } from './creator.entity';
 export { CreatorExclusion, ExclusionType } from './creator-exclusion.entity';
 export {
@@ -108,3 +114,21 @@ export {
 } from './campaign-performance-report.entity';
 export { ClientPerformanceReport } from './client-performance-report.entity';
 export { AgencyBrandingProfile } from './agency-branding-profile.entity';
+
+// E8 -- Creator Recruitment and Growth (section 2 of the E8 architecture doc)
+export { CreatorPublicImport } from './creator-public-import.entity';
+export { CreatorInvitation, CreatorInvitationStatus } from './creator-invitation.entity';
+export { CreatorConsentRecord, CreatorConsentType } from './creator-consent-record.entity';
+export {
+  CreatorSocialAccount,
+  SocialPlatform,
+  SocialAccountStatus,
+  SocialAccountDisconnectReason,
+} from './creator-social-account.entity';
+export { CreatorRatePreference } from './creator-rate-preference.entity';
+export { CreatorMediaKitExport, MediaKitExportStatus } from './creator-media-kit-export.entity';
+export {
+  CreatorDataSubjectRequest,
+  DataSubjectRequestType,
+  DataSubjectRequestStatus,
+} from './creator-data-subject-request.entity';

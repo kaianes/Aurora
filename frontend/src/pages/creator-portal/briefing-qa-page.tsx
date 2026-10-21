@@ -24,7 +24,7 @@ export function CreatorBriefingQaPage() {
   const [askError, setAskError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!getCreatorToken()) navigate('/creator-portal/access');
+    if (!getCreatorToken()) navigate('/creator-portal/login');
   }, [navigate]);
 
   const { data: thread, isLoading, error } = useQuery({
