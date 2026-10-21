@@ -22,11 +22,18 @@ export function CreatorPortalLayout() {
             <Link to="/creator-portal/opportunities" className="text-xl font-bold text-primary">
               Aurora
             </Link>
-            {hasToken && (
-              <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
-                Sair
-              </button>
-            )}
+            <div className="flex items-center gap-4">
+              {hasToken && (
+                <Link to="/creator-portal/submissions/new" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Enviar conteudo
+                </Link>
+              )}
+              {hasToken && (
+                <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
+                  Sair
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>

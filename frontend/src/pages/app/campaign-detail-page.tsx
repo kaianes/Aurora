@@ -357,6 +357,14 @@ export function CampaignDetailPage() {
         </Card>
       )}
 
+      {/* Brand safety ruleset (E4, US-15 scenario 2) */}
+      <Card>
+        <h3 className="text-sm font-semibold text-text-dark mb-3">Seguranca de marca</h3>
+        <Link to={`/app/campaigns/${campaign.id}/safety-ruleset`}>
+          <Button variant="outline" size="sm">Ver regras de seguranca da campanha</Button>
+        </Link>
+      </Card>
+
       {/* Lifecycle controls */}
       {canWrite && ['active', 'paused', 'confirmed'].includes(campaign.state) && (
         <Card>

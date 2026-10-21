@@ -26,6 +26,12 @@ import { ExclusionsPage } from '@/pages/app/exclusions-page';
 import { ShortlistOverridePage } from '@/pages/app/shortlist-override-page';
 import { CreatorAccessPage } from '@/pages/creator-portal/creator-access-page';
 import { OpportunitiesPage } from '@/pages/creator-portal/opportunities-page';
+import { SafetyRulesetPage } from '@/pages/app/safety-ruleset-page';
+import { CampaignSafetyRulesetPage } from '@/pages/app/campaign-safety-ruleset-page';
+import { ReviewQueuePage } from '@/pages/app/review-queue-page';
+import { ReviewQueueDetailPage } from '@/pages/app/review-queue-detail-page';
+import { MonitoringPage } from '@/pages/app/monitoring-page';
+import { NewSubmissionPage } from '@/pages/creator-portal/new-submission-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,9 +84,15 @@ export default function App() {
                 }
               />
               <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+              <Route path="campaigns/:id/safety-ruleset" element={<CampaignSafetyRulesetPage />} />
               <Route path="exclusions" element={<ExclusionsPage />} />
               <Route path="templates" element={<TemplatesPage />} />
               <Route path="templates/:id/instantiate" element={<TemplateInstantiatePage />} />
+              {/* E4 -- Brand Safety (US-15, US-16b, US-17) */}
+              <Route path="safety/ruleset" element={<SafetyRulesetPage />} />
+              <Route path="safety/review-queue" element={<ReviewQueuePage />} />
+              <Route path="safety/review-queue/:id" element={<ReviewQueueDetailPage />} />
+              <Route path="safety/monitoring" element={<MonitoringPage />} />
               <Route
                 path="clients"
                 element={
@@ -103,6 +115,7 @@ export default function App() {
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>
               <Route path="access" element={<CreatorAccessPage />} />
               <Route path="opportunities" element={<OpportunitiesPage />} />
+              <Route path="submissions/new" element={<NewSubmissionPage />} />
             </Route>
 
             {/* Default redirect */}

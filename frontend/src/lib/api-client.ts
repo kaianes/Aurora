@@ -7,19 +7,27 @@ import type {
   BrandProfile,
   BulkShortlistDecisionRequest,
   Campaign,
+  CampaignSafetyRuleset,
   CampaignShortlist,
   CampaignSummary,
   CampaignTemplate,
   ClientListResponse,
   CreateBrandProfileRequest,
+  CreateCampaignOverrideRequest,
   CreateCampaignRequest,
   CreateClientRequest,
   CreateClientResponse,
+  CreateContentSubmissionRequest,
+  CreateContentSubmissionResponse,
   CreateExclusionRequest,
   CreateInvitationRequest,
+  CreateSafetyRuleRequest,
   CreatorMetrics,
   CreatorOpportunity,
   ConfirmCampaignResponse,
+  DecideReviewItemRequest,
+  DecideReviewItemResponse,
+  DeleteSafetyRuleResponse,
   Exclusion,
   InstantiateTemplateRequest,
   Invitation,
@@ -32,6 +40,8 @@ import type {
   MfaConfirmRequest,
   MfaConfirmResponse,
   MfaSetupResponse,
+  MonitoringSnapshot,
+  MonitoringSnapshotDetail,
   OperatorAccess,
   PaginatedResponse,
   PricingResponse,
@@ -48,6 +58,11 @@ import type {
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResolveShortfallRequest,
+  ReviewQueueItem,
+  ReviewQueueItemDetail,
+  SafetyCheckResult,
+  SafetyRule,
+  SafetyRuleset,
   SaveAsTemplateRequest,
   ShortfallResponse,
   ShortlistDecisionRequest,
@@ -58,6 +73,7 @@ import type {
   UpdateCampaignRequest,
   UpdateMemberRequest,
   UpdateMemberResponse,
+  UpdateSafetyRuleRequest,
   VerifyEmailRequest,
   VerifyEmailResponse,
   WorkspaceResponse,
@@ -377,6 +393,54 @@ export const exclusionApi = {
   remove: (id: string) => api.delete(`/exclusions/${id}`).then(() => undefined),
 };
 
+// E4 -- Brand safety ruleset and campaign overrides (US-15), per
+// docs/architecture/e4-brand-safety.md section 3.2.
+
+export const safetyRulesetApi = {
+  getBrand: () => api.get<SafetyRuleset>('/safety/rulesets/brand').then((r) => r.data),
+
+  createBrandRule: (data: CreateSafetyRuleRequest) =>
+    api.post<SafetyRule>('/safety/rulesets/brand/rules', data).then((r) => r.data),
+
+  updateBrandRule: (ruleId: string, data: UpdateSafetyRuleRequest) =>
+    api.patch<SafetyRule>(`/safety/rulesets/brand/rules/${ruleId}`, data).then((r) => r.data),
+
+  deleteBrandRule: (ruleId: string) =>
+    api.delete<DeleteSafetyRuleResponse | ''>(`/safety/rulesets/brand/rules/${ruleId}`).then((r) =>
+      r.data && typeof r.data === 'object' ? r.data : {},
+    ),
+
+  getCampaignRuleset: (campaignId: string) =>
+    api.get<CampaignSafetyRuleset>(`/campaigns/${campaignId}/safety-ruleset`).then((r) => r.data),
+
+  createCampaignOverride: (campaignId: string, data: CreateCampaignOverrideRequest) =>
+    api.post(`/campaigns/${campaignId}/safety-ruleset/overrides`, data).then((r) => r.data),
+
+  deleteCampaignOverride: (campaignId: string, ruleId: string) =>
+    api.delete(`/campaigns/${campaignId}/safety-ruleset/overrides/${ruleId}`).then(() => undefined),
+};
+
+// E4 -- Human review queue (US-17), per docs/architecture/e4-brand-safety.md section 3.4.
+
+export const reviewQueueApi = {
+  list: (params?: { status?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<ReviewQueueItem>>('/safety/review-queue', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<ReviewQueueItemDetail>(`/safety/review-queue/${id}`).then((r) => r.data),
+
+  decide: (id: string, data: DecideReviewItemRequest) =>
+    api.post<DecideReviewItemResponse>(`/safety/review-queue/${id}/decide`, data).then((r) => r.data),
+};
+
+// E4 -- Post-publication monitoring (US-16b), per docs/architecture/e4-brand-safety.md section 3.5.
+
+export const monitoringApi = {
+  list: (params?: { campaign_id?: string; result?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<MonitoringSnapshot>>('/safety/monitoring', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<MonitoringSnapshotDetail>(`/safety/monitoring/${id}`).then((r) => r.data),
+};
+
 // Creator portal (US-28): separate token storage since creators are not account members.
 // Pilot-only creator login (ADR-0013): POST /creator-portal/login takes a creator_id
 // (no password -- E8 owns the real social-auth/magic-link flow) and returns a short-lived
@@ -425,6 +489,18 @@ export const creatorPortalApi = {
 
   decline: (id: string) =>
     creatorPortalClient.post<CreatorOpportunity>(`/creator-portal/opportunities/${id}/decline`).then((r) => r.data),
+
+  // E4 -- content submission intake (US-16), per docs/architecture/e4-brand-safety.md section 3.3.
+  // This is the one creator-facing endpoint E4 exposes ahead of E5's real draft-submission flow.
+  submitContent: (data: CreateContentSubmissionRequest) =>
+    creatorPortalClient
+      .post<CreateContentSubmissionResponse>('/creator-portal/content-submissions', data)
+      .then((r) => r.data),
+
+  // Polling endpoint is shared with account members (section 3.3); reached here with the
+  // creator JWT since this page is the creator-facing side of the check.
+  getSafetyCheck: (contentSubmissionId: string) =>
+    creatorPortalClient.get<SafetyCheckResult>(`/safety/submissions/${contentSubmissionId}/check`).then((r) => r.data),
 };
 
 export default api;

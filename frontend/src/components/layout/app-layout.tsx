@@ -65,6 +65,15 @@ export function AppLayout() {
             <NavLink to="/app/exclusions" className={navLinkClass}>
               Lista de Exclusao
             </NavLink>
+            <NavLink to="/app/safety/ruleset" className={navLinkClass}>
+              Regras de Seguranca
+            </NavLink>
+            <NavLink to="/app/safety/review-queue" className={navLinkClass}>
+              Fila de Revisao
+            </NavLink>
+            <NavLink to="/app/safety/monitoring" className={navLinkClass}>
+              Monitoramento
+            </NavLink>
             <NavLink to="/app/team" className={navLinkClass}>
               Equipe
             </NavLink>
