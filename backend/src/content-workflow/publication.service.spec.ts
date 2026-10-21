@@ -18,6 +18,8 @@ describe('PublicationService - US-34', () => {
   let linkVerifier: { verify: ReturnType<typeof vi.fn> };
   let auditService: { log: ReturnType<typeof vi.fn> };
   let payoutObligationService: { createForConfirmedPublication: ReturnType<typeof vi.fn> };
+  let manager: { save: ReturnType<typeof vi.fn> };
+  let dataSource: { transaction: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     submissionRepo = mockRepo();
@@ -33,6 +35,12 @@ describe('PublicationService - US-34', () => {
         .fn()
         .mockResolvedValue({ payoutObligationId: 'pay-1', alreadyExisted: false }),
     };
+    manager = { save: vi.fn().mockResolvedValue(undefined) };
+    // Financial-integrity fix: confirmPublication now wraps the submission
+    // save, recordPublication, and createForConfirmedPublication in one
+    // database transaction (dataSource.transaction()), the same pattern
+    // LedgerService.recordBalancedEntry already uses.
+    dataSource = { transaction: vi.fn((cb: any) => cb(manager)) };
 
     submissionRepo.findOne.mockResolvedValue({
       id: 'sub-1',
@@ -50,6 +58,7 @@ describe('PublicationService - US-34', () => {
       linkVerifier as any,
       auditService as any,
       payoutObligationService as any,
+      dataSource as any,
     );
   });
 
@@ -58,13 +67,34 @@ describe('PublicationService - US-34', () => {
   it('confirms publication when approved, cleared, and matching (US-34 scenario 1)', async () => {
     const result = await service.confirmPublication('sub-1', 'creator-1', dto, actor);
     expect(result.status).toBe('confirmed');
+    expect(dataSource.transaction).toHaveBeenCalledTimes(1);
+    expect(manager.save).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ id: 'sub-1', publishedUrl: dto.published_url }),
+    );
     expect(gateService.recordPublication).toHaveBeenCalledWith('sub-1', dto.published_url);
+    // The payout obligation write is passed the transaction's own manager
+    // (the financial-integrity fix), not left to open a second transaction.
     expect(payoutObligationService.createForConfirmedPublication).toHaveBeenCalledWith(
       expect.objectContaining({ contentSubmissionId: 'sub-1', opportunityId: 'opp-1' }),
+      manager,
     );
     expect(auditService.log).toHaveBeenCalledWith(
       expect.objectContaining({ action: 'content_submission.publication_confirmed' }),
     );
+  });
+
+  it('rolls back the submission write when the payout obligation write fails inside the shared transaction', async () => {
+    payoutObligationService.createForConfirmedPublication.mockRejectedValue(new Error('db unavailable'));
+
+    await expect(service.confirmPublication('sub-1', 'creator-1', dto, actor)).rejects.toThrow(
+      'db unavailable',
+    );
+
+    // The transaction callback threw, so the caller never reaches the
+    // audit log write below it -- the one write explicitly left outside
+    // the atomic boundary.
+    expect(auditService.log).not.toHaveBeenCalled();
   });
 
   it('returns SUBMISSION_NOT_FOUND for a submission not owned by the caller', async () => {
@@ -118,6 +148,6 @@ describe('PublicationService - US-34', () => {
     await expect(service.confirmPublication('sub-1', 'creator-1', dto, actor)).rejects.toBeInstanceOf(
       ConflictException,
     );
-    expect(submissionRepo.save).not.toHaveBeenCalled();
+    expect(dataSource.transaction).not.toHaveBeenCalled();
   });
 });
