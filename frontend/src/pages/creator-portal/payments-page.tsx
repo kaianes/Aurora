@@ -134,7 +134,7 @@ export function PaymentsPage() {
 
   useEffect(() => {
     if (!getCreatorToken()) {
-      navigate('/creator-portal/access');
+      navigate('/creator-portal/login');
     }
   }, [navigate]);
 

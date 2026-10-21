@@ -39,7 +39,7 @@ export function NewDraftPage() {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    if (!getCreatorToken()) navigate('/creator-portal/access');
+    if (!getCreatorToken()) navigate('/creator-portal/login');
   }, [navigate]);
 
   const { data: opportunitiesData } = useQuery({

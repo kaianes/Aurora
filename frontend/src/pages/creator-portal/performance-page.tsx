@@ -101,7 +101,7 @@ export function CreatorPerformancePage() {
 
   useEffect(() => {
     if (!getCreatorToken()) {
-      navigate('/creator-portal/access');
+      navigate('/creator-portal/login');
     }
   }, [navigate]);
 

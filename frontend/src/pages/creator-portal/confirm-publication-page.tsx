@@ -30,7 +30,7 @@ export function ConfirmPublicationPage() {
   const [publishedUrl, setPublishedUrl] = useState('');
 
   useEffect(() => {
-    if (!getCreatorToken()) navigate('/creator-portal/access');
+    if (!getCreatorToken()) navigate('/creator-portal/login');
   }, [navigate]);
 
   const confirmMutation = useMutation({
