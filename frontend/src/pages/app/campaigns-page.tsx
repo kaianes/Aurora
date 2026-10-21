@@ -37,11 +37,15 @@ function formatCurrency(amount: string | null) {
 }
 
 export function CampaignsPage() {
-  const { currentRole } = useAuth();
+  const { currentRole, workspace } = useAuth();
   const canCreate = currentRole ? canWriteCampaign(currentRole) : false;
+  const accountId = workspace?.current_account?.id;
 
+  // Keying on accountId (the US-39 client-context selector) ensures a refetch happens whenever
+  // Renata switches client context, even though the switcher itself does not navigate or remount
+  // this page -- otherwise it would keep showing the previous client's campaigns.
   const { data, isLoading, error } = useQuery({
-    queryKey: ['campaigns'],
+    queryKey: ['campaigns', accountId],
     queryFn: () => campaignApi.list({ limit: 50 }),
   });
 

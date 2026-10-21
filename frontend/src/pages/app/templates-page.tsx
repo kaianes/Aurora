@@ -106,9 +106,12 @@ function CopyTemplateAction({ templateId }: { templateId: string }) {
 export function TemplatesPage() {
   const { workspace } = useAuth();
   const isAgency = workspace?.workspace?.type === 'agency';
+  const accountId = workspace?.current_account?.id;
 
+  // Keyed on accountId (the US-39 client-context selector) so switching client context refetches
+  // instead of continuing to show the previous client's templates.
   const { data, isLoading, error } = useQuery({
-    queryKey: ['campaign-templates'],
+    queryKey: ['campaign-templates', accountId],
     queryFn: () => templateApi.list({ limit: 50 }),
   });
 
