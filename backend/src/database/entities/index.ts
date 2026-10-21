@@ -44,3 +44,28 @@ export {
   AdditionalCandidatesRequest,
   AdditionalCandidatesRequestStatus,
 } from './additional-candidates-request.entity';
+export { SafetyRuleset, SafetyRulesetScope } from './safety-ruleset.entity';
+export {
+  SafetyRule,
+  SafetyRuleType,
+  SafetyRuleAction,
+} from './safety-rule.entity';
+export type {
+  SafetyRuleDefinition,
+  ProhibitedTopicDefinition,
+  RestrictedLanguageDefinition,
+  CompetitorMentionDefinition,
+} from './safety-rule.entity';
+export { ContentSubmission, ExtractionStatus } from './content-submission.entity';
+export { SafetyCheck, SafetyCheckStatus, SafetyCheckTier } from './safety-check.entity';
+export { SafetyRuleTrigger, SafetyTriggerChannel } from './safety-rule-trigger.entity';
+export {
+  SafetyReviewQueueItem,
+  ReviewReasonCategory,
+  ReviewItemStatus,
+} from './safety-review-queue-item.entity';
+export {
+  PublishedContentSnapshot,
+  MonitoringStatus,
+  MonitoringResult,
+} from './published-content-snapshot.entity';

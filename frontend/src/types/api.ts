@@ -583,3 +583,184 @@ export interface CreatorOpportunity {
   status: OpportunityStatus;
   responded_at?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// E4 -- Brand Safety
+// Types mirror docs/architecture/e4-brand-safety.md section 3.
+// ---------------------------------------------------------------------------
+
+export type SafetyRuleType = 'prohibited_topic' | 'restricted_language' | 'competitor_mention';
+export type SafetyRuleAction = 'add' | 'replace' | 'suppress';
+
+export interface ProhibitedTopicDefinition {
+  topic: string;
+}
+
+export interface RestrictedLanguageDefinition {
+  pattern: string;
+  pattern_type: 'keyword' | 'regex';
+}
+
+export interface CompetitorMentionDefinition {
+  competitor_name: string;
+  aliases?: string[];
+}
+
+export type SafetyRuleDefinition =
+  | ProhibitedTopicDefinition
+  | RestrictedLanguageDefinition
+  | CompetitorMentionDefinition;
+
+export interface SafetyRule {
+  id: string;
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition | null;
+  action: SafetyRuleAction;
+  supersedes_rule_id: string | null;
+  created_at: string;
+}
+
+export interface SafetyRuleset {
+  id: string;
+  scope: 'brand';
+  rules: SafetyRule[];
+  updated_at: string;
+}
+
+export interface CreateSafetyRuleRequest {
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition;
+}
+
+export interface UpdateSafetyRuleRequest {
+  definition: Partial<ProhibitedTopicDefinition & RestrictedLanguageDefinition & CompetitorMentionDefinition>;
+}
+
+export interface DeleteSafetyRuleResponse {
+  affected_campaign_overrides?: string[];
+}
+
+export type EffectiveRuleSource = 'brand' | 'campaign_override';
+
+export interface EffectiveSafetyRule {
+  id: string;
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition | null;
+  source: EffectiveRuleSource;
+  override_action?: SafetyRuleAction;
+  supersedes_rule_id?: string | null;
+  note?: string;
+}
+
+export interface CampaignSafetyRuleset {
+  campaign_id: string;
+  has_override: boolean;
+  effective_rules: EffectiveSafetyRule[];
+  override_rule_ids: string[];
+}
+
+export interface CreateCampaignOverrideRequest {
+  action: SafetyRuleAction;
+  supersedes_rule_id?: string;
+  rule_type?: SafetyRuleType;
+  definition?: SafetyRuleDefinition;
+}
+
+// Safety check / content submission intake (US-16)
+
+export type SafetyCheckStatus = 'pending' | 'passed' | 'flagged' | 'check_unavailable';
+export type SafetyCheckChannel = 'caption' | 'on_screen_text' | 'audio' | 'system';
+export type SafetyCheckTier = 'tier1' | 'tier2';
+
+export interface TriggeredRule {
+  rule_id: string | null;
+  rule_type: SafetyRuleType | null;
+  channel: SafetyCheckChannel;
+  matched_excerpt: string | null;
+}
+
+export interface SafetyCheckResult {
+  id: string;
+  status: SafetyCheckStatus;
+  tier_reached?: SafetyCheckTier | null;
+  triggered_rules?: TriggeredRule[];
+  message?: string;
+  requested_at: string;
+  resolved_at?: string | null;
+}
+
+export interface CreateContentSubmissionRequest {
+  campaign_id: string;
+  opportunity_id?: string;
+  caption_text: string;
+  on_screen_text?: string;
+  audio_transcript?: string;
+  media_asset_url?: string;
+}
+
+export interface CreateContentSubmissionResponse {
+  content_submission_id: string;
+  safety_check_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+// Human review queue (US-17)
+
+export type ReviewQueueReasonCategory = 'rule_violation' | 'check_unavailable';
+export type ReviewQueueStatus = 'pending' | 'approved' | 'rejected' | 'revision_requested';
+
+export interface ReviewQueueItem {
+  id: string;
+  content_submission_id: string;
+  campaign_id: string;
+  campaign_name: string;
+  creator_display_name: string;
+  reason_category: ReviewQueueReasonCategory;
+  triggered_rules: TriggeredRule[];
+  status: ReviewQueueStatus;
+  decision_reason?: string | null;
+  decided_at?: string | null;
+  created_at: string;
+}
+
+export interface ReviewQueueItemDetail extends Omit<ReviewQueueItem, 'triggered_rules'> {
+  caption_text: string;
+  on_screen_text: string | null;
+  audio_transcript: string | null;
+  tier_reached: SafetyCheckTier | null;
+  triggered_rules: (TriggeredRule & { definition?: SafetyRuleDefinition | null })[];
+}
+
+export interface DecideReviewItemRequest {
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  reason?: string;
+}
+
+export interface DecideReviewItemResponse {
+  id: string;
+  status: ReviewQueueStatus;
+  decided_at: string;
+}
+
+// Post-publication monitoring (US-16b)
+
+export type MonitoringResult = 'matching' | 'deviated' | 'unreachable';
+
+export interface MonitoringSnapshot {
+  id: string;
+  content_submission_id: string;
+  campaign_id: string;
+  published_url: string;
+  last_result: MonitoringResult | null;
+  last_checked_at: string | null;
+  deviation_details?: Record<string, unknown> | null;
+  consecutive_unreachable_count?: number;
+}
+
+export interface MonitoringSnapshotDetail extends MonitoringSnapshot {
+  approved_caption_text: string;
+  approved_on_screen_text: string | null;
+  approved_audio_transcript: string | null;
+  monitoring_status: 'active' | 'stopped';
+}
