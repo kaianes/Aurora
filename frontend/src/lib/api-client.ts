@@ -26,11 +26,28 @@ import type {
   ClientPerformanceReport,
   CompareClientReportsResponse,
   ConfigureBrandingRequest,
+  ConfirmInvitationRequest,
+  ConfirmInvitationResponse,
+  CreatorInvitationPreview,
+  CreatorLoginRequest,
+  CreatorLoginResponse,
   CreatorPerformanceResponse,
+  CreatorRegisterRequest,
+  CreatorRegisterResponse,
+  CreatorSocialAccount,
   ConfirmPublicationRequest,
   ConfirmPublicationResponse,
   ContentSubmissionVersion,
+  DeclineInvitationResponse,
   Invoice,
+  MediaKitExport,
+  OnboardingStatusResponse,
+  RatePreference,
+  RequestMediaKitResponse,
+  SetRatePreferenceRequest,
+  SocialAuthorizeResponse,
+  SocialPlatform,
+  UpdateCreatorProfileRequest,
   CreateBrandProfileRequest,
   CreateCampaignOverrideRequest,
   CreateCampaignRequest,
@@ -592,9 +609,9 @@ export const contentSubmissionApi = {
 };
 
 // Creator portal (US-28): separate token storage since creators are not account members.
-// Pilot-only creator login (ADR-0013): POST /creator-portal/login takes a creator_id
-// (no password -- E8 owns the real social-auth/magic-link flow) and returns a short-lived
-// creator JWT, used against the /creator-portal/* endpoints below.
+// E8 owns the real creator identity (registration, claim, email/password login) at this
+// same /creator-portal/login route; the pilot-only creator_id-only stub it replaces
+// (ADR-0013) is gone from this client.
 
 const CREATOR_TOKEN_KEY = 'aurora_creator_token';
 
@@ -624,11 +641,68 @@ creatorPortalClient.interceptors.request.use((config: InternalAxiosRequestConfig
 });
 
 export const creatorPortalApi = {
-  login: (creator_id: string) =>
+  // E8 -- registration, email verification, and login (US-24.1 step 1, section 5.1-5.2).
+  // These three calls carry no creator bearer token (there isn't one yet), but are issued
+  // through creatorPortalClient for grouping consistency; the interceptor simply finds
+  // nothing to attach.
+  register: (data: CreatorRegisterRequest) =>
+    creatorPortalClient.post<CreatorRegisterResponse>('/creator-portal/register', data).then((r) => r.data),
+
+  verifyEmail: (data: VerifyEmailRequest) =>
+    creatorPortalClient.post<VerifyEmailResponse>('/creator-portal/verify-email', data).then((r) => r.data),
+
+  login: (data: CreatorLoginRequest) =>
+    creatorPortalClient.post<CreatorLoginResponse>('/creator-portal/login', data).then((r) => r.data),
+
+  // E8 -- invitation preview, confirm (with corrections), and decline (US-23.2, section
+  // 4.3-4.5). Public, gated by possession of the invitation's own token, never a bearer token.
+  getInvitation: (token: string) =>
+    creatorPortalClient.get<CreatorInvitationPreview>(`/creator-portal/invitations/${token}`).then((r) => r.data),
+
+  confirmInvitation: (token: string, data: ConfirmInvitationRequest) =>
     creatorPortalClient
-      .post<{ access_token: string; expires_in: number; creator_id: string }>('/creator-portal/login', {
-        creator_id,
-      })
+      .post<ConfirmInvitationResponse>(`/creator-portal/invitations/${token}/confirm`, data)
+      .then((r) => r.data),
+
+  declineInvitation: (token: string) =>
+    creatorPortalClient
+      .post<DeclineInvitationResponse>(`/creator-portal/invitations/${token}/decline`)
+      .then((r) => r.data),
+
+  // E8 -- social account linking (US-24.1, section 5.3-5.6).
+  authorizeSocialAccount: (platform: SocialPlatform) =>
+    creatorPortalClient
+      .post<SocialAuthorizeResponse>(`/creator-portal/social-accounts/${platform}/authorize`)
+      .then((r) => r.data),
+
+  listSocialAccounts: () =>
+    creatorPortalClient.get<{ data: CreatorSocialAccount[] }>('/creator-portal/social-accounts').then((r) => r.data),
+
+  disconnectSocialAccount: (platform: SocialPlatform) =>
+    creatorPortalClient.delete(`/creator-portal/social-accounts/${platform}`).then(() => undefined),
+
+  // E8 -- review/correct surfaced display name and niche (US-24.1 onboarding step 3).
+  updateProfile: (data: UpdateCreatorProfileRequest) =>
+    creatorPortalClient.patch<void>('/creator-portal/profile', data).then(() => undefined),
+
+  // E8 -- qualification outcome (US-24.4, section 5.7).
+  getOnboardingStatus: () =>
+    creatorPortalClient.get<OnboardingStatusResponse>('/creator-portal/onboarding/status').then((r) => r.data),
+
+  // E8 -- automatic media kit (US-25, section 6).
+  requestMediaKit: () =>
+    creatorPortalClient.post<RequestMediaKitResponse>('/creator-portal/media-kit').then((r) => r.data),
+
+  getMediaKit: (exportId: string) =>
+    creatorPortalClient.get<MediaKitExport>(`/creator-portal/media-kit/${exportId}`).then((r) => r.data),
+
+  // E8 -- rate preferences (US-27, section 7).
+  listRatePreferences: () =>
+    creatorPortalClient.get<{ data: RatePreference[] }>('/creator-portal/rate-preferences').then((r) => r.data),
+
+  setRatePreference: (deliverableFormat: string, data: SetRatePreferenceRequest) =>
+    creatorPortalClient
+      .put<RatePreference>(`/creator-portal/rate-preferences/${deliverableFormat}`, data)
       .then((r) => r.data),
 
   listOpportunities: () =>

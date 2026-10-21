@@ -26,6 +26,17 @@ import { ExclusionsPage } from '@/pages/app/exclusions-page';
 import { ShortlistOverridePage } from '@/pages/app/shortlist-override-page';
 import { CreatorAccessPage } from '@/pages/creator-portal/creator-access-page';
 import { OpportunitiesPage } from '@/pages/creator-portal/opportunities-page';
+// E8 -- Creator Recruitment and Growth (US-23.1, US-23.2, US-24.1-24.4, US-25, US-26, US-27)
+import { RegisterPage as CreatorRegisterPage } from '@/pages/creator-portal/register-page';
+import { CreatorVerifyEmailPage } from '@/pages/creator-portal/verify-email-page';
+import { ClaimInvitationPage } from '@/pages/creator-portal/claim-invitation-page';
+import { OnboardingLinkAccountsPage } from '@/pages/creator-portal/onboarding-link-accounts-page';
+import { OnboardingReviewPage } from '@/pages/creator-portal/onboarding-review-page';
+import { OnboardingAnalyzingPage } from '@/pages/creator-portal/onboarding-analyzing-page';
+import { OnboardingResultPage } from '@/pages/creator-portal/onboarding-result-page';
+import { SocialAccountsPage } from '@/pages/creator-portal/social-accounts-page';
+import { RatePreferencesPage } from '@/pages/creator-portal/rate-preferences-page';
+import { MediaKitPage } from '@/pages/creator-portal/media-kit-page';
 import { SafetyRulesetPage } from '@/pages/app/safety-ruleset-page';
 import { CampaignSafetyRulesetPage } from '@/pages/app/campaign-safety-ruleset-page';
 import { ReviewQueuePage } from '@/pages/app/review-queue-page';
@@ -165,7 +176,20 @@ export default function App() {
             {/* Creator portal (US-28): separate from /app, creators are not account members */}
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>
               <Route path="access" element={<CreatorAccessPage />} />
+              <Route path="login" element={<CreatorAccessPage />} />
               <Route path="opportunities" element={<OpportunitiesPage />} />
+              {/* E8 -- Creator Recruitment and Growth, per
+                  docs/architecture/e8-creator-recruitment-growth.md section 10 */}
+              <Route path="register" element={<CreatorRegisterPage />} />
+              <Route path="verify-email" element={<CreatorVerifyEmailPage />} />
+              <Route path="invitations/:token" element={<ClaimInvitationPage />} />
+              <Route path="onboarding/link-accounts" element={<OnboardingLinkAccountsPage />} />
+              <Route path="onboarding/review" element={<OnboardingReviewPage />} />
+              <Route path="onboarding/analyzing" element={<OnboardingAnalyzingPage />} />
+              <Route path="onboarding/result" element={<OnboardingResultPage />} />
+              <Route path="social-accounts" element={<SocialAccountsPage />} />
+              <Route path="rate-preferences" element={<RatePreferencesPage />} />
+              <Route path="media-kit" element={<MediaKitPage />} />
               {/* E5 -- Briefing and Content Workflow (US-30, US-31, US-32a, US-32b, US-34) */}
               <Route path="briefing" element={<CreatorBriefingPage />} />
               <Route path="briefing/qa" element={<CreatorBriefingQaPage />} />

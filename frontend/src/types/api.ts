@@ -1168,3 +1168,157 @@ export interface ConfigureBrandingRequest {
   primary_color_hex?: string;
   secondary_color_hex?: string;
 }
+
+// ---------------------------------------------------------------------------
+// E8 -- Creator Recruitment and Growth
+// Types mirror docs/architecture/e8-creator-recruitment-growth.md sections 4-7.
+// ---------------------------------------------------------------------------
+
+// Self-registration (US-24.1 step 1), section 5.1. Same shape and enumeration-safe
+// behavior as E1's brand POST /auth/register, reused as-is via AuthService.
+export interface CreatorRegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  accepted_terms: boolean;
+  terms_version: string;
+}
+
+export interface CreatorRegisterResponse {
+  message: string;
+  user_id: string;
+}
+
+// Login (section 5.2): identical semantics to E1's brand login, reused unchanged,
+// except the issued JWT carries creator_id instead of memberships. No MFA branch
+// (creators carry no financial-privilege role under FR-04).
+export interface CreatorLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface CreatorLoginResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+}
+
+// Invitation and claim flow (US-23.2), section 4.3-4.5
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export interface InvitationImportedData {
+  display_name: string;
+  platform: string | null;
+  observed_handle: string | null;
+  observed_follower_count: number | null;
+  observed_niche: string | null;
+}
+
+export interface CreatorInvitationPreview {
+  invitation_id: string;
+  status: InvitationStatus;
+  imported_data: InvitationImportedData;
+}
+
+export interface ConfirmInvitationRequest {
+  email: string;
+  password: string;
+  corrections?: {
+    display_name?: string;
+    content_niche?: string;
+  };
+  accepted_terms: boolean;
+  terms_version: string;
+}
+
+export interface ConfirmInvitationResponse {
+  creator_id: string;
+  status: 'active';
+  access_token: string;
+  expires_in: number;
+  message: string;
+}
+
+export interface DeclineInvitationResponse {
+  status: 'declined';
+}
+
+// Social account linking (US-24.1), section 5.3-5.6
+export type SocialPlatform = 'instagram' | 'tiktok' | 'youtube';
+
+export interface SocialAuthorizeResponse {
+  authorize_url: string;
+  state: string;
+}
+
+export type SocialAccountStatus = 'connected' | 'disconnected';
+export type SocialDisconnectReason = 'revoked_by_platform' | 'refresh_failed' | 'manual' | null;
+
+export interface CreatorSocialAccount {
+  platform: SocialPlatform;
+  platform_handle: string | null;
+  status: SocialAccountStatus;
+  disconnect_reason: SocialDisconnectReason;
+  connected_at: string;
+  disconnected_at: string | null;
+}
+
+// Profile correction (US-24.1/US-24.4 onboarding step 3), section 5 (step table, row 3).
+// No GET /creator-portal/profile is specified in the architecture document -- the frontend
+// prefills from whatever it already has in the current session (e.g. the name just entered
+// at registration) and otherwise leaves fields blank rather than fabricating a prior value.
+export interface UpdateCreatorProfileRequest {
+  display_name?: string;
+  content_niche?: string;
+}
+
+// Onboarding status (US-24.2, US-24.3, US-24.4), section 5.7
+export type OnboardingStatus = 'qualified' | 'not_qualified' | 'pending';
+export type AuthenticityStatus = 'pending' | 'scored' | 'insufficient_data';
+
+export interface OnboardingStatusResponse {
+  onboarding_status: OnboardingStatus;
+  status?: 'active';
+  linked_platforms?: SocialPlatform[];
+  audience_size?: number | null;
+  engagement_rate?: string | null;
+  authenticity_score?: number | null;
+  authenticity_status?: AuthenticityStatus;
+  qualification_decided_at?: string | null;
+  qualification_missing_criteria?: string[];
+  qualification_expected_ready_at?: string | null;
+  message?: string;
+}
+
+// Media kit (US-25), section 6
+export type MediaKitStatus = 'pending' | 'ready' | 'failed';
+
+export interface RequestMediaKitResponse {
+  export_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+export interface MediaKitExport {
+  id: string;
+  status: MediaKitStatus;
+  has_campaign_history?: boolean;
+  campaign_section_message?: string;
+  pdf_document_url?: string;
+  failure_reason?: string;
+  message?: string;
+}
+
+// Rate preferences (US-27), section 7
+export interface RatePreference {
+  deliverable_format: DeliverableFormat;
+  rate_amount: string;
+  currency: string;
+  updated_at: string;
+  applies_to?: 'future_opportunities_only';
+}
+
+export interface SetRatePreferenceRequest {
+  rate_amount: string;
+  currency?: string;
+}
