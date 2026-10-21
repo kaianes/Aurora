@@ -82,6 +82,16 @@ export function AppLayout() {
                 Clientes
               </NavLink>
             )}
+            {isAgency && (
+              <NavLink to="/app/reports/compare" className={navLinkClass}>
+                Comparar Clientes
+              </NavLink>
+            )}
+            {isAgency && (
+              <NavLink to="/app/agency/branding" className={navLinkClass}>
+                Marca da Agencia
+              </NavLink>
+            )}
           </nav>
         </aside>
         <main className="flex-1 p-4 sm:p-6 lg:p-8">

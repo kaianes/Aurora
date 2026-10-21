@@ -1008,3 +1008,163 @@ export interface Invoice {
   line_items: InvoiceLineItem[];
   issued_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// E7 -- Analytics and Reporting
+// Types mirror docs/architecture/e7-analytics-reporting.md sections 2 and 5.
+// ---------------------------------------------------------------------------
+
+// US-21a's distinction between a transient failure and a structurally different one
+// (auth_revoked) is preserved end to end, never conflated, wherever ingestion_status is shown.
+export type IngestionStatus =
+  | 'pending_first_pull'
+  | 'fresh'
+  | 'stale_rate_limited'
+  | 'stale_unreachable'
+  | 'stale_auth_revoked';
+
+export type DashboardCreatorStatus = 'delivered' | 'pending_delivery';
+
+export interface DashboardCreatorEntry {
+  creator_id: string;
+  display_name: string;
+  status: DashboardCreatorStatus;
+  // null (never 0) whenever status is pending_delivery or no successful pull has happened yet.
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus | null;
+  last_successful_pull_at: string | null;
+}
+
+export interface CampaignDashboardAggregate {
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  total_delivered_impressions: number;
+  any_stale: boolean;
+  last_computed_at: string;
+}
+
+// US-21b -- GET /campaigns/:id/dashboard
+export interface CampaignDashboard {
+  campaign_id: string;
+  campaign_state: CampaignState;
+  pool_size: number;
+  delivered_count: number;
+  pending_delivery_count: number;
+  pool_aggregate: CampaignDashboardAggregate;
+  creators: DashboardCreatorEntry[];
+}
+
+// US-37 -- GET /creator-portal/performance
+export interface CreatorPerformanceEntry {
+  content_submission_id: string;
+  campaign_id: string;
+  campaign_name: string;
+  published_url: string;
+  published_at: string;
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus;
+  last_successful_pull_at: string | null;
+}
+
+export interface CreatorPerformanceResponse {
+  data: CreatorPerformanceEntry[];
+}
+
+// US-43 / US-46 -- shared report request/poll shape (section 5.3's pattern, reused by 5.5)
+export type ReportStatus = 'pending' | 'ready' | 'failed';
+
+export interface RequestReportResponse {
+  report_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+// US-22 -- spend_source, section 3.4: whether the spend figure came from
+// campaign.locked_price (mid-campaign, no invoice yet) or invoice.total_amount
+// (once one has been generated).
+export type SpendSource = 'locked_price' | 'invoice';
+
+export type CampaignProgressLabel = 'in_progress' | 'final';
+
+// US-22 -- GET /campaigns/:id/reports/:reportId (section 5.3). Matches
+// CampaignReportService#format exactly -- no requested_at on the read side.
+export interface CampaignPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_progress_label: CampaignProgressLabel | null;
+  spend_amount: string | null;
+  spend_source: SpendSource | null;
+  has_deliveries: boolean | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by
+  // (US-22 scenario 3, ADR-0046).
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  resolved_at: string | null;
+  // Only present when status is 'ready' and has_deliveries is false (US-22 scenario 3).
+  message?: string;
+}
+
+// US-43 -- GET /agency/clients/:clientAccountId/reports/:reportId
+export interface ClientPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_count: number | null;
+  total_spend: string | null;
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by.
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  branding_applied: boolean | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  requested_at: string;
+  resolved_at: string | null;
+}
+
+// US-46 -- GET /agency/reports/compare
+export interface ClientComparisonEntry {
+  client_account_id: string;
+  client_name: string;
+  campaign_count: number;
+  total_spend: string;
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  average_reach_per_campaign: number;
+  average_engagement_per_campaign: number;
+}
+
+export interface RefusedClient {
+  client_account_id: string;
+  reason: string;
+}
+
+export interface CompareClientReportsResponse {
+  data: ClientComparisonEntry[];
+  refused: RefusedClient[];
+}
+
+// Agency branding profile (ADR-0048, section 2.3): the logo and two colors a per-client
+// report (US-43) renders under when branding_applied is true. GET/PUT /agency/branding,
+// agency_admin only. A row with all three fields null is "not yet configured", same as a
+// missing row -- the UI treats them identically.
+export interface AgencyBrandingProfile {
+  logo_url: string | null;
+  primary_color_hex: string | null;
+  secondary_color_hex: string | null;
+  updated_at?: string;
+}
+
+export interface ConfigureBrandingRequest {
+  logo_url?: string;
+  primary_color_hex?: string;
+  secondary_color_hex?: string;
+}

@@ -11,6 +11,7 @@ import {
   CampaignState,
   ReallocationBounds,
 } from '../database/entities';
+import { PerformanceScoringService } from '../analytics/performance-scoring.service';
 
 const PENDING_QUOTE_SAFETY_WINDOW_MS = (90 + 120) * 1000; // 90s timeout + 2min safety net
 
@@ -27,13 +28,17 @@ export class CampaignScheduledTasksService {
     private boundsRepo: Repository<ReallocationBounds>,
     @InjectQueue('campaign')
     private campaignQueue: Queue,
+    private performanceScoringService: PerformanceScoringService,
   ) {}
 
   // Enqueues a reallocate-budget job for every active campaign that has
-  // opted into reallocation. The metrics feed integration (FR-52) does not
-  // exist yet in E2's scope, so metricsFeedAvailable is reported false until
-  // that integration lands; the job correctly skips and logs rather than
-  // acting on absent data (US-10 scenario 3).
+  // opted into reallocation. metricsFeedAvailable/performance now come from
+  // E7's exported PerformanceScoringService.getReallocationInputs
+  // (ADR-0047), replacing the hardcoded metricsFeedAvailable: false,
+  // performance: [] literals this method used before E7's metrics feed
+  // (FR-52) existed. The job itself (reallocation.processor.ts) still
+  // correctly skips and logs when a given cycle's feed is unavailable
+  // (US-10 scenario 3) -- that behavior is unchanged.
   @Cron(CronExpression.EVERY_6_HOURS)
   async scheduleReallocation() {
     const enabledBounds = await this.boundsRepo.find({ where: { enabled: true } });
@@ -47,10 +52,12 @@ export class CampaignScheduledTasksService {
 
     for (const campaignId of campaignIds) {
       if (!activeIds.has(campaignId)) continue;
+      const { metricsFeedAvailable, performance } =
+        await this.performanceScoringService.getReallocationInputs(campaignId);
       await this.campaignQueue.add('reallocate-budget', {
         campaignId,
-        metricsFeedAvailable: false,
-        performance: [],
+        metricsFeedAvailable,
+        performance,
       });
     }
   }

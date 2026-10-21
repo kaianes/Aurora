@@ -19,6 +19,7 @@ import { MatchingModule } from './matching/matching.module';
 import { BrandSafetyModule } from './brand-safety/brand-safety.module';
 import { ContentWorkflowModule } from './content-workflow/content-workflow.module';
 import { PaymentsModule } from './payments/payments.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -65,6 +66,12 @@ import {
   TaxDocument,
   Invoice,
   InvoiceLineItem,
+  ContentSubmissionMetricSnapshot,
+  PerformanceMetricIngestionAttempt,
+  CampaignPerformanceAggregate,
+  CampaignPerformanceReport,
+  ClientPerformanceReport,
+  AgencyBrandingProfile,
 } from './database/entities';
 
 @Module({
@@ -124,6 +131,12 @@ import {
           TaxDocument,
           Invoice,
           InvoiceLineItem,
+          ContentSubmissionMetricSnapshot,
+          PerformanceMetricIngestionAttempt,
+          CampaignPerformanceAggregate,
+          CampaignPerformanceReport,
+          ClientPerformanceReport,
+          AgencyBrandingProfile,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -156,6 +169,7 @@ import {
     BrandSafetyModule,
     ContentWorkflowModule,
     PaymentsModule,
+    AnalyticsModule,
   ],
   providers: [
     {

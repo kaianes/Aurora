@@ -91,3 +91,20 @@ export { LedgerEntry, LedgerReferenceType, LedgerDirection } from './ledger-entr
 export { TaxDocument, TaxDocumentStatus } from './tax-document.entity';
 export { Invoice, InvoiceStatus } from './invoice.entity';
 export { InvoiceLineItem, InvoiceLineItemType } from './invoice-line-item.entity';
+export {
+  ContentSubmissionMetricSnapshot,
+  IngestionStatus,
+} from './content-submission-metric-snapshot.entity';
+export {
+  PerformanceMetricIngestionAttempt,
+  IngestionAttemptOutcome,
+} from './performance-metric-ingestion-attempt.entity';
+export { CampaignPerformanceAggregate } from './campaign-performance-aggregate.entity';
+export {
+  CampaignPerformanceReport,
+  PerformanceReportStatus,
+  SpendSource,
+  CampaignProgressLabel,
+} from './campaign-performance-report.entity';
+export { ClientPerformanceReport } from './client-performance-report.entity';
+export { AgencyBrandingProfile } from './agency-branding-profile.entity';
