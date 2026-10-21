@@ -6,6 +6,14 @@ export function AppLayout() {
   const navigate = useNavigate();
   const isAgency = workspace?.workspace?.type === 'agency';
 
+  // US-39 (E9): the home account is the agency's own; every other account in the workspace
+  // is a client. Grouping the existing flat list gives Renata the structure she needs to tell
+  // them apart at a glance, without any new API call or state (section 6 of the E9 arch doc).
+  const homeAccount = workspace?.accounts.find((a) => a.is_home);
+  const clientAccounts = workspace?.accounts.filter((a) => !a.is_home) ?? [];
+  const currentAccount = workspace?.accounts.find((a) => a.id === workspace.current_account.id);
+  const actingOnBehalfOfClient = isAgency && currentAccount && !currentAccount.is_home;
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -32,11 +40,20 @@ export function AppLayout() {
                   className="rounded-lg border border-border px-3 py-1.5 text-sm"
                   aria-label="Selecionar conta"
                 >
-                  {workspace.accounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name}
-                    </option>
-                  ))}
+                  {homeAccount && (
+                    <optgroup label="Minha agencia">
+                      <option value={homeAccount.id}>{homeAccount.name}</option>
+                    </optgroup>
+                  )}
+                  {clientAccounts.length > 0 && (
+                    <optgroup label="Clientes">
+                      {clientAccounts.map((acc) => (
+                        <option key={acc.id} value={acc.id}>
+                          {acc.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               )}
               <span className="text-sm text-muted">{user?.name}</span>
@@ -49,6 +66,19 @@ export function AppLayout() {
             </div>
           </div>
         </div>
+        {actingOnBehalfOfClient && (
+          <div className="bg-surface border-t border-border">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1.5">
+              <p className="font-mono text-xs text-text-dark">
+                <span
+                  className="inline-block h-2 w-2 rounded-full mr-2"
+                  style={{ backgroundColor: 'var(--color-strategy-violet)' }}
+                />
+                Atuando em nome de: {currentAccount.name}
+              </p>
+            </div>
+          </div>
+        )}
       </header>
       <div className="flex flex-1">
         <aside className="hidden md:flex w-60 flex-col border-r border-border bg-white p-4" aria-label="Menu lateral">
@@ -90,6 +120,11 @@ export function AppLayout() {
             {isAgency && (
               <NavLink to="/app/agency/branding" className={navLinkClass}>
                 Marca da Agencia
+              </NavLink>
+            )}
+            {isAgency && (
+              <NavLink to="/app/audit-log" className={navLinkClass}>
+                Registro de Auditoria
               </NavLink>
             )}
           </nav>

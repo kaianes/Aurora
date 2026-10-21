@@ -327,6 +327,9 @@ export interface CampaignQuote {
 export interface Campaign {
   id: string;
   account_id: string;
+  // US-39 (E9): client attribution, present for every workspace type (section 5.2 of the E9
+  // architecture doc) -- for a brand workspace this is simply always the brand's own account.
+  account_name?: string;
   template_id?: string | null;
   name: string;
   state: CampaignState;
@@ -350,6 +353,9 @@ export interface CampaignSummary {
   name: string;
   state: CampaignState;
   budget_amount: string | null;
+  // US-39 (E9), per docs/architecture/e9-agency-multi-client-operations.md section 5.2.
+  account_id?: string;
+  account_name?: string;
   created_at: string;
 }
 
@@ -430,6 +436,10 @@ export interface CampaignTemplate {
   id: string;
   account_id: string;
   source_campaign_id?: string | null;
+  // US-41 (E9): set when this template was created by a cross-client copy rather than by
+  // saveAsTemplate from a campaign (ADR-0060). Mutually exclusive with source_campaign_id
+  // in practice, per docs/architecture/e9-agency-multi-client-operations.md section 2.2.
+  copied_from_template_id?: string | null;
   name: string;
   audience_targeting?: AudienceTargeting;
   message?: string;
@@ -446,6 +456,12 @@ export interface InstantiateTemplateRequest {
   name: string;
   budget_amount: string;
   timeline_start: string;
+}
+
+// US-41 (E9) -- POST /campaign-templates/:id/copy, per
+// docs/architecture/e9-agency-multi-client-operations.md section 4.2.
+export interface CopyTemplateRequest {
+  target_account_id: string;
 }
 
 export interface AcknowledgeDriftRequest {
@@ -1160,6 +1176,11 @@ export interface AgencyBrandingProfile {
   logo_url: string | null;
   primary_color_hex: string | null;
   secondary_color_hex: string | null;
+  // US-44 (E9): extends this table, does not replace it (ADR-0048's own forecast, ADR-0061).
+  // domain_status never reaches any value but 'pending_activation' or null in this pilot --
+  // no DNS verification, certificate provisioning, or routing exists.
+  custom_domain?: string | null;
+  domain_status?: 'pending_activation' | null;
   updated_at?: string;
 }
 
@@ -1167,6 +1188,57 @@ export interface ConfigureBrandingRequest {
   logo_url?: string;
   primary_color_hex?: string;
   secondary_color_hex?: string;
+  custom_domain?: string;
+}
+
+// US-44 (E9) -- POST /agency/clients/:clientAccountId/reports/:reportId/share-link, per
+// docs/architecture/e9-agency-multi-client-operations.md section 5.5. The response carries no
+// row id (only token/share_url/display_url/expires_at); without a GET list endpoint for a
+// report's share links, a link cannot be revoked once this result leaves local component
+// state -- a gap flagged back rather than invented around (see architecture doc section 5.5).
+export interface MintShareLinkResponse {
+  token: string;
+  share_url: string;
+  display_url: string;
+  expires_at: string;
+}
+
+// US-44 (E9) -- GET /public/client-reports/:token, public and unauthenticated, per section 5.5.
+export interface PublicClientReportBranding {
+  logo_url: string | null;
+  primary_color_hex: string | null;
+  secondary_color_hex: string | null;
+  applied: boolean;
+}
+
+export interface PublicClientReportData {
+  campaign_count: number;
+  total_spend: string;
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  cost_per_engagement: string;
+  cpm_equivalent: string;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+}
+
+export interface PublicClientReportResponse {
+  agency_name: string;
+  branding: PublicClientReportBranding;
+  report: PublicClientReportData;
+}
+
+// FR-60 (E9) -- GET /audit-log, per section 5.4. ip_address/user_agent are deliberately
+// omitted from this read-only surface (data-minimization), consistent with the backend
+// response shape -- never requested or rendered here.
+export interface AuditLogEntry {
+  id: string;
+  actor_user_id: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+  action: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
 }
 
 // ---------------------------------------------------------------------------

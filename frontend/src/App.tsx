@@ -60,6 +60,9 @@ import { ClientReportPage } from '@/pages/app/client-report-page';
 import { ReportsComparePage } from '@/pages/app/reports-compare-page';
 import { AgencyBrandingPage } from '@/pages/app/agency-branding-page';
 import { CreatorPerformancePage } from '@/pages/creator-portal/performance-page';
+// E9 -- Agency Multi-Client Operations (US-39, US-41, US-44, FR-60)
+import { AuditLogPage } from '@/pages/app/audit-log-page';
+import { PublicClientReportPage } from '@/pages/public-client-report-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,7 +174,21 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              {/* E9 -- FR-60 audit log viewer, agency_admin/agency_operator only (section 5.4) */}
+              <Route
+                path="audit-log"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <AuditLogPage />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
+
+            {/* E9 -- US-44 public, token-gated client report share link. No login, no
+                X-Account-Id, no Aurora chrome (AppLayout/PublicLayout) -- the one route in
+                this entire epic reachable by someone who has never had an Aurora account. */}
+            <Route path="/public/client-reports/:token" element={<PublicClientReportPage />} />
 
             {/* Creator portal (US-28): separate from /app, creators are not account members */}
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>

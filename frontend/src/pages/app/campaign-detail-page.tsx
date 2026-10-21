@@ -212,6 +212,8 @@ export function CampaignDetailPage() {
             <CardDescription>Criada em {new Date(campaign.created_at).toLocaleDateString('pt-BR')}</CardDescription>
           </div>
           <div className="flex items-center gap-2">
+            {/* US-39 (E9): client attribution, shown for every workspace type. */}
+            {campaign.account_name && <Badge variant="default">{campaign.account_name}</Badge>}
             <Badge variant={STATE_BADGE[campaign.state]}>{STATE_LABELS[campaign.state]}</Badge>
             {canWrite && campaign.state === 'draft' && (
               <Link to={`/app/campaigns/${campaign.id}/edit`}>

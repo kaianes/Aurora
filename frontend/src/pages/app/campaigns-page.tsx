@@ -88,6 +88,9 @@ export function CampaignsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
+                  {/* US-39 (E9): client attribution, shown for every workspace type (for a
+                      brand workspace it is simply always the same account). */}
+                  {c.account_name && <Badge variant="default">{c.account_name}</Badge>}
                   <span className="font-mono text-sm text-text-dark">{formatCurrency(c.budget_amount)}</span>
                   <Badge variant={STATE_BADGE[c.state]}>{STATE_LABELS[c.state]}</Badge>
                 </div>
