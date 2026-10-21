@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { agencyApi, setCurrentAccountId } from '@/lib/api-client';
@@ -127,6 +127,15 @@ export function ClientReportPage() {
               {report.branding_applied ? 'Com marca da agencia' : 'Sem marca configurada'}
             </Badge>
           </div>
+
+          {!report.branding_applied && (
+            <p className="text-xs text-muted mb-3">
+              Configure o logo e as cores da sua agencia para que aparecam nos proximos relatorios.{' '}
+              <Link to="/app/agency/branding" className="text-primary underline">
+                Configurar marca da agencia
+              </Link>
+            </p>
+          )}
 
           <div className="space-y-2 border-t border-border pt-3">
             <p className="flex items-center font-mono text-sm text-text-dark">

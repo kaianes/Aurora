@@ -46,6 +46,7 @@ import { InvoicePage } from '@/pages/app/invoice-page';
 import { CampaignDashboardPage } from '@/pages/app/campaign-dashboard-page';
 import { ClientReportPage } from '@/pages/app/client-report-page';
 import { ReportsComparePage } from '@/pages/app/reports-compare-page';
+import { AgencyBrandingPage } from '@/pages/app/agency-branding-page';
 import { CreatorPerformancePage } from '@/pages/creator-portal/performance-page';
 
 const queryClient = new QueryClient({
@@ -146,6 +147,14 @@ export default function App() {
                 element={
                   <ProtectedRoute requiredWorkspaceType="agency">
                     <ReportsComparePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="agency/branding"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <AgencyBrandingPage />
                   </ProtectedRoute>
                 }
               />
