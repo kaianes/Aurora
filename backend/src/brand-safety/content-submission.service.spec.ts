@@ -103,6 +103,100 @@ describe('ContentSubmissionService - US-16', () => {
     expect(saved[0].extractionStatus).toBe(ExtractionStatus.NOT_REQUIRED);
   });
 
+  describe('version lineage (ADR-0025, ADR-0032)', () => {
+    it('defaults to a first-version shape when no options are passed (backward-compatible with E4 callers)', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola' },
+        'creator-1',
+        actor,
+      );
+
+      expect(result.version_number).toBe(1);
+      expect(submissionRepo.save).toHaveBeenCalledTimes(2); // insert, then self-referencing root fixup
+    });
+
+    it('computes version_number and carries root_submission_id forward when supersedesSubmissionId is given', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+      submissionRepo.findOne.mockResolvedValue({ id: 'sub-1', versionNumber: 1, rootSubmissionId: 'sub-1' });
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola v2' },
+        'creator-1',
+        actor,
+        { supersedesSubmissionId: 'sub-1' },
+      );
+
+      expect(result.version_number).toBe(2);
+    });
+
+    it('includes review_deadline_at in the response when provided', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+      const deadline = new Date('2026-10-23T09:00:00Z');
+
+      const result = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'ola' },
+        'creator-1',
+        actor,
+        { reviewDeadlineAt: deadline },
+      );
+
+      expect(result.review_deadline_at).toBe(deadline.toISOString());
+    });
+
+    // US-32a scenario 2 (hard case): root_submission_id must carry forward unchanged across
+    // every hop in a lineage, not just a single resubmission -- a third version must still point
+    // back to the very first version's id, never to its immediate predecessor's id.
+    it('carries root_submission_id forward unchanged across three chained resubmissions', async () => {
+      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'account-1' });
+
+      const rowsById: Record<string, any> = {};
+      let counter = 0;
+      submissionRepo.save.mockImplementation((entity: any) => {
+        const id = entity.id || `sub-${++counter}`;
+        const row = { ...entity, id, createdAt: entity.createdAt || new Date() };
+        rowsById[id] = row;
+        return Promise.resolve(row);
+      });
+      submissionRepo.findOne.mockImplementation(({ where }: any) =>
+        Promise.resolve(where?.id ? rowsById[where.id] : undefined),
+      );
+
+      const v1 = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'v1' },
+        'creator-1',
+        actor,
+      );
+      expect(v1.version_number).toBe(1);
+      const v1Id = v1.content_submission_id;
+      expect(rowsById[v1Id].rootSubmissionId).toBe(v1Id);
+
+      const v2 = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'v2' },
+        'creator-1',
+        actor,
+        { supersedesSubmissionId: v1Id },
+      );
+      expect(v2.version_number).toBe(2);
+      const v2Id = v2.content_submission_id;
+      expect(rowsById[v2Id].rootSubmissionId).toBe(v1Id);
+
+      const v3 = await service.createSubmission(
+        { campaign_id: 'camp-1', caption_text: 'v3' },
+        'creator-1',
+        actor,
+        { supersedesSubmissionId: v2Id },
+      );
+      expect(v3.version_number).toBe(3);
+      const v3Id = v3.content_submission_id;
+      // The critical assertion: v3's root is still v1's id, not v2's id -- lineage root is
+      // denormalized once and carried forward, never recomputed from the immediate predecessor.
+      expect(rowsById[v3Id].rootSubmissionId).toBe(v1Id);
+      expect(rowsById[v3Id].supersedesSubmissionId).toBe(v2Id);
+    });
+  });
+
   describe('getCheckStatus', () => {
     it('denies a creator polling a submission that is not theirs (404, no existence leak)', async () => {
       submissionRepo.findOne.mockResolvedValue({ id: 'sub-1', creatorId: 'creator-2' });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { creatorPortalApi, getCreatorToken } from '@/lib/api-client';
@@ -18,17 +18,23 @@ const CHANNEL_LABEL: Record<string, string> = {
   system: 'Sistema',
 };
 
+const ERROR_CODE_MESSAGE: Record<string, string> = {
+  OPPORTUNITY_NOT_FOUND: 'Nenhuma oportunidade aceita foi encontrada para este envio.',
+  CAMPAIGN_NOT_ACTIVE: 'Esta campanha nao esta ativa no momento, portanto nao aceita novos envios.',
+  PENDING_REVIEW_IN_PROGRESS: 'A versao mais recente deste envio ainda esta aguardando revisao. Aguarde a decisao antes de enviar outra.',
+  ALREADY_APPROVED: 'Esta entrega ja foi aprovada e nao aceita novas versoes.',
+};
+
 /**
- * Minimal content submission form (US-16), the gap-period creator-facing intake endpoint this
- * epic exposes ahead of E5's real draft flow (section 3.3). Polls the safety check until it
- * resolves and renders all three outcomes the gate can produce: passed, flagged (with the
- * specific rule and channel cited), or check_unavailable.
+ * Draft submission (US-32a), replacing E4's gap-filler form at the dedicated route this epic's
+ * architecture names (section 6). Every version submitted here is retained, never overwritten
+ * (section 3.3) -- the backend enforces the resubmission precondition, this page only surfaces
+ * the specific, named reason when it refuses (scenario 3), rather than inventing its own.
  *
- * Note: the architecture contract takes `media_asset_url` as a plain S3 reference string in the
- * JSON body -- no file-upload endpoint is defined anywhere in this epic's contract, so this is a
- * text field rather than a file picker. Flagging this as a known gap, not an invented endpoint.
+ * On success, the stated review deadline is shown immediately (US-32b scenario 1), alongside the
+ * same safety-check verdict flow E4 already established for this intake path.
  */
-export function NewSubmissionPage() {
+export function NewDraftPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -52,6 +58,8 @@ export function NewSubmissionPage() {
   const [audioTranscript, setAudioTranscript] = useState('');
   const [mediaAssetUrl, setMediaAssetUrl] = useState('');
   const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [versionNumber, setVersionNumber] = useState<number | null>(null);
+  const [reviewDeadlineAt, setReviewDeadlineAt] = useState<string | null>(null);
 
   const selectedOpportunity = acceptedOpportunities.find((o) => o.id === opportunityId) ?? null;
   const campaignId = selectedOpportunity?.campaign_id ?? searchParams.get('campaign_id') ?? '';
@@ -66,7 +74,11 @@ export function NewSubmissionPage() {
         audio_transcript: audioTranscript || undefined,
         media_asset_url: mediaAssetUrl || undefined,
       }),
-    onSuccess: (data) => setSubmissionId(data.content_submission_id),
+    onSuccess: (data) => {
+      setSubmissionId(data.content_submission_id);
+      setVersionNumber(data.version_number ?? null);
+      setReviewDeadlineAt(data.review_deadline_at ?? null);
+    },
   });
 
   const { data: check } = useQuery({
@@ -76,15 +88,18 @@ export function NewSubmissionPage() {
     refetchInterval: (query) => (query.state.data?.status === 'pending' ? 2000 : false),
   });
 
-  const submitError =
-    submitMutation.error && isAxiosError(submitMutation.error) && submitMutation.error.response?.data?.error?.message
-      ? submitMutation.error.response.data.error.message
-      : submitMutation.error
-        ? 'Nao foi possivel enviar sua submissao agora.'
-        : null;
+  const submitErrorCode =
+    submitMutation.error && isAxiosError(submitMutation.error) ? submitMutation.error.response?.data?.error?.code : undefined;
+  const submitError = submitMutation.error
+    ? (submitErrorCode && ERROR_CODE_MESSAGE[submitErrorCode]) ||
+      (isAxiosError(submitMutation.error) && submitMutation.error.response?.data?.error?.message) ||
+      'Nao foi possivel enviar seu rascunho agora.'
+    : null;
 
   const resetForm = () => {
     setSubmissionId(null);
+    setVersionNumber(null);
+    setReviewDeadlineAt(null);
     setCaptionText('');
     setOnScreenText('');
     setAudioTranscript('');
@@ -96,9 +111,18 @@ export function NewSubmissionPage() {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <CardHeader>
-          <CardTitle>Verificacao de seguranca de marca</CardTitle>
-          <CardDescription>Sua submissao esta sendo analisada antes de poder avancar para publicacao.</CardDescription>
+          <CardTitle>Rascunho enviado</CardTitle>
+          <CardDescription>Seu rascunho foi registrado e esta sendo verificado antes de avancar para revisao.</CardDescription>
         </CardHeader>
+
+        <Card>
+          <div className="space-y-1 text-sm text-text-dark">
+            {versionNumber != null && <p className="font-mono">Versao: {versionNumber}</p>}
+            {reviewDeadlineAt && (
+              <p className="font-mono">Prazo de revisao: {new Date(reviewDeadlineAt).toLocaleString('pt-BR')}</p>
+            )}
+          </div>
+        </Card>
 
         <Card>
           {!check || check.status === 'pending' ? (
@@ -140,9 +164,19 @@ export function NewSubmissionPage() {
           )}
         </Card>
 
-        <Button variant="outline" onClick={resetForm}>
-          Enviar outra submissao
-        </Button>
+        <div className="flex gap-4">
+          <Button variant="outline" onClick={resetForm}>
+            Enviar outro rascunho
+          </Button>
+          {opportunityId && (
+            <Link
+              to={`/creator-portal/drafts?opportunity_id=${opportunityId}`}
+              className="text-sm text-primary hover:underline self-center"
+            >
+              Ver historico de versoes
+            </Link>
+          )}
+        </div>
       </div>
     );
   }
@@ -150,9 +184,9 @@ export function NewSubmissionPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Enviar conteudo para verificacao</CardTitle>
+        <CardTitle>Enviar rascunho de conteudo</CardTitle>
         <CardDescription>
-          Seu conteudo sera verificado quanto a seguranca de marca antes de poder avancar no fluxo de aprovacao.
+          Seu rascunho sera verificado quanto a seguranca de marca e depois revisado pela marca antes da publicacao.
         </CardDescription>
       </CardHeader>
 
@@ -178,7 +212,7 @@ export function NewSubmissionPage() {
                 label: `${o.brand_name} · ${o.deliverable.format}`,
               }))}
             />
-            <p className="text-sm text-muted mt-1">Apenas oportunidades que voce ja aceitou podem receber submissoes.</p>
+            <p className="text-sm text-muted mt-1">Apenas oportunidades que voce ja aceitou podem receber rascunhos.</p>
           </div>
           <Textarea label="Legenda (obrigatorio)" value={captionText} onChange={(e) => setCaptionText(e.target.value)} />
           <Textarea label="Texto na tela (opcional)" value={onScreenText} onChange={(e) => setOnScreenText(e.target.value)} />
@@ -193,11 +227,17 @@ export function NewSubmissionPage() {
             onChange={(e) => setMediaAssetUrl(e.target.value)}
             hint="Referencia S3 do video ou imagem bruta, usada quando nao ha texto na tela ou audio informados diretamente."
           />
-          <Button type="submit" loading={submitMutation.isPending} disabled={!campaignId || !captionText.trim()}>
-            Enviar para verificacao
+          <Button type="submit" loading={submitMutation.isPending} disabled={!campaignId || !opportunityId || !captionText.trim()}>
+            Enviar rascunho
           </Button>
         </form>
       </Card>
+
+      {opportunityId && (
+        <Link to={`/creator-portal/drafts?opportunity_id=${opportunityId}`} className="text-sm text-primary hover:underline">
+          Ver versoes ja enviadas para esta oportunidade
+        </Link>
+      )}
     </div>
   );
 }
