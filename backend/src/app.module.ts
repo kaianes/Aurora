@@ -16,6 +16,7 @@ import { AgencyModule } from './agency/agency.module';
 import { JobsModule } from './jobs/jobs.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { MatchingModule } from './matching/matching.module';
+import { BrandSafetyModule } from './brand-safety/brand-safety.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -44,6 +45,13 @@ import {
   CampaignShortlistEntry,
   CampaignOpportunity,
   AdditionalCandidatesRequest,
+  SafetyRuleset,
+  SafetyRule,
+  ContentSubmission,
+  SafetyCheck,
+  SafetyRuleTrigger,
+  SafetyReviewQueueItem,
+  PublishedContentSnapshot,
 } from './database/entities';
 
 @Module({
@@ -85,6 +93,13 @@ import {
           CampaignShortlistEntry,
           CampaignOpportunity,
           AdditionalCandidatesRequest,
+          SafetyRuleset,
+          SafetyRule,
+          ContentSubmission,
+          SafetyCheck,
+          SafetyRuleTrigger,
+          SafetyReviewQueueItem,
+          PublishedContentSnapshot,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -114,6 +129,7 @@ import {
     JobsModule,
     CampaignModule,
     MatchingModule,
+    BrandSafetyModule,
   ],
   providers: [
     {
