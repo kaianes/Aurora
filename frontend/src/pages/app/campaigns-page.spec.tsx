@@ -87,3 +87,77 @@ describe('CampaignsPage - US-39 client attribution', () => {
     expect(await screen.findByText(/Nenhuma campanha ainda/)).toBeInTheDocument();
   });
 });
+
+// US-39 scenario 2 (hard case): "Renata ... switches her active client context to Client B
+// ... every list ... view she opens under Client B's context shows only Client B's campaigns;
+// nothing from Client A's context carries over by the switch itself." The account switcher
+// (AppLayout) does not navigate or remount CampaignsPage -- it only updates the auth context's
+// current_account and re-fetches the workspace. For the list to actually reflect the new
+// client, the campaigns query must be scoped to (and refetch on) the current account, the same
+// way AuditLogPage already keys its own query on accountId.
+describe('CampaignsPage - US-39 scenario 2, switching client context without navigating away', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(useAuth).mockReturnValue({
+      currentRole: 'agency_admin',
+      workspace: { current_account: { id: 'acct-client-a' } },
+    } as any);
+  });
+
+  it('refetches and shows only the new client\'s campaigns after the account switcher changes context, with no stale campaign from the previous client left on screen', async () => {
+    vi.mocked(campaignApi.list).mockResolvedValueOnce({
+      data: [
+        {
+          id: 'camp-a1',
+          name: 'Campanha Cliente A',
+          state: 'active',
+          budget_amount: '10000.00',
+          account_id: 'acct-client-a',
+          account_name: 'Cliente A',
+          created_at: '2026-10-15T14:00:00Z',
+        },
+      ],
+      pagination: { next_cursor: null, has_more: false },
+    });
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const tree = (
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <CampaignsPage />
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+    const { rerender } = render(tree);
+
+    expect(await screen.findByText('Campanha Cliente A')).toBeInTheDocument();
+
+    // Simulate the US-39 account switcher: current_account changes from Client A to Client B,
+    // with no route change and no remount of CampaignsPage (exactly how AppLayout's <select>
+    // drives switchAccount today).
+    vi.mocked(useAuth).mockReturnValue({
+      currentRole: 'agency_admin',
+      workspace: { current_account: { id: 'acct-client-b' } },
+    } as any);
+    vi.mocked(campaignApi.list).mockResolvedValueOnce({
+      data: [
+        {
+          id: 'camp-b1',
+          name: 'Campanha Cliente B',
+          state: 'active',
+          budget_amount: '20000.00',
+          account_id: 'acct-client-b',
+          account_name: 'Cliente B',
+          created_at: '2026-10-16T14:00:00Z',
+        },
+      ],
+      pagination: { next_cursor: null, has_more: false },
+    });
+
+    rerender(tree);
+
+    expect(await screen.findByText('Campanha Cliente B')).toBeInTheDocument();
+    expect(screen.queryByText('Campanha Cliente A')).not.toBeInTheDocument();
+    expect(campaignApi.list).toHaveBeenCalledTimes(2);
+  });
+});

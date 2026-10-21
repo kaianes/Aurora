@@ -83,3 +83,47 @@ describe('CampaignDetailPage - US-39 client attribution', () => {
     expect(screen.queryByText(/Cliente:/)).not.toBeInTheDocument();
   });
 });
+
+// US-39 scenario 2 (hard case): switching the active client context must not leave a
+// previously-viewed campaign's stale detail on screen. The campaign detail query is keyed only
+// on the route's campaign id (['campaign', id]), never on the current account, so switching
+// context via the global account selector (no navigation, no remount, same route) does not
+// cause this page to re-validate the campaign against the new account at all.
+describe('CampaignDetailPage - US-39 scenario 2, switching client context without navigating away', () => {
+  it('re-fetches the campaign against the backend after the account context switches, rather than continuing to show the previous client\'s cached detail', async () => {
+    vi.mocked(useAuth).mockReturnValue({
+      currentRole: 'agency_admin',
+      workspace: { current_account: { id: 'acct-client-a' } },
+    } as any);
+    vi.mocked(campaignApi.get).mockResolvedValueOnce(draftCampaign);
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const tree = (
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/app/campaigns/camp-1']}>
+          <Routes>
+            <Route path="/app/campaigns/:id" element={<CampaignDetailPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    );
+    const { rerender } = render(tree);
+
+    expect(await screen.findByText('Lancamento Serum')).toBeInTheDocument();
+
+    // US-39's selector switches context to Client B; the route/campaign id is unchanged, so a
+    // correct implementation must still re-validate against the backend under the new
+    // X-Account-Id (which would, in the real backend, 404 since camp-1 belongs to Client A) --
+    // it must not simply keep rendering the cached response from Client A's context.
+    vi.mocked(useAuth).mockReturnValue({
+      currentRole: 'agency_admin',
+      workspace: { current_account: { id: 'acct-client-b' } },
+    } as any);
+
+    rerender(tree);
+
+    await vi.waitFor(() => {
+      expect(campaignApi.get).toHaveBeenCalledTimes(2);
+    });
+  });
+});
