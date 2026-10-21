@@ -1008,3 +1008,117 @@ export interface Invoice {
   line_items: InvoiceLineItem[];
   issued_at: string;
 }
+
+// ---------------------------------------------------------------------------
+// E7 -- Analytics and Reporting
+// Types mirror docs/architecture/e7-analytics-reporting.md sections 2 and 5.
+// ---------------------------------------------------------------------------
+
+// US-21a's distinction between a transient failure and a structurally different one
+// (auth_revoked) is preserved end to end, never conflated, wherever ingestion_status is shown.
+export type IngestionStatus =
+  | 'pending_first_pull'
+  | 'fresh'
+  | 'stale_rate_limited'
+  | 'stale_unreachable'
+  | 'stale_auth_revoked';
+
+export type DashboardCreatorStatus = 'delivered' | 'pending_delivery';
+
+export interface DashboardCreatorEntry {
+  creator_id: string;
+  display_name: string;
+  status: DashboardCreatorStatus;
+  // null (never 0) whenever status is pending_delivery or no successful pull has happened yet.
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus | null;
+  last_successful_pull_at: string | null;
+}
+
+export interface CampaignDashboardAggregate {
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  total_delivered_impressions: number;
+  any_stale: boolean;
+  last_computed_at: string;
+}
+
+// US-21b -- GET /campaigns/:id/dashboard
+export interface CampaignDashboard {
+  campaign_id: string;
+  campaign_state: CampaignState;
+  pool_size: number;
+  delivered_count: number;
+  pending_delivery_count: number;
+  pool_aggregate: CampaignDashboardAggregate;
+  creators: DashboardCreatorEntry[];
+}
+
+// US-37 -- GET /creator-portal/performance
+export interface CreatorPerformanceEntry {
+  content_submission_id: string;
+  campaign_id: string;
+  campaign_name: string;
+  published_url: string;
+  published_at: string;
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus;
+  last_successful_pull_at: string | null;
+}
+
+export interface CreatorPerformanceResponse {
+  data: CreatorPerformanceEntry[];
+}
+
+// US-43 / US-46 -- shared report request/poll shape (section 5.3's pattern, reused by 5.5)
+export type ReportStatus = 'pending' | 'ready' | 'failed';
+
+export interface RequestReportResponse {
+  report_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+// US-43 -- GET /agency/clients/:clientAccountId/reports/:reportId
+export interface ClientPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_count: number | null;
+  total_spend: string | null;
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by.
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  branding_applied: boolean | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  requested_at: string;
+  resolved_at: string | null;
+}
+
+// US-46 -- GET /agency/reports/compare
+export interface ClientComparisonEntry {
+  client_account_id: string;
+  client_name: string;
+  campaign_count: number;
+  total_spend: string;
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  average_reach_per_campaign: number;
+  average_engagement_per_campaign: number;
+}
+
+export interface RefusedClient {
+  client_account_id: string;
+  reason: string;
+}
+
+export interface CompareClientReportsResponse {
+  data: ClientComparisonEntry[];
+  refused: RefusedClient[];
+}

@@ -34,6 +34,11 @@ export function CreatorPortalLayout() {
                 </Link>
               )}
               {hasToken && (
+                <Link to="/creator-portal/performance" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Desempenho
+                </Link>
+              )}
+              {hasToken && (
                 <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
                   Sair
                 </button>

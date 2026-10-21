@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -204,6 +204,19 @@ export function ClientDetailPage() {
 
       {saveSuccess && <Alert variant="success">Perfil salvo com sucesso.</Alert>}
       {saveErrorMessage && <Alert variant="error">{saveErrorMessage}</Alert>}
+
+      {/* Per-client report (E7, US-43) */}
+      <Card>
+        <h3 className="text-sm font-semibold text-text-dark mb-3">Relatorios</h3>
+        <p className="text-xs text-muted mb-3">
+          Gere um relatorio consolidado de todas as campanhas deste cliente, sob a marca da sua agencia.
+        </p>
+        <Link to={`/app/clients/${clientId}/reports`}>
+          <Button variant="outline" size="sm">
+            Ver relatorio do cliente
+          </Button>
+        </Link>
+      </Card>
 
       {/* Brand profile form */}
       <Card>
