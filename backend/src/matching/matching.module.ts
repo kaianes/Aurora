@@ -1,8 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   Campaign,
   CampaignPoolMember,
@@ -45,13 +43,6 @@ import { MatchingScheduledTasksService } from './matching-scheduled-tasks.servic
       Account,
     ]),
     BullModule.registerQueue({ name: 'matching' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-      }),
-      inject: [ConfigService],
-    }),
   ],
   controllers: [ExclusionController, CreatorController, ShortlistController, CreatorPortalController],
   providers: [

@@ -11,6 +11,7 @@ import {
   PoolMemberStatus,
 } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
+import { PAYOUT_WINDOW_DAYS, addDays } from '../payments/payments.config';
 
 interface ActorContext {
   ipAddress: string;
@@ -55,7 +56,13 @@ export class OpportunityService {
         const account = campaign
           ? await this.accountRepo.findOne({ where: { id: campaign.accountId } })
           : null;
-        return this.format(o, account?.name || null);
+        // US-29 / ADR-0035 (E6): expected_payment_date is added to this
+        // existing response, computed read-only, never stored on
+        // campaign_opportunity.
+        return this.format(o, account?.name || null, {
+          timelineEnd: campaign?.timelineEnd ?? null,
+          includeExpectedPaymentDate: true,
+        });
       }),
     );
 
@@ -64,6 +71,10 @@ export class OpportunityService {
 
   async accept(id: string, creatorId: string, actor: ActorContext) {
     const opportunity = await this.findOwnOrFail(id, creatorId);
+    // US-29 / ADR-0035: the same projection added to the accept response,
+    // whichever path it returns through.
+    const campaign = await this.campaignRepo.findOne({ where: { id: opportunity.campaignId } });
+    const formatOptions = { timelineEnd: campaign?.timelineEnd ?? null, includeExpectedPaymentDate: true };
 
     // Defensive check against races with the expire-opportunities cron
     // (US-28 scenario 3): never create a payout obligation past expiry.
@@ -77,7 +88,7 @@ export class OpportunityService {
           },
         });
       }
-      return this.format(opportunity, null);
+      return this.format(opportunity, null, formatOptions);
     }
     if (new Date() >= opportunity.expiresAt) {
       opportunity.status = OpportunityStatus.EXPIRED;
@@ -109,7 +120,7 @@ export class OpportunityService {
       userAgent: actor.userAgent,
     });
 
-    const response = this.format(saved, null);
+    const response = this.format(saved, null, formatOptions);
     if (poolChanged) {
       response.note =
         'O shortlist final desta campanha mudou desde que esta oportunidade foi enviada.';
@@ -159,8 +170,12 @@ export class OpportunityService {
     return opportunity;
   }
 
-  private format(opportunity: CampaignOpportunity, brandName: string | null) {
-    return {
+  private format(
+    opportunity: CampaignOpportunity,
+    brandName: string | null,
+    options?: { timelineEnd?: Date | null; includeExpectedPaymentDate?: boolean },
+  ) {
+    const result: Record<string, any> = {
       id: opportunity.id,
       campaign_id: opportunity.campaignId,
       brand_name: brandName,
@@ -171,6 +186,20 @@ export class OpportunityService {
       expires_at: opportunity.expiresAt.toISOString(),
       status: opportunity.status,
       responded_at: opportunity.respondedAt?.toISOString() || null,
-    } as Record<string, any>;
+    };
+
+    if (options?.includeExpectedPaymentDate) {
+      // ADR-0035 (E6, US-29): COALESCE(campaign.timeline_end,
+      // opportunity.expires_at) + PAYOUT_WINDOW_DAYS. A projection, always
+      // flagged as an estimate on this pre-acceptance surface -- the
+      // binding figure is computed separately, later, from the real
+      // published_at (ADR-0034), once PaymentsModule creates the
+      // payout_obligation.
+      const base = options.timelineEnd || opportunity.expiresAt;
+      result.expected_payment_date = addDays(base, PAYOUT_WINDOW_DAYS).toISOString();
+      result.expected_payment_date_is_estimate = true;
+    }
+
+    return result;
   }
 }

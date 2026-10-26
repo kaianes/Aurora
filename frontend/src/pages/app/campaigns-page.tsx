@@ -37,11 +37,15 @@ function formatCurrency(amount: string | null) {
 }
 
 export function CampaignsPage() {
-  const { currentRole } = useAuth();
+  const { currentRole, workspace } = useAuth();
   const canCreate = currentRole ? canWriteCampaign(currentRole) : false;
+  const accountId = workspace?.current_account?.id;
 
+  // Keying on accountId (the US-39 client-context selector) ensures a refetch happens whenever
+  // Renata switches client context, even though the switcher itself does not navigate or remount
+  // this page -- otherwise it would keep showing the previous client's campaigns.
   const { data, isLoading, error } = useQuery({
-    queryKey: ['campaigns'],
+    queryKey: ['campaigns', accountId],
     queryFn: () => campaignApi.list({ limit: 50 }),
   });
 
@@ -88,6 +92,9 @@ export function CampaignsPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
+                  {/* US-39 (E9): client attribution, shown for every workspace type (for a
+                      brand workspace it is simply always the same account). */}
+                  {c.account_name && <Badge variant="default">{c.account_name}</Badge>}
                   <span className="font-mono text-sm text-text-dark">{formatCurrency(c.budget_amount)}</span>
                   <Badge variant={STATE_BADGE[c.state]}>{STATE_LABELS[c.state]}</Badge>
                 </div>

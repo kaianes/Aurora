@@ -22,6 +22,7 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
   let shortfallRepo: ReturnType<typeof mockRepo>;
   let reallocationEventRepo: ReturnType<typeof mockRepo>;
   let brandProfileRepo: ReturnType<typeof mockRepo>;
+  let accountRepo: ReturnType<typeof mockRepo>;
   let auditService: { log: ReturnType<typeof vi.fn> };
   let campaignQueue: { add: ReturnType<typeof vi.fn> };
 
@@ -35,6 +36,7 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
     shortfallRepo = mockRepo();
     reallocationEventRepo = mockRepo();
     brandProfileRepo = mockRepo();
+    accountRepo = mockRepo();
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
     campaignQueue = { add: vi.fn().mockResolvedValue(undefined) };
 
@@ -46,6 +48,7 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
       shortfallRepo as any,
       reallocationEventRepo as any,
       brandProfileRepo as any,
+      accountRepo as any,
       campaignQueue as any,
       auditService as any,
     );
@@ -235,5 +238,63 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
     expect(result.enabled).toBe(true);
     expect(result.max_shift_pct).toBe(15);
     expect(result.min_guaranteed_share_pct).toBe(60);
+  });
+
+  // ---- US-39, section 5.2 of the E9 architecture doc: client attribution
+  // on campaign create/detail/list, present for every workspace type. ----
+  describe('US-39 campaign client attribution', () => {
+    it('create() includes account_id and account_name', async () => {
+      brandProfileRepo.findOne.mockResolvedValue({ status: 'complete' });
+      accountRepo.findOne.mockResolvedValue({ id: 'account-1', name: 'Cliente: Acme Cosmeticos' });
+
+      const result = await service.create(
+        'account-1',
+        { name: 'Lancamento', budget_amount: '5000.00' } as any,
+        actor,
+      );
+
+      expect(result.account_id).toBe('account-1');
+      expect(result.account_name).toBe('Cliente: Acme Cosmeticos');
+    });
+
+    // The field is present unconditionally, even for a brand workspace with
+    // no agency context -- the frontend decides whether to render it.
+    it('create() resolves account_name to null when the account itself cannot be found', async () => {
+      brandProfileRepo.findOne.mockResolvedValue({ status: 'complete' });
+      accountRepo.findOne.mockResolvedValue(undefined);
+
+      const result = await service.create(
+        'account-1',
+        { name: 'Lancamento', budget_amount: '5000.00' } as any,
+        actor,
+      );
+
+      expect(result.account_name).toBeNull();
+    });
+
+    it('list() attaches account_id and account_name to every row with a single account lookup', async () => {
+      const rows = [
+        { id: 'camp-1', name: 'Campanha A', state: CampaignState.ACTIVE, budgetAmount: '1000.00', accountId: 'account-1', createdAt: new Date() },
+        { id: 'camp-2', name: 'Campanha B', state: CampaignState.DRAFT, budgetAmount: '2000.00', accountId: 'account-1', createdAt: new Date() },
+      ];
+      const qb: any = {
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        orderBy: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockReturnThis(),
+        getMany: vi.fn().mockResolvedValue(rows),
+      };
+      campaignRepo.createQueryBuilder.mockReturnValue(qb);
+      accountRepo.findOne.mockResolvedValue({ id: 'account-1', name: 'Cliente: Acme Cosmeticos' });
+
+      const result = await service.list('account-1');
+
+      expect(accountRepo.findOne).toHaveBeenCalledTimes(1);
+      expect(result.data).toHaveLength(2);
+      for (const row of result.data) {
+        expect(row.account_id).toBe('account-1');
+        expect(row.account_name).toBe('Cliente: Acme Cosmeticos');
+      }
+    });
   });
 });
