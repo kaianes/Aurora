@@ -16,6 +16,11 @@ import { AgencyModule } from './agency/agency.module';
 import { JobsModule } from './jobs/jobs.module';
 import { CampaignModule } from './campaign/campaign.module';
 import { MatchingModule } from './matching/matching.module';
+import { BrandSafetyModule } from './brand-safety/brand-safety.module';
+import { ContentWorkflowModule } from './content-workflow/content-workflow.module';
+import { PaymentsModule } from './payments/payments.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { CreatorNetworkModule } from './creator-network/creator-network.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -44,6 +49,38 @@ import {
   CampaignShortlistEntry,
   CampaignOpportunity,
   AdditionalCandidatesRequest,
+  SafetyRuleset,
+  SafetyRule,
+  ContentSubmission,
+  SafetyCheck,
+  SafetyRuleTrigger,
+  SafetyReviewQueueItem,
+  PublishedContentSnapshot,
+  Briefing,
+  BriefingDistributionRecipient,
+  BriefingQaThread,
+  BriefingQaMessage,
+  ContentReviewDecision,
+  PayoutObligation,
+  PayoutExecutionAttempt,
+  LedgerEntry,
+  TaxDocument,
+  Invoice,
+  InvoiceLineItem,
+  ContentSubmissionMetricSnapshot,
+  PerformanceMetricIngestionAttempt,
+  CampaignPerformanceAggregate,
+  CampaignPerformanceReport,
+  ClientPerformanceReport,
+  AgencyBrandingProfile,
+  ClientReportShareLink,
+  CreatorPublicImport,
+  CreatorInvitation,
+  CreatorConsentRecord,
+  CreatorSocialAccount,
+  CreatorRatePreference,
+  CreatorMediaKitExport,
+  CreatorDataSubjectRequest,
 } from './database/entities';
 
 @Module({
@@ -85,6 +122,38 @@ import {
           CampaignShortlistEntry,
           CampaignOpportunity,
           AdditionalCandidatesRequest,
+          SafetyRuleset,
+          SafetyRule,
+          ContentSubmission,
+          SafetyCheck,
+          SafetyRuleTrigger,
+          SafetyReviewQueueItem,
+          PublishedContentSnapshot,
+          Briefing,
+          BriefingDistributionRecipient,
+          BriefingQaThread,
+          BriefingQaMessage,
+          ContentReviewDecision,
+          PayoutObligation,
+          PayoutExecutionAttempt,
+          LedgerEntry,
+          TaxDocument,
+          Invoice,
+          InvoiceLineItem,
+          ContentSubmissionMetricSnapshot,
+          PerformanceMetricIngestionAttempt,
+          CampaignPerformanceAggregate,
+          CampaignPerformanceReport,
+          ClientPerformanceReport,
+          AgencyBrandingProfile,
+          ClientReportShareLink,
+          CreatorPublicImport,
+          CreatorInvitation,
+          CreatorConsentRecord,
+          CreatorSocialAccount,
+          CreatorRatePreference,
+          CreatorMediaKitExport,
+          CreatorDataSubjectRequest,
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
@@ -114,6 +183,11 @@ import {
     JobsModule,
     CampaignModule,
     MatchingModule,
+    BrandSafetyModule,
+    ContentWorkflowModule,
+    PaymentsModule,
+    AnalyticsModule,
+    CreatorNetworkModule,
   ],
   providers: [
     {

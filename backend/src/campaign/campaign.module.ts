@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import {
+  Account,
   Campaign,
   CampaignQuote,
   CampaignPoolMember,
@@ -23,10 +24,13 @@ import { CampaignScheduledTasksService } from './campaign-scheduled-tasks.servic
 import { MATCHING_ENGINE_ADAPTER } from './matching-engine.adapter';
 import { MatchingModule } from '../matching/matching.module';
 import { RealMatchingEngineAdapter } from '../matching/real-matching-engine.adapter';
+import { AnalyticsModule } from '../analytics/analytics.module';
+import { AgencyModule } from '../agency/agency.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      Account,
       Campaign,
       CampaignQuote,
       CampaignPoolMember,
@@ -39,6 +43,19 @@ import { RealMatchingEngineAdapter } from '../matching/real-matching-engine.adap
     ]),
     BullModule.registerQueue({ name: 'campaign' }),
     MatchingModule,
+    // ADR-0047: imports AnalyticsModule to reach its one exported service,
+    // PerformanceScoringService, in process -- CampaignScheduledTasksService
+    // calls getReallocationInputs immediately before enqueueing each
+    // reallocate-budget job, the same mechanism ADR-0032/ADR-0036 already
+    // established for other cross-module hand-offs.
+    AnalyticsModule,
+    // US-41 / FR-22, section 4.2 of the E9 architecture doc: imports
+    // AgencyModule to reach its exported TemplateCopyService in process, so
+    // POST /campaign-templates/:id/copy reuses the same escape-hatch
+    // mechanics the onboarding-time bulk copy already uses, rather than
+    // duplicating them here. Not circular: AgencyModule never imports
+    // CampaignModule.
+    AgencyModule,
   ],
   controllers: [CampaignController, TemplateController],
   providers: [

@@ -4,25 +4,75 @@ import type {
   AcceptInvitationResponse,
   AcknowledgeDriftRequest,
   AddOperatorRequest,
+  AgencyBrandingProfile,
+  AnswerBriefingQuestionRequest,
+  AskBriefingQuestionRequest,
+  AskBriefingQuestionResponse,
+  AuditLogEntry,
+  Briefing,
+  BriefingDistribution,
+  BriefingQaThreadDetail,
+  BriefingQaThreadSummary,
+  BrandContentSubmissionVersion,
   BrandProfile,
   BulkShortlistDecisionRequest,
   Campaign,
+  CampaignDashboard,
+  CampaignPerformanceReport,
+  CampaignSafetyRuleset,
   CampaignShortlist,
   CampaignSummary,
   CampaignTemplate,
   ClientListResponse,
+  ClientPerformanceReport,
+  CompareClientReportsResponse,
+  ConfigureBrandingRequest,
+  ConfirmInvitationRequest,
+  ConfirmInvitationResponse,
+  CopyTemplateRequest,
+  CreatorInvitationPreview,
+  CreatorLoginRequest,
+  CreatorLoginResponse,
+  CreatorPerformanceResponse,
+  CreatorRegisterRequest,
+  CreatorRegisterResponse,
+  CreatorSocialAccount,
+  ConfirmPublicationRequest,
+  ConfirmPublicationResponse,
+  ContentSubmissionVersion,
+  DeclineInvitationResponse,
+  Invoice,
+  MediaKitExport,
+  OnboardingStatusResponse,
+  RatePreference,
+  RequestMediaKitResponse,
+  SetRatePreferenceRequest,
+  SocialAuthorizeResponse,
+  SocialPlatform,
+  UpdateCreatorProfileRequest,
   CreateBrandProfileRequest,
+  CreateCampaignOverrideRequest,
   CreateCampaignRequest,
   CreateClientRequest,
   CreateClientResponse,
+  CreateContentSubmissionRequest,
+  CreateContentSubmissionResponse,
   CreateExclusionRequest,
   CreateInvitationRequest,
+  CreateSafetyRuleRequest,
   CreatorMetrics,
   CreatorOpportunity,
+  CreatorQaThreadResponse,
   ConfirmCampaignResponse,
+  DecideReviewItemRequest,
+  DecideReviewItemResponse,
+  DecideSubmissionRequest,
+  DecideSubmissionResponse,
+  DeleteSafetyRuleResponse,
   Exclusion,
   InstantiateTemplateRequest,
   Invitation,
+  IssueBriefingResponse,
   LifecycleActionRequest,
   LifecycleActionResponse,
   LoginRequest,
@@ -32,9 +82,17 @@ import type {
   MfaConfirmRequest,
   MfaConfirmResponse,
   MfaSetupResponse,
+  MintShareLinkResponse,
+  MonitoringSnapshot,
+  MonitoringSnapshotDetail,
   OperatorAccess,
   PaginatedResponse,
+  PayoutObligationDetail,
+  PayoutObligationListItem,
+  PayoutObligationStatus,
+  PayoutStatementResponse,
   PricingResponse,
+  PublicClientReportResponse,
   CampaignQuote,
   ReallocationBounds,
   ReallocationEvent,
@@ -43,21 +101,30 @@ import type {
   RegisterResponse,
   RequestAdditionalCandidatesResponse,
   RequestQuoteResponse,
+  RequestReportResponse,
   RequestShortlistResponse,
   ResendInvitationResponse,
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResolveShortfallRequest,
+  ReviewQueueItem,
+  ReviewQueueItemDetail,
+  SafetyCheckResult,
+  SafetyRule,
+  SafetyRuleset,
   SaveAsTemplateRequest,
+  SaveBriefingRequest,
   ShortfallResponse,
   ShortlistDecisionRequest,
   ShortlistDecisionResponse,
   ShortlistOverrideRequest,
   ShortlistOverrideResponse,
+  TaxDocumentResponse,
   UpdateBrandProfileRequest,
   UpdateCampaignRequest,
   UpdateMemberRequest,
   UpdateMemberResponse,
+  UpdateSafetyRuleRequest,
   VerifyEmailRequest,
   VerifyEmailResponse,
   WorkspaceResponse,
@@ -265,6 +332,72 @@ export const agencyApi = {
 
   removeOperator: (clientId: string, userId: string) =>
     api.delete(`/agency/clients/${clientId}/operators/${userId}`).then(() => undefined),
+
+  // E7 -- per-client report (US-43), per docs/architecture/e7-analytics-reporting.md section
+  // 5.5. The caller's X-Account-Id must be the client account itself (section 2.5) -- the page
+  // calling these is responsible for switching account context around each call, the same
+  // pattern client-detail-page already uses for brand-profile operations on a client account.
+  requestClientReport: (clientAccountId: string) =>
+    api.post<RequestReportResponse>(`/agency/clients/${clientAccountId}/reports`).then((r) => r.data),
+
+  getClientReport: (clientAccountId: string, reportId: string) =>
+    api
+      .get<ClientPerformanceReport>(`/agency/clients/${clientAccountId}/reports/${reportId}`)
+      .then((r) => r.data),
+
+  // E7 -- cross-client comparison (US-46), per section 5.6. Runs under the agency's own home
+  // account context; the backend's app.agency_cross_client_read escape hatch (section 2.5)
+  // scopes the read, not X-Account-Id.
+  compareReports: (clientAccountIds: string[]) =>
+    api
+      .get<CompareClientReportsResponse>('/agency/reports/compare', {
+        params: { client_account_ids: clientAccountIds.join(',') },
+      })
+      .then((r) => r.data),
+
+  // E7 -- agency branding profile (ADR-0048, section 2.3), closing the US-43 gap: an
+  // agency_admin needs a way to actually configure the logo/colors a per-client report
+  // renders under. Runs under the agency's own home account context, never a client account.
+  getBranding: () => api.get<AgencyBrandingProfile>('/agency/branding').then((r) => r.data),
+
+  configureBranding: (data: ConfigureBrandingRequest) =>
+    api.put<AgencyBrandingProfile>('/agency/branding', data).then((r) => r.data),
+
+  // E9 -- client report share link (US-44), per
+  // docs/architecture/e9-agency-multi-client-operations.md section 5.5. Caller's X-Account-Id
+  // must be the client account itself, same convention as requestClientReport/getClientReport
+  // above -- the page calling this is responsible for switching account context around the call.
+  mintShareLink: (clientAccountId: string, reportId: string) =>
+    api
+      .post<MintShareLinkResponse>(`/agency/clients/${clientAccountId}/reports/${reportId}/share-link`)
+      .then((r) => r.data),
+
+  revokeShareLink: (clientAccountId: string, reportId: string, linkId: string) =>
+    api
+      .delete(`/agency/clients/${clientAccountId}/reports/${reportId}/share-link/${linkId}`)
+      .then(() => undefined),
+};
+
+// FR-60 (E9) -- audit log read (shared addendum to US-38/US-45), per
+// docs/architecture/e9-agency-multi-client-operations.md section 5.4. X-Account-Id resolves
+// the one client account whose log is requested -- there is no cross-client aggregate; Renata
+// switches context (the same US-39 selector) to view a different client's log.
+export const auditApi = {
+  list: (params?: { cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<AuditLogEntry>>('/audit-log', { params }).then((r) => r.data),
+};
+
+// E9 -- public, token-gated client report view (US-44), per section 5.5. No authentication,
+// no X-Account-Id: a separate axios instance with none of the token/account interceptors above,
+// since the agency's actual client company has no Aurora login at all.
+const publicClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+export const publicApi = {
+  getClientReport: (token: string) =>
+    publicClient.get<PublicClientReportResponse>(`/public/client-reports/${token}`).then((r) => r.data),
 };
 
 export const campaignApi = {
@@ -316,6 +449,41 @@ export const campaignApi = {
 
   acknowledgeDrift: (id: string, data: AcknowledgeDriftRequest) =>
     api.post<Campaign>(`/campaigns/${id}/acknowledge-drift`, data).then((r) => r.data),
+
+  // E7 -- unified dashboard (US-21b), per docs/architecture/e7-analytics-reporting.md section
+  // 5.2. A direct read of campaign_performance_aggregate, never recomputed at request time.
+  getDashboard: (id: string) =>
+    api.get<CampaignDashboard>(`/campaigns/${id}/dashboard`).then((r) => r.data),
+
+  // E7 -- single-campaign report export (US-22), per
+  // docs/architecture/e7-analytics-reporting.md section 5.3. Request/poll, same pattern as
+  // the quote/shortlist/client-report flows above.
+  requestReport: (id: string) =>
+    api.post<RequestReportResponse>(`/campaigns/${id}/reports`).then((r) => r.data),
+
+  getReport: (campaignId: string, reportId: string) =>
+    api
+      .get<CampaignPerformanceReport>(`/campaigns/${campaignId}/reports/${reportId}`)
+      .then((r) => r.data),
+};
+
+// E6 -- Campaign invoice, one per campaign, serving both a direct brand buyer (US-20) and an
+// agency client (US-42) with no shape difference (ADR-0040), per
+// docs/architecture/e6-payments-financial-transparency.md section 4.4.
+
+export const invoiceApi = {
+  get: (campaignId: string) =>
+    api
+      .get<Invoice>(`/campaigns/${campaignId}/invoice`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 INVOICE_NOT_YET_GENERATED: no invoice exists yet, not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  generate: (campaignId: string) =>
+    api.post<Invoice>(`/campaigns/${campaignId}/invoice`).then((r) => r.data),
 };
 
 export const templateApi = {
@@ -324,6 +492,13 @@ export const templateApi = {
 
   instantiate: (id: string, data: InstantiateTemplateRequest) =>
     api.post<Campaign>(`/campaign-templates/${id}/instantiate`, data).then((r) => r.data),
+
+  // E9 -- cross-client template copy (US-41), per
+  // docs/architecture/e9-agency-multi-client-operations.md section 4.2. The caller's own
+  // X-Account-Id must already resolve to the source template's account; no account switching
+  // is needed here, unlike the client-report-page pattern.
+  copy: (id: string, data: CopyTemplateRequest) =>
+    api.post<CampaignTemplate>(`/campaign-templates/${id}/copy`, data).then((r) => r.data),
 };
 
 // E3 -- shortlist, metrics, exclusions, agency override (per docs/architecture/e3-creator-matching-curation.md section 3)
@@ -377,10 +552,113 @@ export const exclusionApi = {
   remove: (id: string) => api.delete(`/exclusions/${id}`).then(() => undefined),
 };
 
+// E4 -- Brand safety ruleset and campaign overrides (US-15), per
+// docs/architecture/e4-brand-safety.md section 3.2.
+
+export const safetyRulesetApi = {
+  getBrand: () => api.get<SafetyRuleset>('/safety/rulesets/brand').then((r) => r.data),
+
+  createBrandRule: (data: CreateSafetyRuleRequest) =>
+    api.post<SafetyRule>('/safety/rulesets/brand/rules', data).then((r) => r.data),
+
+  updateBrandRule: (ruleId: string, data: UpdateSafetyRuleRequest) =>
+    api.patch<SafetyRule>(`/safety/rulesets/brand/rules/${ruleId}`, data).then((r) => r.data),
+
+  deleteBrandRule: (ruleId: string) =>
+    api.delete<DeleteSafetyRuleResponse | ''>(`/safety/rulesets/brand/rules/${ruleId}`).then((r) =>
+      r.data && typeof r.data === 'object' ? r.data : {},
+    ),
+
+  getCampaignRuleset: (campaignId: string) =>
+    api.get<CampaignSafetyRuleset>(`/campaigns/${campaignId}/safety-ruleset`).then((r) => r.data),
+
+  createCampaignOverride: (campaignId: string, data: CreateCampaignOverrideRequest) =>
+    api.post(`/campaigns/${campaignId}/safety-ruleset/overrides`, data).then((r) => r.data),
+
+  deleteCampaignOverride: (campaignId: string, ruleId: string) =>
+    api.delete(`/campaigns/${campaignId}/safety-ruleset/overrides/${ruleId}`).then(() => undefined),
+};
+
+// E4 -- Human review queue (US-17), per docs/architecture/e4-brand-safety.md section 3.4.
+
+export const reviewQueueApi = {
+  list: (params?: { status?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<ReviewQueueItem>>('/safety/review-queue', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<ReviewQueueItemDetail>(`/safety/review-queue/${id}`).then((r) => r.data),
+
+  decide: (id: string, data: DecideReviewItemRequest) =>
+    api.post<DecideReviewItemResponse>(`/safety/review-queue/${id}/decide`, data).then((r) => r.data),
+};
+
+// E4 -- Post-publication monitoring (US-16b), per docs/architecture/e4-brand-safety.md section 3.5.
+
+export const monitoringApi = {
+  list: (params?: { campaign_id?: string; result?: string; cursor?: string; limit?: number }) =>
+    api.get<PaginatedResponse<MonitoringSnapshot>>('/safety/monitoring', { params }).then((r) => r.data),
+
+  get: (id: string) => api.get<MonitoringSnapshotDetail>(`/safety/monitoring/${id}`).then((r) => r.data),
+};
+
+// E5 -- Briefing composition, distribution, and Q&A (US-18a, US-18b, US-31 brand side), per
+// docs/architecture/e5-briefing-content-workflow.md section 4.2-4.3.
+
+export const briefingApi = {
+  get: (campaignId: string) =>
+    api
+      .get<Briefing>(`/campaigns/${campaignId}/briefing`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 BRIEFING_NOT_FOUND means Marina has never saved a draft yet -- not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  save: (campaignId: string, data: SaveBriefingRequest) =>
+    api.put<Briefing>(`/campaigns/${campaignId}/briefing`, data).then((r) => r.data),
+
+  issue: (campaignId: string) =>
+    api.post<IssueBriefingResponse>(`/campaigns/${campaignId}/briefing/issue`).then((r) => r.data),
+
+  getDistribution: (campaignId: string) =>
+    api.get<BriefingDistribution>(`/campaigns/${campaignId}/briefing/distribution`).then((r) => r.data),
+
+  listQa: (campaignId: string) =>
+    api.get<{ data: BriefingQaThreadSummary[] }>(`/campaigns/${campaignId}/briefing/qa`).then((r) => r.data),
+
+  getQaThread: (campaignId: string, threadId: string) =>
+    api.get<BriefingQaThreadDetail>(`/campaigns/${campaignId}/briefing/qa/${threadId}`).then((r) => r.data),
+
+  answerQa: (campaignId: string, threadId: string, data: AnswerBriefingQuestionRequest) =>
+    api
+      .post<{ sender_type: 'brand'; body: string; created_at: string }>(
+        `/campaigns/${campaignId}/briefing/qa/${threadId}/messages`,
+        data,
+      )
+      .then((r) => r.data),
+};
+
+// E5 -- Marina's review queue and decision (US-19), per section 4.4-4.5.
+
+export const contentSubmissionApi = {
+  list: (
+    campaignId: string,
+    params?: { opportunity_id?: string; review_status?: string; cursor?: string; limit?: number },
+  ) =>
+    api
+      .get<PaginatedResponse<BrandContentSubmissionVersion>>(`/campaigns/${campaignId}/content-submissions`, {
+        params,
+      })
+      .then((r) => r.data),
+
+  decide: (submissionId: string, data: DecideSubmissionRequest) =>
+    api.post<DecideSubmissionResponse>(`/content-submissions/${submissionId}/decide`, data).then((r) => r.data),
+};
+
 // Creator portal (US-28): separate token storage since creators are not account members.
-// Pilot-only creator login (ADR-0013): POST /creator-portal/login takes a creator_id
-// (no password -- E8 owns the real social-auth/magic-link flow) and returns a short-lived
-// creator JWT, used against the /creator-portal/* endpoints below.
+// E8 owns the real creator identity (registration, claim, email/password login) at this
+// same /creator-portal/login route; the pilot-only creator_id-only stub it replaces
+// (ADR-0013) is gone from this client.
 
 const CREATOR_TOKEN_KEY = 'aurora_creator_token';
 
@@ -410,11 +688,68 @@ creatorPortalClient.interceptors.request.use((config: InternalAxiosRequestConfig
 });
 
 export const creatorPortalApi = {
-  login: (creator_id: string) =>
+  // E8 -- registration, email verification, and login (US-24.1 step 1, section 5.1-5.2).
+  // These three calls carry no creator bearer token (there isn't one yet), but are issued
+  // through creatorPortalClient for grouping consistency; the interceptor simply finds
+  // nothing to attach.
+  register: (data: CreatorRegisterRequest) =>
+    creatorPortalClient.post<CreatorRegisterResponse>('/creator-portal/register', data).then((r) => r.data),
+
+  verifyEmail: (data: VerifyEmailRequest) =>
+    creatorPortalClient.post<VerifyEmailResponse>('/creator-portal/verify-email', data).then((r) => r.data),
+
+  login: (data: CreatorLoginRequest) =>
+    creatorPortalClient.post<CreatorLoginResponse>('/creator-portal/login', data).then((r) => r.data),
+
+  // E8 -- invitation preview, confirm (with corrections), and decline (US-23.2, section
+  // 4.3-4.5). Public, gated by possession of the invitation's own token, never a bearer token.
+  getInvitation: (token: string) =>
+    creatorPortalClient.get<CreatorInvitationPreview>(`/creator-portal/invitations/${token}`).then((r) => r.data),
+
+  confirmInvitation: (token: string, data: ConfirmInvitationRequest) =>
     creatorPortalClient
-      .post<{ access_token: string; expires_in: number; creator_id: string }>('/creator-portal/login', {
-        creator_id,
-      })
+      .post<ConfirmInvitationResponse>(`/creator-portal/invitations/${token}/confirm`, data)
+      .then((r) => r.data),
+
+  declineInvitation: (token: string) =>
+    creatorPortalClient
+      .post<DeclineInvitationResponse>(`/creator-portal/invitations/${token}/decline`)
+      .then((r) => r.data),
+
+  // E8 -- social account linking (US-24.1, section 5.3-5.6).
+  authorizeSocialAccount: (platform: SocialPlatform) =>
+    creatorPortalClient
+      .post<SocialAuthorizeResponse>(`/creator-portal/social-accounts/${platform}/authorize`)
+      .then((r) => r.data),
+
+  listSocialAccounts: () =>
+    creatorPortalClient.get<{ data: CreatorSocialAccount[] }>('/creator-portal/social-accounts').then((r) => r.data),
+
+  disconnectSocialAccount: (platform: SocialPlatform) =>
+    creatorPortalClient.delete(`/creator-portal/social-accounts/${platform}`).then(() => undefined),
+
+  // E8 -- review/correct surfaced display name and niche (US-24.1 onboarding step 3).
+  updateProfile: (data: UpdateCreatorProfileRequest) =>
+    creatorPortalClient.patch<void>('/creator-portal/profile', data).then(() => undefined),
+
+  // E8 -- qualification outcome (US-24.4, section 5.7).
+  getOnboardingStatus: () =>
+    creatorPortalClient.get<OnboardingStatusResponse>('/creator-portal/onboarding/status').then((r) => r.data),
+
+  // E8 -- automatic media kit (US-25, section 6).
+  requestMediaKit: () =>
+    creatorPortalClient.post<RequestMediaKitResponse>('/creator-portal/media-kit').then((r) => r.data),
+
+  getMediaKit: (exportId: string) =>
+    creatorPortalClient.get<MediaKitExport>(`/creator-portal/media-kit/${exportId}`).then((r) => r.data),
+
+  // E8 -- rate preferences (US-27, section 7).
+  listRatePreferences: () =>
+    creatorPortalClient.get<{ data: RatePreference[] }>('/creator-portal/rate-preferences').then((r) => r.data),
+
+  setRatePreference: (deliverableFormat: string, data: SetRatePreferenceRequest) =>
+    creatorPortalClient
+      .put<RatePreference>(`/creator-portal/rate-preferences/${deliverableFormat}`, data)
       .then((r) => r.data),
 
   listOpportunities: () =>
@@ -425,6 +760,84 @@ export const creatorPortalApi = {
 
   decline: (id: string) =>
     creatorPortalClient.post<CreatorOpportunity>(`/creator-portal/opportunities/${id}/decline`).then((r) => r.data),
+
+  // E5 -- content-workflow's own controller now answers this same route (US-32a), replacing
+  // E4's stub per docs/architecture/e5-briefing-content-workflow.md section 4.4/7.4.
+  submitContent: (data: CreateContentSubmissionRequest) =>
+    creatorPortalClient
+      .post<CreateContentSubmissionResponse>('/creator-portal/content-submissions', data)
+      .then((r) => r.data),
+
+  // Polling endpoint is shared with account members (section 3.3); reached here with the
+  // creator JWT since this page is the creator-facing side of the check.
+  getSafetyCheck: (contentSubmissionId: string) =>
+    creatorPortalClient.get<SafetyCheckResult>(`/safety/submissions/${contentSubmissionId}/check`).then((r) => r.data),
+
+  // E5 -- briefing viewer and Q&A (US-30, US-31), per section 4.3.
+  getBriefing: (campaignId: string) =>
+    creatorPortalClient
+      .get<Briefing>('/creator-portal/briefing', { params: { campaign_id: campaignId } })
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 BRIEFING_NOT_AVAILABLE covers "no briefing", "not issued", and "opportunity not
+        // accepted" uniformly, by design (section 4.3) -- the UI never tries to tell those apart.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  askBriefingQuestion: (data: AskBriefingQuestionRequest) =>
+    creatorPortalClient.post<AskBriefingQuestionResponse>('/creator-portal/briefing/qa', data).then((r) => r.data),
+
+  getBriefingQa: (campaignId: string) =>
+    creatorPortalClient
+      .get<CreatorQaThreadResponse>('/creator-portal/briefing/qa', { params: { campaign_id: campaignId } })
+      .then((r) => r.data),
+
+  // E5 -- draft version history (US-32a, US-32b, US-33), per section 4.4.
+  listSubmissions: (opportunityId: string) =>
+    creatorPortalClient
+      .get<{ data: ContentSubmissionVersion[] }>('/creator-portal/content-submissions', {
+        params: { opportunity_id: opportunityId },
+      })
+      .then((r) => r.data),
+
+  // E5 -- publication confirmation (US-34), per section 4.6.
+  confirmPublication: (submissionId: string, data: ConfirmPublicationRequest) =>
+    creatorPortalClient
+      .post<ConfirmPublicationResponse>(`/creator-portal/content-submissions/${submissionId}/confirm-publication`, data)
+      .then((r) => r.data),
+
+  // E6 -- payment history, statements, tax documents (US-35a/b/c, US-36a, US-36b), per
+  // docs/architecture/e6-payments-financial-transparency.md section 4.3.
+  listPayoutObligations: (params?: { status?: PayoutObligationStatus; campaign_id?: string; cursor?: string; limit?: number }) =>
+    creatorPortalClient
+      .get<PaginatedResponse<PayoutObligationListItem>>('/creator-portal/payout-obligations', { params })
+      .then((r) => r.data),
+
+  getPayoutObligation: (id: string) =>
+    creatorPortalClient
+      .get<PayoutObligationDetail>(`/creator-portal/payout-obligations/${id}`)
+      .then((r) => r.data),
+
+  getPayoutStatement: (id: string) =>
+    creatorPortalClient
+      .get<PayoutStatementResponse>(`/creator-portal/payout-obligations/${id}/statement`)
+      .then((r) => r.data),
+
+  getTaxDocument: (id: string) =>
+    creatorPortalClient
+      .get<TaxDocumentResponse>(`/creator-portal/payout-obligations/${id}/tax-document`)
+      .then((r) => r.data)
+      .catch((err) => {
+        // 404 TAX_DOCUMENT_NOT_AVAILABLE: the obligation has not settled yet, not an error state.
+        if (isAxiosError(err) && err.response?.status === 404) return null;
+        throw err;
+      }),
+
+  // E7 -- Duda's own performance (US-37), per docs/architecture/e7-analytics-reporting.md
+  // section 5.4. Scoped server-side to her creator ID from the JWT, never a parameter.
+  listPerformance: () =>
+    creatorPortalClient.get<CreatorPerformanceResponse>('/creator-portal/performance').then((r) => r.data),
 };
 
 export default api;
