@@ -327,6 +327,9 @@ export interface CampaignQuote {
 export interface Campaign {
   id: string;
   account_id: string;
+  // US-39 (E9): client attribution, present for every workspace type (section 5.2 of the E9
+  // architecture doc) -- for a brand workspace this is simply always the brand's own account.
+  account_name?: string;
   template_id?: string | null;
   name: string;
   state: CampaignState;
@@ -350,6 +353,9 @@ export interface CampaignSummary {
   name: string;
   state: CampaignState;
   budget_amount: string | null;
+  // US-39 (E9), per docs/architecture/e9-agency-multi-client-operations.md section 5.2.
+  account_id?: string;
+  account_name?: string;
   created_at: string;
 }
 
@@ -430,6 +436,10 @@ export interface CampaignTemplate {
   id: string;
   account_id: string;
   source_campaign_id?: string | null;
+  // US-41 (E9): set when this template was created by a cross-client copy rather than by
+  // saveAsTemplate from a campaign (ADR-0060). Mutually exclusive with source_campaign_id
+  // in practice, per docs/architecture/e9-agency-multi-client-operations.md section 2.2.
+  copied_from_template_id?: string | null;
   name: string;
   audience_targeting?: AudienceTargeting;
   message?: string;
@@ -446,6 +456,12 @@ export interface InstantiateTemplateRequest {
   name: string;
   budget_amount: string;
   timeline_start: string;
+}
+
+// US-41 (E9) -- POST /campaign-templates/:id/copy, per
+// docs/architecture/e9-agency-multi-client-operations.md section 4.2.
+export interface CopyTemplateRequest {
+  target_account_id: string;
 }
 
 export interface AcknowledgeDriftRequest {
@@ -579,7 +595,802 @@ export interface CreatorOpportunity {
   payout_gross: string;
   payout_commission: string;
   payout_net: string;
+  // E6 (US-29): projected from campaign.timeline_end / opportunity.expires_at, always an
+  // estimate on this pre-acceptance surface -- never the same visual weight as the three
+  // locked figures above. See docs/architecture/e6-payments-financial-transparency.md section 4.2.
+  expected_payment_date?: string;
+  expected_payment_date_is_estimate?: boolean;
   expires_at: string;
   status: OpportunityStatus;
   responded_at?: string | null;
+}
+
+// ---------------------------------------------------------------------------
+// E4 -- Brand Safety
+// Types mirror docs/architecture/e4-brand-safety.md section 3.
+// ---------------------------------------------------------------------------
+
+export type SafetyRuleType = 'prohibited_topic' | 'restricted_language' | 'competitor_mention';
+export type SafetyRuleAction = 'add' | 'replace' | 'suppress';
+
+export interface ProhibitedTopicDefinition {
+  topic: string;
+}
+
+export interface RestrictedLanguageDefinition {
+  pattern: string;
+  pattern_type: 'keyword' | 'regex';
+}
+
+export interface CompetitorMentionDefinition {
+  competitor_name: string;
+  aliases?: string[];
+}
+
+export type SafetyRuleDefinition =
+  | ProhibitedTopicDefinition
+  | RestrictedLanguageDefinition
+  | CompetitorMentionDefinition;
+
+export interface SafetyRule {
+  id: string;
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition | null;
+  action: SafetyRuleAction;
+  supersedes_rule_id: string | null;
+  created_at: string;
+}
+
+export interface SafetyRuleset {
+  id: string;
+  scope: 'brand';
+  rules: SafetyRule[];
+  updated_at: string;
+}
+
+export interface CreateSafetyRuleRequest {
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition;
+}
+
+export interface UpdateSafetyRuleRequest {
+  definition: Partial<ProhibitedTopicDefinition & RestrictedLanguageDefinition & CompetitorMentionDefinition>;
+}
+
+export interface DeleteSafetyRuleResponse {
+  affected_campaign_overrides?: string[];
+}
+
+export type EffectiveRuleSource = 'brand' | 'campaign_override';
+
+export interface EffectiveSafetyRule {
+  id: string;
+  rule_type: SafetyRuleType;
+  definition: SafetyRuleDefinition | null;
+  source: EffectiveRuleSource;
+  override_action?: SafetyRuleAction;
+  supersedes_rule_id?: string | null;
+  note?: string;
+}
+
+export interface CampaignSafetyRuleset {
+  campaign_id: string;
+  has_override: boolean;
+  effective_rules: EffectiveSafetyRule[];
+  override_rule_ids: string[];
+}
+
+export interface CreateCampaignOverrideRequest {
+  action: SafetyRuleAction;
+  supersedes_rule_id?: string;
+  rule_type?: SafetyRuleType;
+  definition?: SafetyRuleDefinition;
+}
+
+// Safety check / content submission intake (US-16)
+
+export type SafetyCheckStatus = 'pending' | 'passed' | 'flagged' | 'check_unavailable';
+export type SafetyCheckChannel = 'caption' | 'on_screen_text' | 'audio' | 'system';
+export type SafetyCheckTier = 'tier1' | 'tier2';
+
+export interface TriggeredRule {
+  rule_id: string | null;
+  rule_type: SafetyRuleType | null;
+  channel: SafetyCheckChannel;
+  matched_excerpt: string | null;
+}
+
+export interface SafetyCheckResult {
+  id: string;
+  status: SafetyCheckStatus;
+  tier_reached?: SafetyCheckTier | null;
+  triggered_rules?: TriggeredRule[];
+  message?: string;
+  requested_at: string;
+  resolved_at?: string | null;
+}
+
+export interface CreateContentSubmissionRequest {
+  campaign_id: string;
+  opportunity_id?: string;
+  caption_text: string;
+  on_screen_text?: string;
+  audio_transcript?: string;
+  media_asset_url?: string;
+}
+
+export interface CreateContentSubmissionResponse {
+  content_submission_id: string;
+  safety_check_id: string;
+  status: 'pending';
+  poll_url: string;
+  // E5 (US-32a/US-32b): populated once content-workflow's own controller replaces E4's stub at
+  // this same route, per docs/architecture/e5-briefing-content-workflow.md section 4.4.
+  version_number?: number;
+  review_deadline_at?: string;
+}
+
+// Human review queue (US-17)
+
+export type ReviewQueueReasonCategory = 'rule_violation' | 'check_unavailable';
+export type ReviewQueueStatus = 'pending' | 'approved' | 'rejected' | 'revision_requested';
+
+export interface ReviewQueueItem {
+  id: string;
+  content_submission_id: string;
+  campaign_id: string;
+  campaign_name: string;
+  creator_display_name: string;
+  reason_category: ReviewQueueReasonCategory;
+  triggered_rules: TriggeredRule[];
+  status: ReviewQueueStatus;
+  decision_reason?: string | null;
+  decided_at?: string | null;
+  created_at: string;
+}
+
+export interface ReviewQueueItemDetail extends Omit<ReviewQueueItem, 'triggered_rules'> {
+  caption_text: string;
+  on_screen_text: string | null;
+  audio_transcript: string | null;
+  tier_reached: SafetyCheckTier | null;
+  triggered_rules: (TriggeredRule & { definition?: SafetyRuleDefinition | null })[];
+}
+
+export interface DecideReviewItemRequest {
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  reason?: string;
+}
+
+export interface DecideReviewItemResponse {
+  id: string;
+  status: ReviewQueueStatus;
+  decided_at: string;
+}
+
+// Post-publication monitoring (US-16b)
+
+export type MonitoringResult = 'matching' | 'deviated' | 'unreachable';
+
+export interface MonitoringSnapshot {
+  id: string;
+  content_submission_id: string;
+  campaign_id: string;
+  published_url: string;
+  last_result: MonitoringResult | null;
+  last_checked_at: string | null;
+  deviation_details?: Record<string, unknown> | null;
+  consecutive_unreachable_count?: number;
+}
+
+export interface MonitoringSnapshotDetail extends MonitoringSnapshot {
+  approved_caption_text: string;
+  approved_on_screen_text: string | null;
+  approved_audio_transcript: string | null;
+  monitoring_status: 'active' | 'stopped';
+}
+
+// ---------------------------------------------------------------------------
+// E5 -- Briefing and Content Workflow
+// Types mirror docs/architecture/e5-briefing-content-workflow.md section 4.
+// ---------------------------------------------------------------------------
+
+export type BriefingStatus = 'draft' | 'issued';
+
+export interface DeliverableSpec {
+  format: string;
+  quantity?: number;
+  aspect_ratio?: string;
+  caption_length_limit?: number;
+  mandatory_hashtags?: string[];
+  notes?: string;
+}
+
+export interface Briefing {
+  id: string;
+  campaign_id: string;
+  status: BriefingStatus;
+  dos: string[] | null;
+  donts: string[] | null;
+  reference_examples: string[] | null;
+  deliverable_spec: DeliverableSpec | null;
+  deadline: string | null;
+  issued_at: string | null;
+  issued_by_user_id?: string | null; // brand-side read only, absent on the creator-portal GET
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SaveBriefingRequest {
+  dos?: string[];
+  donts?: string[];
+  reference_examples?: string[];
+  deliverable_spec?: DeliverableSpec;
+  deadline?: string;
+}
+
+export interface IssueBriefingResponse {
+  id: string;
+  status: 'issued';
+  issued_at: string;
+  recipients_queued: number;
+}
+
+export interface BriefingDistributionFailure {
+  creator_id: string;
+  failure_reason: string;
+}
+
+export interface BriefingDistribution {
+  briefing_id: string;
+  recipients_total: number;
+  delivered: number;
+  failed: BriefingDistributionFailure[];
+  pending: number;
+}
+
+// Briefing Q&A (US-31)
+
+export type QaSenderType = 'creator' | 'brand';
+
+export interface QaMessage {
+  sender_type: QaSenderType;
+  body: string;
+  created_at: string;
+}
+
+export interface CreatorQaThreadResponse {
+  thread_id: string | null;
+  messages: QaMessage[];
+  answered: boolean | null;
+}
+
+export interface AskBriefingQuestionRequest {
+  campaign_id: string;
+  question: string;
+}
+
+export interface AskBriefingQuestionResponse extends QaMessage {
+  thread_id: string;
+  sender_type: 'creator';
+}
+
+export interface BriefingQaThreadSummary {
+  thread_id: string;
+  creator_id: string;
+  creator_display_name: string;
+  message_count: number;
+  answered: boolean;
+  last_message_at: string;
+}
+
+export interface BriefingQaThreadDetail {
+  thread_id: string;
+  creator_id: string;
+  creator_display_name?: string;
+  messages: QaMessage[];
+  answered: boolean;
+}
+
+export interface AnswerBriefingQuestionRequest {
+  body: string;
+}
+
+// Content submission version history and review decision (US-32a, US-32b, US-19, US-33)
+
+export type ReviewDecisionStatus = 'pending' | 'approved' | 'rejected' | 'revision_requested';
+
+export interface SafetyGateStatus {
+  cleared: boolean;
+  blocking_reason: string | null;
+}
+
+export interface ContentSubmissionVersion {
+  id: string;
+  version_number: number;
+  supersedes_submission_id: string | null;
+  review_status: ReviewDecisionStatus;
+  review_reason: string | null;
+  review_decided_at: string | null;
+  review_deadline_at: string | null;
+  review_escalated: boolean;
+  safety_gate: SafetyGateStatus;
+  published_url: string | null;
+  submitted_at: string;
+}
+
+export interface BrandContentSubmissionVersion extends ContentSubmissionVersion {
+  creator_display_name: string;
+  latest_version: boolean;
+}
+
+export interface DecideSubmissionRequest {
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  reason?: string;
+}
+
+export interface DecideSubmissionResponse {
+  id: string;
+  content_submission_id: string;
+  decision: 'approved' | 'rejected' | 'revision_requested';
+  decided_at: string;
+}
+
+// Publication confirmation (US-34)
+
+export interface ConfirmPublicationRequest {
+  published_url: string;
+}
+
+export interface ConfirmPublicationResponse {
+  content_submission_id: string;
+  published_url: string;
+  published_at: string;
+  status: 'confirmed';
+}
+
+// ---------------------------------------------------------------------------
+// E6 -- Payments and Financial Transparency
+// Types mirror docs/architecture/e6-payments-financial-transparency.md sections 3-4.
+// ---------------------------------------------------------------------------
+
+// Failure is deliberately not a fourth status (section 3.2): a failed execution attempt
+// leaves the obligation visibly `owed`, carrying `last_failure_reason` alongside it.
+export type PayoutObligationStatus = 'owed' | 'in_flight' | 'settled';
+
+export interface PayoutObligationListItem {
+  id: string;
+  campaign_id: string;
+  campaign_name: string;
+  buyer_name: string;
+  payout_gross: string;
+  payout_commission: string;
+  payout_net: string;
+  status: PayoutObligationStatus;
+  committed_deadline_at: string;
+  last_failure_reason: string | null;
+  escalated_for_manual_review: boolean;
+  settled_at: string | null;
+  created_at: string;
+}
+
+export type PayoutExecutionAttemptTrigger = 'scheduled' | 'manual';
+export type PayoutExecutionAttemptOutcome = 'instructed' | 'failed';
+
+export interface PayoutExecutionAttempt {
+  id: string;
+  trigger: PayoutExecutionAttemptTrigger;
+  outcome: PayoutExecutionAttemptOutcome;
+  failure_reason: string | null;
+  provider_reference: string | null;
+  created_at: string;
+}
+
+export interface PayoutObligationDetail extends PayoutObligationListItem {
+  payout_execution_attempts: PayoutExecutionAttempt[];
+}
+
+export interface PayoutStatementResponse {
+  payout_obligation_id: string;
+  document_url: string;
+  generated_at: string;
+}
+
+export type TaxDocumentStatus = 'generated' | 'blocked_missing_info';
+
+export interface TaxDocumentResponse {
+  status: TaxDocumentStatus;
+  tax_period?: string;
+  document_url?: string;
+  generated_at?: string;
+  missing_fields?: string[];
+  message?: string;
+}
+
+// US-20 / US-42: no schema difference between a direct brand buyer and an agency client
+// (ADR-0040) -- the same invoice shape serves both.
+export type InvoiceLineType = 'base_price' | 'shortfall_refund_adjustment';
+
+export interface InvoiceLineItem {
+  line_type: InvoiceLineType;
+  description: string;
+  amount: string;
+}
+
+export interface Invoice {
+  id: string;
+  campaign_id: string;
+  total_amount: string;
+  line_items: InvoiceLineItem[];
+  issued_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// E7 -- Analytics and Reporting
+// Types mirror docs/architecture/e7-analytics-reporting.md sections 2 and 5.
+// ---------------------------------------------------------------------------
+
+// US-21a's distinction between a transient failure and a structurally different one
+// (auth_revoked) is preserved end to end, never conflated, wherever ingestion_status is shown.
+export type IngestionStatus =
+  | 'pending_first_pull'
+  | 'fresh'
+  | 'stale_rate_limited'
+  | 'stale_unreachable'
+  | 'stale_auth_revoked';
+
+export type DashboardCreatorStatus = 'delivered' | 'pending_delivery';
+
+export interface DashboardCreatorEntry {
+  creator_id: string;
+  display_name: string;
+  status: DashboardCreatorStatus;
+  // null (never 0) whenever status is pending_delivery or no successful pull has happened yet.
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus | null;
+  last_successful_pull_at: string | null;
+}
+
+export interface CampaignDashboardAggregate {
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  total_delivered_impressions: number;
+  any_stale: boolean;
+  last_computed_at: string;
+}
+
+// US-21b -- GET /campaigns/:id/dashboard
+export interface CampaignDashboard {
+  campaign_id: string;
+  campaign_state: CampaignState;
+  pool_size: number;
+  delivered_count: number;
+  pending_delivery_count: number;
+  pool_aggregate: CampaignDashboardAggregate;
+  creators: DashboardCreatorEntry[];
+}
+
+// US-37 -- GET /creator-portal/performance
+export interface CreatorPerformanceEntry {
+  content_submission_id: string;
+  campaign_id: string;
+  campaign_name: string;
+  published_url: string;
+  published_at: string;
+  reach: number | null;
+  engagement: number | null;
+  impressions: number | null;
+  ingestion_status: IngestionStatus;
+  last_successful_pull_at: string | null;
+}
+
+export interface CreatorPerformanceResponse {
+  data: CreatorPerformanceEntry[];
+}
+
+// US-43 / US-46 -- shared report request/poll shape (section 5.3's pattern, reused by 5.5)
+export type ReportStatus = 'pending' | 'ready' | 'failed';
+
+export interface RequestReportResponse {
+  report_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+// US-22 -- spend_source, section 3.4: whether the spend figure came from
+// campaign.locked_price (mid-campaign, no invoice yet) or invoice.total_amount
+// (once one has been generated).
+export type SpendSource = 'locked_price' | 'invoice';
+
+export type CampaignProgressLabel = 'in_progress' | 'final';
+
+// US-22 -- GET /campaigns/:id/reports/:reportId (section 5.3). Matches
+// CampaignReportService#format exactly -- no requested_at on the read side.
+export interface CampaignPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_progress_label: CampaignProgressLabel | null;
+  spend_amount: string | null;
+  spend_source: SpendSource | null;
+  has_deliveries: boolean | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by
+  // (US-22 scenario 3, ADR-0046).
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  resolved_at: string | null;
+  // Only present when status is 'ready' and has_deliveries is false (US-22 scenario 3).
+  message?: string;
+}
+
+// US-43 -- GET /agency/clients/:clientAccountId/reports/:reportId
+export interface ClientPerformanceReport {
+  id: string;
+  status: ReportStatus;
+  campaign_count: number | null;
+  total_spend: string | null;
+  total_delivered_reach: number | null;
+  total_delivered_engagement: number | null;
+  // Null, never zero, whenever there is no delivered engagement/reach to divide by.
+  cost_per_engagement: string | null;
+  cpm_equivalent: string | null;
+  branding_applied: boolean | null;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+  requested_at: string;
+  resolved_at: string | null;
+}
+
+// US-46 -- GET /agency/reports/compare
+export interface ClientComparisonEntry {
+  client_account_id: string;
+  client_name: string;
+  campaign_count: number;
+  total_spend: string;
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  average_reach_per_campaign: number;
+  average_engagement_per_campaign: number;
+}
+
+export interface RefusedClient {
+  client_account_id: string;
+  reason: string;
+}
+
+export interface CompareClientReportsResponse {
+  data: ClientComparisonEntry[];
+  refused: RefusedClient[];
+}
+
+// Agency branding profile (ADR-0048, section 2.3): the logo and two colors a per-client
+// report (US-43) renders under when branding_applied is true. GET/PUT /agency/branding,
+// agency_admin only. A row with all three fields null is "not yet configured", same as a
+// missing row -- the UI treats them identically.
+export interface AgencyBrandingProfile {
+  logo_url: string | null;
+  primary_color_hex: string | null;
+  secondary_color_hex: string | null;
+  // US-44 (E9): extends this table, does not replace it (ADR-0048's own forecast, ADR-0061).
+  // domain_status never reaches any value but 'pending_activation' or null in this pilot --
+  // no DNS verification, certificate provisioning, or routing exists.
+  custom_domain?: string | null;
+  domain_status?: 'pending_activation' | null;
+  updated_at?: string;
+}
+
+export interface ConfigureBrandingRequest {
+  logo_url?: string;
+  primary_color_hex?: string;
+  secondary_color_hex?: string;
+  custom_domain?: string;
+}
+
+// US-44 (E9) -- POST /agency/clients/:clientAccountId/reports/:reportId/share-link, per
+// docs/architecture/e9-agency-multi-client-operations.md section 5.5. The response carries no
+// row id (only token/share_url/display_url/expires_at); without a GET list endpoint for a
+// report's share links, a link cannot be revoked once this result leaves local component
+// state -- a gap flagged back rather than invented around (see architecture doc section 5.5).
+export interface MintShareLinkResponse {
+  token: string;
+  share_url: string;
+  display_url: string;
+  expires_at: string;
+}
+
+// US-44 (E9) -- GET /public/client-reports/:token, public and unauthenticated, per section 5.5.
+export interface PublicClientReportBranding {
+  logo_url: string | null;
+  primary_color_hex: string | null;
+  secondary_color_hex: string | null;
+  applied: boolean;
+}
+
+export interface PublicClientReportData {
+  campaign_count: number;
+  total_spend: string;
+  total_delivered_reach: number;
+  total_delivered_engagement: number;
+  cost_per_engagement: string;
+  cpm_equivalent: string;
+  pdf_document_url: string | null;
+  csv_document_url: string | null;
+}
+
+export interface PublicClientReportResponse {
+  agency_name: string;
+  branding: PublicClientReportBranding;
+  report: PublicClientReportData;
+}
+
+// FR-60 (E9) -- GET /audit-log, per section 5.4. ip_address/user_agent are deliberately
+// omitted from this read-only surface (data-minimization), consistent with the backend
+// response shape -- never requested or rendered here.
+export interface AuditLogEntry {
+  id: string;
+  actor_user_id: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+  action: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+// ---------------------------------------------------------------------------
+// E8 -- Creator Recruitment and Growth
+// Types mirror docs/architecture/e8-creator-recruitment-growth.md sections 4-7.
+// ---------------------------------------------------------------------------
+
+// Self-registration (US-24.1 step 1), section 5.1. Same shape and enumeration-safe
+// behavior as E1's brand POST /auth/register, reused as-is via AuthService.
+export interface CreatorRegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+  accepted_terms: boolean;
+  terms_version: string;
+}
+
+export interface CreatorRegisterResponse {
+  message: string;
+  user_id: string;
+}
+
+// Login (section 5.2): identical semantics to E1's brand login, reused unchanged,
+// except the issued JWT carries creator_id instead of memberships. No MFA branch
+// (creators carry no financial-privilege role under FR-04).
+export interface CreatorLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface CreatorLoginResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in: number;
+}
+
+// Invitation and claim flow (US-23.2), section 4.3-4.5
+export type InvitationStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export interface InvitationImportedData {
+  display_name: string;
+  platform: string | null;
+  observed_handle: string | null;
+  observed_follower_count: number | null;
+  observed_niche: string | null;
+}
+
+export interface CreatorInvitationPreview {
+  invitation_id: string;
+  status: InvitationStatus;
+  imported_data: InvitationImportedData;
+}
+
+export interface ConfirmInvitationRequest {
+  email: string;
+  password: string;
+  corrections?: {
+    display_name?: string;
+    content_niche?: string;
+  };
+  accepted_terms: boolean;
+  terms_version: string;
+}
+
+export interface ConfirmInvitationResponse {
+  creator_id: string;
+  status: 'active';
+  access_token: string;
+  expires_in: number;
+  message: string;
+}
+
+export interface DeclineInvitationResponse {
+  status: 'declined';
+}
+
+// Social account linking (US-24.1), section 5.3-5.6
+export type SocialPlatform = 'instagram' | 'tiktok' | 'youtube';
+
+export interface SocialAuthorizeResponse {
+  authorize_url: string;
+  state: string;
+}
+
+export type SocialAccountStatus = 'connected' | 'disconnected';
+export type SocialDisconnectReason = 'revoked_by_platform' | 'refresh_failed' | 'manual' | null;
+
+export interface CreatorSocialAccount {
+  platform: SocialPlatform;
+  platform_handle: string | null;
+  status: SocialAccountStatus;
+  disconnect_reason: SocialDisconnectReason;
+  connected_at: string;
+  disconnected_at: string | null;
+}
+
+// Profile correction (US-24.1/US-24.4 onboarding step 3), section 5 (step table, row 3).
+// No GET /creator-portal/profile is specified in the architecture document -- the frontend
+// prefills from whatever it already has in the current session (e.g. the name just entered
+// at registration) and otherwise leaves fields blank rather than fabricating a prior value.
+export interface UpdateCreatorProfileRequest {
+  display_name?: string;
+  content_niche?: string;
+}
+
+// Onboarding status (US-24.2, US-24.3, US-24.4), section 5.7
+export type OnboardingStatus = 'qualified' | 'not_qualified' | 'pending';
+export type AuthenticityStatus = 'pending' | 'scored' | 'insufficient_data';
+
+export interface OnboardingStatusResponse {
+  onboarding_status: OnboardingStatus;
+  status?: 'active';
+  linked_platforms?: SocialPlatform[];
+  audience_size?: number | null;
+  engagement_rate?: string | null;
+  authenticity_score?: number | null;
+  authenticity_status?: AuthenticityStatus;
+  qualification_decided_at?: string | null;
+  qualification_missing_criteria?: string[];
+  qualification_expected_ready_at?: string | null;
+  message?: string;
+}
+
+// Media kit (US-25), section 6
+export type MediaKitStatus = 'pending' | 'ready' | 'failed';
+
+export interface RequestMediaKitResponse {
+  export_id: string;
+  status: 'pending';
+  poll_url: string;
+}
+
+export interface MediaKitExport {
+  id: string;
+  status: MediaKitStatus;
+  has_campaign_history?: boolean;
+  campaign_section_message?: string;
+  pdf_document_url?: string;
+  failure_reason?: string;
+  message?: string;
+}
+
+// Rate preferences (US-27), section 7
+export interface RatePreference {
+  deliverable_format: DeliverableFormat;
+  rate_amount: string;
+  currency: string;
+  updated_at: string;
+  applies_to?: 'future_opportunities_only';
+}
+
+export interface SetRatePreferenceRequest {
+  rate_amount: string;
+  currency?: string;
 }

@@ -35,6 +35,12 @@ export class User {
   @Column({ type: 'timestamptz', nullable: true, name: 'email_verified_at' })
   emailVerifiedAt: Date | null;
 
+  // E6 / ADR-0038: the aurora_operator principal. Not granted through any
+  // API this platform exposes -- set directly, outside this epic's API
+  // surface, the same way the pilot's creator rows are seeded (ADR-0013).
+  @Column({ type: 'boolean', default: false, name: 'is_aurora_operator' })
+  isAuroraOperator: boolean;
+
   @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
   createdAt: Date;
 

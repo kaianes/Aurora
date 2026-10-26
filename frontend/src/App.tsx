@@ -26,6 +26,43 @@ import { ExclusionsPage } from '@/pages/app/exclusions-page';
 import { ShortlistOverridePage } from '@/pages/app/shortlist-override-page';
 import { CreatorAccessPage } from '@/pages/creator-portal/creator-access-page';
 import { OpportunitiesPage } from '@/pages/creator-portal/opportunities-page';
+// E8 -- Creator Recruitment and Growth (US-23.1, US-23.2, US-24.1-24.4, US-25, US-26, US-27)
+import { RegisterPage as CreatorRegisterPage } from '@/pages/creator-portal/register-page';
+import { CreatorVerifyEmailPage } from '@/pages/creator-portal/verify-email-page';
+import { ClaimInvitationPage } from '@/pages/creator-portal/claim-invitation-page';
+import { OnboardingLinkAccountsPage } from '@/pages/creator-portal/onboarding-link-accounts-page';
+import { OnboardingReviewPage } from '@/pages/creator-portal/onboarding-review-page';
+import { OnboardingAnalyzingPage } from '@/pages/creator-portal/onboarding-analyzing-page';
+import { OnboardingResultPage } from '@/pages/creator-portal/onboarding-result-page';
+import { SocialAccountsPage } from '@/pages/creator-portal/social-accounts-page';
+import { RatePreferencesPage } from '@/pages/creator-portal/rate-preferences-page';
+import { MediaKitPage } from '@/pages/creator-portal/media-kit-page';
+import { SafetyRulesetPage } from '@/pages/app/safety-ruleset-page';
+import { CampaignSafetyRulesetPage } from '@/pages/app/campaign-safety-ruleset-page';
+import { ReviewQueuePage } from '@/pages/app/review-queue-page';
+import { ReviewQueueDetailPage } from '@/pages/app/review-queue-detail-page';
+import { MonitoringPage } from '@/pages/app/monitoring-page';
+import { BriefingComposerPage } from '@/pages/app/briefing-composer-page';
+import { BriefingDistributionPage } from '@/pages/app/briefing-distribution-page';
+import { BriefingQaPage } from '@/pages/app/briefing-qa-page';
+import { ContentSubmissionsPage } from '@/pages/app/content-submissions-page';
+import { CreatorBriefingPage } from '@/pages/creator-portal/briefing-page';
+import { CreatorBriefingQaPage } from '@/pages/creator-portal/briefing-qa-page';
+import { NewDraftPage } from '@/pages/creator-portal/new-draft-page';
+import { DraftsPage } from '@/pages/creator-portal/drafts-page';
+import { ConfirmPublicationPage } from '@/pages/creator-portal/confirm-publication-page';
+import { PaymentsPage } from '@/pages/creator-portal/payments-page';
+import { PaymentDetailPage } from '@/pages/creator-portal/payment-detail-page';
+import { InvoicePage } from '@/pages/app/invoice-page';
+import { CampaignDashboardPage } from '@/pages/app/campaign-dashboard-page';
+import { CampaignReportPage } from '@/pages/app/campaign-report-page';
+import { ClientReportPage } from '@/pages/app/client-report-page';
+import { ReportsComparePage } from '@/pages/app/reports-compare-page';
+import { AgencyBrandingPage } from '@/pages/app/agency-branding-page';
+import { CreatorPerformancePage } from '@/pages/creator-portal/performance-page';
+// E9 -- Agency Multi-Client Operations (US-39, US-41, US-44, FR-60)
+import { AuditLogPage } from '@/pages/app/audit-log-page';
+import { PublicClientReportPage } from '@/pages/public-client-report-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,9 +115,25 @@ export default function App() {
                 }
               />
               <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+              <Route path="campaigns/:id/safety-ruleset" element={<CampaignSafetyRulesetPage />} />
               <Route path="exclusions" element={<ExclusionsPage />} />
               <Route path="templates" element={<TemplatesPage />} />
               <Route path="templates/:id/instantiate" element={<TemplateInstantiatePage />} />
+              {/* E4 -- Brand Safety (US-15, US-16b, US-17) */}
+              <Route path="safety/ruleset" element={<SafetyRulesetPage />} />
+              <Route path="safety/review-queue" element={<ReviewQueuePage />} />
+              <Route path="safety/review-queue/:id" element={<ReviewQueueDetailPage />} />
+              <Route path="safety/monitoring" element={<MonitoringPage />} />
+              {/* E5 -- Briefing and Content Workflow (US-18a, US-18b, US-19, US-31) */}
+              <Route path="campaigns/:id/briefing" element={<BriefingComposerPage />} />
+              <Route path="campaigns/:id/briefing/distribution" element={<BriefingDistributionPage />} />
+              <Route path="campaigns/:id/briefing/qa" element={<BriefingQaPage />} />
+              <Route path="campaigns/:id/content-submissions" element={<ContentSubmissionsPage />} />
+              {/* E6 -- Payments and Financial Transparency (US-20, US-42) */}
+              <Route path="campaigns/:id/invoice" element={<InvoicePage />} />
+              {/* E7 -- Analytics and Reporting (US-21b, US-22, US-43, US-46) */}
+              <Route path="campaigns/:id/dashboard" element={<CampaignDashboardPage />} />
+              <Route path="campaigns/:id/reports" element={<CampaignReportPage />} />
               <Route
                 path="clients"
                 element={
@@ -97,12 +150,74 @@ export default function App() {
                   </ProtectedRoute>
                 }
               />
+              <Route
+                path="clients/:id/reports"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <ClientReportPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="reports/compare"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <ReportsComparePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="agency/branding"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <AgencyBrandingPage />
+                  </ProtectedRoute>
+                }
+              />
+              {/* E9 -- FR-60 audit log viewer, agency_admin/agency_operator only (section 5.4) */}
+              <Route
+                path="audit-log"
+                element={
+                  <ProtectedRoute requiredWorkspaceType="agency">
+                    <AuditLogPage />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
+
+            {/* E9 -- US-44 public, token-gated client report share link. No login, no
+                X-Account-Id, no Aurora chrome (AppLayout/PublicLayout) -- the one route in
+                this entire epic reachable by someone who has never had an Aurora account. */}
+            <Route path="/public/client-reports/:token" element={<PublicClientReportPage />} />
 
             {/* Creator portal (US-28): separate from /app, creators are not account members */}
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>
               <Route path="access" element={<CreatorAccessPage />} />
+              <Route path="login" element={<CreatorAccessPage />} />
               <Route path="opportunities" element={<OpportunitiesPage />} />
+              {/* E8 -- Creator Recruitment and Growth, per
+                  docs/architecture/e8-creator-recruitment-growth.md section 10 */}
+              <Route path="register" element={<CreatorRegisterPage />} />
+              <Route path="verify-email" element={<CreatorVerifyEmailPage />} />
+              <Route path="invitations/:token" element={<ClaimInvitationPage />} />
+              <Route path="onboarding/link-accounts" element={<OnboardingLinkAccountsPage />} />
+              <Route path="onboarding/review" element={<OnboardingReviewPage />} />
+              <Route path="onboarding/analyzing" element={<OnboardingAnalyzingPage />} />
+              <Route path="onboarding/result" element={<OnboardingResultPage />} />
+              <Route path="social-accounts" element={<SocialAccountsPage />} />
+              <Route path="rate-preferences" element={<RatePreferencesPage />} />
+              <Route path="media-kit" element={<MediaKitPage />} />
+              {/* E5 -- Briefing and Content Workflow (US-30, US-31, US-32a, US-32b, US-34) */}
+              <Route path="briefing" element={<CreatorBriefingPage />} />
+              <Route path="briefing/qa" element={<CreatorBriefingQaPage />} />
+              <Route path="drafts/new" element={<NewDraftPage />} />
+              <Route path="drafts" element={<DraftsPage />} />
+              <Route path="drafts/:id/confirm-publication" element={<ConfirmPublicationPage />} />
+              {/* E6 -- Payments and Financial Transparency (US-35a, US-35b, US-35c, US-36a, US-36b) */}
+              <Route path="payments" element={<PaymentsPage />} />
+              <Route path="payments/:id" element={<PaymentDetailPage />} />
+              {/* E7 -- Analytics and Reporting (US-37) */}
+              <Route path="performance" element={<CreatorPerformancePage />} />
             </Route>
 
             {/* Default redirect */}

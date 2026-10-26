@@ -25,7 +25,13 @@ export {
   ShortfallResolutionType,
   ShortfallChosenBy,
 } from './pool-shortfall-resolution.entity';
-export { Creator, CreatorStatus, CreatorOnboardingStatus } from './creator.entity';
+export {
+  Creator,
+  CreatorStatus,
+  CreatorOnboardingStatus,
+  CreatorRecruitmentOrigin,
+  CreatorAuthenticityStatus,
+} from './creator.entity';
 export type { DemographicComposition } from './creator.entity';
 export { CreatorExclusion, ExclusionType } from './creator-exclusion.entity';
 export {
@@ -44,3 +50,86 @@ export {
   AdditionalCandidatesRequest,
   AdditionalCandidatesRequestStatus,
 } from './additional-candidates-request.entity';
+export { SafetyRuleset, SafetyRulesetScope } from './safety-ruleset.entity';
+export {
+  SafetyRule,
+  SafetyRuleType,
+  SafetyRuleAction,
+} from './safety-rule.entity';
+export type {
+  SafetyRuleDefinition,
+  ProhibitedTopicDefinition,
+  RestrictedLanguageDefinition,
+  CompetitorMentionDefinition,
+} from './safety-rule.entity';
+export { ContentSubmission, ExtractionStatus } from './content-submission.entity';
+export { SafetyCheck, SafetyCheckStatus, SafetyCheckTier } from './safety-check.entity';
+export { SafetyRuleTrigger, SafetyTriggerChannel } from './safety-rule-trigger.entity';
+export {
+  SafetyReviewQueueItem,
+  ReviewReasonCategory,
+  ReviewItemStatus,
+} from './safety-review-queue-item.entity';
+export {
+  PublishedContentSnapshot,
+  MonitoringStatus,
+  MonitoringResult,
+} from './published-content-snapshot.entity';
+export { Briefing, BriefingStatus } from './briefing.entity';
+export type { DeliverableSpec } from './briefing.entity';
+export {
+  BriefingDistributionRecipient,
+  DistributionRecipientStatus,
+} from './briefing-distribution-recipient.entity';
+export { BriefingQaThread } from './briefing-qa-thread.entity';
+export { BriefingQaMessage, QaSenderType } from './briefing-qa-message.entity';
+export {
+  ContentReviewDecision,
+  ContentReviewDecisionValue,
+} from './content-review-decision.entity';
+export { PayoutObligation, PayoutObligationStatus } from './payout-obligation.entity';
+export {
+  PayoutExecutionAttempt,
+  PayoutExecutionTrigger,
+  PayoutExecutionOutcome,
+} from './payout-execution-attempt.entity';
+export { LedgerEntry, LedgerReferenceType, LedgerDirection } from './ledger-entry.entity';
+export { TaxDocument, TaxDocumentStatus } from './tax-document.entity';
+export { Invoice, InvoiceStatus } from './invoice.entity';
+export { InvoiceLineItem, InvoiceLineItemType } from './invoice-line-item.entity';
+export {
+  ContentSubmissionMetricSnapshot,
+  IngestionStatus,
+} from './content-submission-metric-snapshot.entity';
+export {
+  PerformanceMetricIngestionAttempt,
+  IngestionAttemptOutcome,
+} from './performance-metric-ingestion-attempt.entity';
+export { CampaignPerformanceAggregate } from './campaign-performance-aggregate.entity';
+export {
+  CampaignPerformanceReport,
+  PerformanceReportStatus,
+  SpendSource,
+  CampaignProgressLabel,
+} from './campaign-performance-report.entity';
+export { ClientPerformanceReport } from './client-performance-report.entity';
+export { AgencyBrandingProfile } from './agency-branding-profile.entity';
+export { ClientReportShareLink } from './client-report-share-link.entity';
+
+// E8 -- Creator Recruitment and Growth (section 2 of the E8 architecture doc)
+export { CreatorPublicImport } from './creator-public-import.entity';
+export { CreatorInvitation, CreatorInvitationStatus } from './creator-invitation.entity';
+export { CreatorConsentRecord, CreatorConsentType } from './creator-consent-record.entity';
+export {
+  CreatorSocialAccount,
+  SocialPlatform,
+  SocialAccountStatus,
+  SocialAccountDisconnectReason,
+} from './creator-social-account.entity';
+export { CreatorRatePreference } from './creator-rate-preference.entity';
+export { CreatorMediaKitExport, MediaKitExportStatus } from './creator-media-kit-export.entity';
+export {
+  CreatorDataSubjectRequest,
+  DataSubjectRequestType,
+  DataSubjectRequestStatus,
+} from './creator-data-subject-request.entity';
