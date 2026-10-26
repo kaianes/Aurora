@@ -25,10 +25,12 @@ The project is now in the coding phase. Three epics are merged to `main` and imp
 
 Two accounts are seeded and ready to log in with, no sign-up needed:
 
-| Role | Email | Password |
-|---|---|---|
-| Brand owner (Marina) | `marina.demo.aurora@gmail.com` | `SenhaForte!2026` |
-| Agency admin (Renata) | `renata.demo.aurora@gmail.com` | `SenhaForte!2026` |
+| Role | Email |
+|---|---|
+| Brand owner (Marina) | `marina.demo.aurora@gmail.com` |
+| Agency admin (Renata) | `renata.demo.aurora@gmail.com` |
+
+Passwords are not published in this repository. Ask the author for them directly.
 
 A short script to exercise all three epics:
 
@@ -165,7 +167,7 @@ The first epic removes the enterprise sales cycle from onboarding: a brand or ag
 - **What was built, tested, and any deviations from the design:** [docs/epics/e1-access-onboarding/summary.md](docs/epics/e1-access-onboarding/summary.md)
 - **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
 
-Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#11-field-research-conducted-alongside-epic-1) for the interview guide and analyses.
+Alongside the build, three market validation interviews were conducted in the Brazilian creator economy (Creator Ads, from both a go-to-market and an operations perspective, and PlayNest) to check Aurora's pricing, segmentation, and agency-role hypotheses against practitioners. See [docs/implementation.md](docs/implementation.md#11-field-research-conducted-alongside-epic-1) for the interview guide and a summary of findings.
 
 ## Epic 2: Campaign Planning and Pool Buying
 
