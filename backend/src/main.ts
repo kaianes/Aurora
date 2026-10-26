@@ -1,12 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DataSource } from 'typeorm';
+import { initializeTransactionalContext, addTransactionalDataSource } from 'typeorm-transactional';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { CorrelationIdInterceptor } from './common/interceptors/correlation-id.interceptor';
 
 async function bootstrap() {
+  // Must happen before any application context is initialized (ADR-0063).
+  initializeTransactionalContext();
+
   const app = await NestFactory.create(AppModule);
+
+  // Patches the bootstrapped DataSource for the lifetime of the process, so
+  // TenantContextRunner's runInTransaction calls actually pin a connection
+  // (ADR-0063). One-time process-level setup, not per-request.
+  addTransactionalDataSource(app.get(DataSource));
 
   // Global prefix: /v1
   app.setGlobalPrefix('v1');
