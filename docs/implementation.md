@@ -173,13 +173,13 @@ The automated pipeline (QA + reviewer) caught real bugs during each epic's own b
 
 ## 11. Field research conducted alongside Epic 1
 
-In parallel with building Epic 1, three market validation interviews were conducted with practitioners in the Brazilian creator economy, to check Aurora's market hypotheses (pricing predictability, client segmentation, automation maturity, and the role of agencies) against how established players actually operate. All interviews were conducted and analyzed by Kaiane Souza, using a shared interview guide (available in [English](field-research/Creator_Economy_Interview_Guide_EN.pdf) and [Portuguese](field-research/Creator_Economy_Interview_Guide_PT.pdf)), cross-referencing the question script, personal notes, an automated meeting summary, and the full transcript for each conversation.
+In parallel with building Epic 1, three market validation interviews were conducted with practitioners in the Brazilian creator economy, to check Aurora's market hypotheses (pricing predictability, client segmentation, automation maturity, and the role of agencies) against how established players actually operate. All interviews were conducted and analyzed by Kaiane Souza, using a shared interview guide (available in [English](field-research/Creator_Economy_Interview_Guide_EN.pdf) and [Portuguese](field-research/Creator_Economy_Interview_Guide_PT.pdf)), cross-referencing the question script, personal notes, an automated meeting summary, and the full transcript for each conversation. Per-interview notes, named by interviewee, are kept internally rather than published in this repository, pending confirmation that each interviewee consents to being identified publicly.
 
-| Interview | Interviewee | Organization | Focus |
+| Interview | Role | Organization | Focus |
 |---|---|---|---|
-| [Creator Ads, Go-to-Market perspective](field-research/Creator_Ads_Kevin_Interview_Analysis.pdf) | Kevin Ramlow, Go-to-Market Engineer | Creator Ads | First validation pass against a category leader: pricing, client profile, automation, creator dynamics, agency role |
-| [Creator Ads, Operations perspective](field-research/Creator_Ads_Lidia_Interview_Analysis.pdf) | Lidia Nascimento, Campaign Operations Lead | Creator Ads | Second interview at the same company, cross-checked against the first for agreement and divergence |
-| [PlayNest](field-research/PlayNest_Gabriel_Interview_Analysis.pdf) | Gabriel Paes Leme, Head of PlayNest | Play9 Group | Executive-level perspective from a second category player: company history, positioning, relationship philosophy |
+| Creator Ads, Go-to-Market perspective | Go-to-Market Engineer | Creator Ads | First validation pass against a category leader: pricing, client profile, automation, creator dynamics, agency role |
+| Creator Ads, Operations perspective | Campaign Operations Lead | Creator Ads | Second interview at the same company, cross-checked against the first for agreement and divergence |
+| PlayNest | Head of PlayNest | Play9 Group | Executive-level perspective from a second category player: company history, positioning, relationship philosophy |
 
 This research grounds the assumptions behind the epics being built, including the pricing model exposed publicly in US-02 and the agency-client relationship modeled in US-47, in direct input from people operating in this market today rather than in desk research alone.
 
