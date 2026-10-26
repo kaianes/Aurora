@@ -15,13 +15,14 @@ import { Request } from 'express';
 import { BriefingQaService } from './briefing-qa.service';
 import { AskQuestionDto } from './dto/ask-question.dto';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 
 // Creator side of US-30 (briefing view) and US-31 (Q&A), section 4.3 of the
 // E5 architecture doc. Authenticated with a creator JWT (E3's
 // CreatorAuthGuard, reused unchanged).
 @Controller('creator-portal')
 @UseGuards(CreatorAuthGuard)
+@CreatorPortalRoute()
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class CreatorPortalBriefingController {
   constructor(private briefingQaService: BriefingQaService) {}

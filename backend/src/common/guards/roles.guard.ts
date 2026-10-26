@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../../database/entities';
-import { ROLES_KEY } from '../decorators';
+import { ROLES_KEY, IS_PUBLIC_KEY, CREATOR_PORTAL_ROUTE_KEY } from '../decorators';
 import { AuditService } from '../../audit/audit.service';
 import { AccountAccessService } from '../account-access.service';
 
@@ -20,16 +20,66 @@ export class RolesGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    // @Public() routes carry no request.user by the time this guard runs
+    // (JwtAuthGuard skips Passport for them entirely); there is nothing for
+    // this guard to resolve for them. Unchanged behavior, now explicit
+    // instead of accidental (ADR-0064).
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+
+    // Creator-portal routes are not account-scoped at all: creators carry no
+    // Membership row and no currentAccountId, by design, and their real
+    // authorization is CreatorAuthGuard's job, applied at the same call
+    // site. This is an explicit, route-level exemption, not an inference
+    // from any property of the caller's token or headers -- see ADR-0064
+    // for why checking user.isCreator or a falsy accountId instead of this
+    // metadata does not close the authorization bypass this guard exists
+    // to prevent.
+    const isCreatorPortalRoute = this.reflector.getAllAndOverride<boolean>(
+      CREATOR_PORTAL_ROUTE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+    if (isCreatorPortalRoute) {
+      return true;
+    }
+
     const user = request.user;
 
     const accountId = request.headers['x-account-id'] || user?.currentAccountId;
 
-    // Routes with no account context at all (creator-portal: creators carry
-    // no memberships and send no X-Account-Id) skip account resolution
-    // entirely -- there is nothing to check here, access for those routes is
-    // enforced by CreatorAuthGuard instead.
+    // Every other route is account-scoped: an authenticated user with no
+    // resolvable account context here (no X-Account-Id header, no
+    // currentAccountId claim) has no legitimate reason to be hitting this
+    // route, and must be denied and logged, not waved through. This closes
+    // the bypass where a creator-portal JWT (or any other caller with no
+    // account context) reached a brand/agency-scoped route with no role
+    // check and no audit trail.
     if (!accountId) {
-      return true;
+      await this.auditService.log({
+        actorUserId: user?.sub,
+        targetAccountId: null,
+        action: 'authorization.denied',
+        metadata: {
+          reason: 'no_account_context',
+          endpoint: request.url,
+          method: request.method,
+        },
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      });
+      throw new ForbiddenException({
+        error: {
+          code: 'INSUFFICIENT_PRIVILEGES',
+          message: 'Voce nao tem permissao para realizar esta acao.',
+          details: {},
+        },
+      });
     }
 
     // Every account-scoped route must resolve to a real relationship between
