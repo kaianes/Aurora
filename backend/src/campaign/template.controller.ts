@@ -15,6 +15,7 @@ import { TemplateService } from './template.service';
 import { SaveTemplateDto } from './dto/save-template.dto';
 import { InstantiateTemplateDto } from './dto/instantiate-template.dto';
 import { AcknowledgeDriftDto } from './dto/acknowledge-drift.dto';
+import { CopyTemplateDto } from './dto/copy-template.dto';
 import { Roles, CurrentUser } from '../common/decorators';
 import { Role } from '../database/entities';
 
@@ -24,6 +25,11 @@ const WRITE_ROLES = [
   Role.AGENCY_ADMIN,
   Role.AGENCY_OPERATOR,
 ];
+
+// Section 4.2 of the E9 architecture doc: cross-client template copy is
+// agency-specific by construction (a brand workspace has exactly one
+// account, so "copy to another client" has no referent for it).
+const COPY_ROLES = [Role.AGENCY_ADMIN, Role.AGENCY_OPERATOR];
 
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 @Controller()
@@ -74,6 +80,25 @@ export class TemplateController {
       id,
       (req as any).currentAccountId,
       dto,
+      this.actorContext(user, req),
+    );
+  }
+
+  @Post('campaign-templates/:id/copy')
+  @Roles(...COPY_ROLES)
+  @HttpCode(HttpStatus.CREATED)
+  async copy(
+    @Param('id') id: string,
+    @Body() dto: CopyTemplateDto,
+    @CurrentUser() user: any,
+    @Req() req: Request,
+  ) {
+    return this.templateService.copyTemplate(
+      id,
+      (req as any).currentAccountId,
+      (req as any).currentRole,
+      dto,
+      user.memberships || [],
       this.actorContext(user, req),
     );
   }

@@ -47,6 +47,11 @@ export class CreatorMetricsService {
       content_niche: creator.contentNiche,
       authenticity_score: authenticityScore,
       authenticity_flag: authenticityFlag(authenticityScore),
+      // E8 additive change (ADR-0052): pending | scored | insufficient_data,
+      // distinct from a null authenticity_score, which was ambiguous between
+      // "never attempted" and "could not be scored." Does not change
+      // ADR-0017's threshold policy in any way.
+      authenticity_status: creator.authenticityStatus,
       metrics_computed_at: creator.metricsComputedAt?.toISOString() || null,
       metrics_stale: creator.metricsStale,
       matched_attributes: matchedAttributes,

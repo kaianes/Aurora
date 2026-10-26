@@ -11,7 +11,7 @@ export function CreatorPortalLayout() {
 
   const handleLogout = () => {
     clearCreatorToken();
-    navigate('/creator-portal/access');
+    navigate('/creator-portal/login');
   };
 
   return (
@@ -22,11 +22,43 @@ export function CreatorPortalLayout() {
             <Link to="/creator-portal/opportunities" className="text-xl font-bold text-primary">
               Aurora
             </Link>
-            {hasToken && (
-              <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
-                Sair
-              </button>
-            )}
+            <div className="flex items-center gap-4">
+              {hasToken && (
+                <Link to="/creator-portal/opportunities" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Oportunidades
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/payments" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Pagamentos
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/performance" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Desempenho
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/social-accounts" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Redes
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/rate-preferences" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Valores
+                </Link>
+              )}
+              {hasToken && (
+                <Link to="/creator-portal/media-kit" className="text-sm text-muted hover:text-text-dark transition-colors">
+                  Media kit
+                </Link>
+              )}
+              {hasToken && (
+                <button onClick={handleLogout} className="text-sm text-muted hover:text-error transition-colors">
+                  Sair
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>

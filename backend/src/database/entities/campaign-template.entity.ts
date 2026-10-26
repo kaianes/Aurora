@@ -30,6 +30,15 @@ export class CampaignTemplate {
   @Column({ type: 'uuid', nullable: true, name: 'source_campaign_id' })
   sourceCampaignId: string | null;
 
+  // E9 / US-41, ADR-0060: set when this template was created by copying
+  // another template across a client-account boundary (onboarding-time bulk
+  // copy or the ongoing POST /campaign-templates/:id/copy action), rather
+  // than by saveAsTemplate from a campaign. Mutually exclusive with
+  // sourceCampaignId in practice but not constrained to be at the database
+  // level (section 2.2 of the E9 architecture doc).
+  @Column({ type: 'uuid', nullable: true, name: 'copied_from_template_id' })
+  copiedFromTemplateId: string | null;
+
   @Column({ type: 'text' })
   name: string;
 
