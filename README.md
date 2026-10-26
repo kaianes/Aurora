@@ -17,11 +17,17 @@ Aurora is a technology platform that lets a brand define a budget, an audience, 
 
 ## Project Status
 
-The project is now in the coding phase. Three epics are merged to `main` and implemented end to end (backend, frontend, and database): Epic 1 (Access and Onboarding), Epic 2 (Campaign Planning and Pool Buying), and Epic 3 (Creator Matching and Curation), the latter two built in Sprint 5. See [docs/implementation.md](docs/implementation.md) for how all three were built, and how to run and test them — or just click the live demo below.
+All nine planned epics are merged to `main` and implemented end to end (backend, frontend, and database): Access and Onboarding, Campaign Planning and Pool Buying, Creator Matching and Curation, Brand Safety, Briefing and Content Workflow, Payments and Financial Transparency, Analytics and Reporting, Creator Recruitment and Growth, and Agency Multi-Client Operations. The cumulative automated suite stands at 518 backend tests and 208 frontend tests, all passing. A same-day remediation pass (ADR-0063/ADR-0064) also closed the single most-repeated critical finding across every epic's own review — tenant-context row-level security never actually engaging at runtime — and a related RolesGuard authorization bypass; see [docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md) for what that fix does and does not yet prove.
+
+See [docs/implementation.md](docs/implementation.md) for how Epics 1-3 were built and how to run and test them, each epic's own section below for Epics 4-9, and [docs/module-2a-2026-report.md](docs/module-2a-2026-report.md) for a single, end-to-end report covering the whole project (market research through implementation, known issues included) — or just click the live demo below.
+
+**Live demo scope note:** the deployed environment below was last redeployed when `main` contained only Epics 1-3; it does not yet reflect Epics 4-9 or the remediation pass. See [docs/deployment.md](docs/deployment.md).
 
 **Live demo:** [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) (frontend) — backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs). See [docs/deployment.md](docs/deployment.md) for how it's hosted and its availability window (it's a free trial on the backend host, not indefinite — see that doc before grading after early November 2026).
 
 ### For graders: what to test
+
+The script below exercises Epics 1-3 only (the three epics the live demo deployment currently reflects). Epics 4-9 are implemented and tested on `main`, each documented in its own section below, but are not yet part of this walkthrough or the live deployment.
 
 Two accounts are seeded and ready to log in with, no sign-up needed:
 
@@ -44,10 +50,14 @@ A short script to exercise all three epics:
 8. Back on Marina's side, try pausing/cancelling a confirmed campaign from its detail page, saving it as a template, and instantiating a new campaign from that template.
 
 **What's a known limitation, not a bug**, if you run into it:
-- A campaign can't reach `active` state yet (no `CONFIRMED → ACTIVE` trigger exists), so the shortlist "lock" is only reachable through the agency override path above, not through normal activation.
+- A campaign can't reach `active` state yet (no `CONFIRMED → ACTIVE` trigger exists), so the shortlist "lock" is only reachable through the agency override path above, not through normal activation. This also means `pause`/`resume` are unreachable through the normal lifecycle.
 - Automatic budget reallocation (toggle in the campaign detail page) saves correctly but never actually reallocates, since it depends on a social-platform metrics feed that's out of scope until a later epic.
-- The creator-side portal (`/creator-portal`) uses a passwordless pilot login (just a creator ID, no real auth) — that's intentional, documented in ADR-0013, not a security bug in the rest of the app.
 - Verification/invitation emails don't arrive in an inbox (console-log stub); this doesn't block grading since both demo accounts are pre-verified.
+
+**What's a known, disclosed bug, not a limitation** — tracked in full in [docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md):
+- A creator cannot decline a campaign opportunity: the underlying shortlist entry is always locked by the time an opportunity exists, and a database trigger rejects the required update.
+- Whether row-level security has ever actually been enforced by the database is **unconfirmed**: the app may have always connected to Postgres as a superuser with implicit `BYPASSRLS`, which would make every RLS policy a no-op regardless of the application-layer fix this period added. Verify with `SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'aurora';` before treating tenant isolation as proven.
+- Geography, age range, and gender targeting in the matching engine always report a match regardless of the creator's actual data, since the minimal creator entity carries none of it.
 
 Full technical detail — what was built per epic, every ADR, test results, and the complete list of known limitations — is in [docs/implementation.md](docs/implementation.md). Each epic's [reviewer summary](docs/epics/) opens with a short TL;DR if you want the headline before the full audit.
 
@@ -56,7 +66,9 @@ Full technical detail — what was built per epic, every ADR, test results, and 
 - ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 functional and 36 non-functional requirements, with full traceability)
 - ✅ **Sprint 4** — System design finalized, the agent pipeline that builds every epic from here on defined, and Epic 1 (Access and Onboarding) built end to end ahead of schedule: authentication, tenant isolation, RBAC, brand profile, team invitations, and agency client management, backend and frontend, with live API docs and a passing backend test suite (see the reviewer's summary for known gaps, including the frontend test environment and tenant isolation enforcement)
 - ✅ **Sprint 5** — Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation) built end to end with the same pipeline, ahead of the original one-epic-per-sprint pace: async quoting and budget reallocation for E2, a real creator-matching engine (replacing E2's stub) and shortlist/exclusion/opportunity flows for E3. Both pass their full automated test suites (116 backend + 32 frontend tests combined) and are merged to `main`. Deployed live and tested end to end by hand afterward, which surfaced and fixed several real bugs the automated pipeline missed — see [docs/implementation.md](docs/implementation.md) section 9 and the "For graders" section below.
-- ⏳ **Next** — Sprint 6, continuing into the remaining epics (Brand Safety, Briefing and Content Workflow, and onward) with the same pipeline
+- ✅ **Post-Sprint-5** — Epics 4 through 9 (Brand Safety, Briefing and Content Workflow, Payments and Financial Transparency, Analytics and Reporting, Creator Recruitment and Growth, and Agency Multi-Client Operations) built end to end with the same pipeline, bringing the cumulative suite to 518 backend + 208 frontend tests, all passing. See each epic's own section below and [docs/module-2a-2026-report.md](docs/module-2a-2026-report.md) for the full account.
+- ✅ **Remediation** — a same-day fix for the single most-repeated critical finding across every epic's own review (tenant-context RLS never engaging at runtime) plus a related RolesGuard authorization bypass, with its own disclosed open items. See [docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md).
+- ⏳ **Next** — closing the open items named throughout this README and in the remediation summary (CI, real-Postgres integration tests, the BYPASSRLS check, and the other disclosed bugs), and redeploying the live demo to reflect Epics 4-9
 
 ## Project Roadmap
 
@@ -188,6 +200,67 @@ The third epic replaces Epic 2's placeholder matching engine with a real one, ra
 - **Decisions:** real matching engine scoring model, shortlist locking, the minimal creator entity, exclusion precedence, override sequencing, guaranteed-minimum advisory, authenticity-score policy, and additional-candidates top-up, each in its own ADR under [docs/adr/](docs/adr) (0011-0018)
 - **What was built, tested, and any deviations from the design:** [docs/epics/e3-creator-matching-curation/summary.md](docs/epics/e3-creator-matching-curation/summary.md)
 - **Run it locally and test it:** [docs/implementation.md](docs/implementation.md)
+
+## Epic 4: Brand Safety
+
+The fourth epic lets a brand define safety rules and prohibited topics, checks every submission at the message level with AI assistance before publication, and routes flagged content to a human for the final call rather than letting an automated check silently block legitimate content. **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e4-brand-safety/stories.md](docs/epics/e4-brand-safety/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e4-brand-safety.md](docs/architecture/e4-brand-safety.md)
+- **Decisions:** ruleset override precedence, the pluggable two-tier content-safety adapter, check-timeout handling, human review superseding automation, and lightweight post-publication monitoring, each in its own ADR under [docs/adr/](docs/adr) (0019-0024)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e4-brand-safety/summary.md](docs/epics/e4-brand-safety/summary.md)
+
+## Epic 5: Briefing and Content Workflow
+
+The fifth epic lets a brand send one structured briefing to the entire creator pool instead of repeating it per creator, and lets drafts move through an approve/reject cycle with a stated reason so revisions converge instead of looping silently. **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e5-briefing-content-workflow/stories.md](docs/epics/e5-briefing-content-workflow/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e5-briefing-content-workflow.md](docs/architecture/e5-briefing-content-workflow.md)
+- **Decisions:** version lineage via self-reference, review-decision separation from the safety queue, dual publication gates, and the review-deadline/escalation default, each in its own ADR under [docs/adr/](docs/adr) (0025-0032)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e5-briefing-content-workflow/summary.md](docs/epics/e5-briefing-content-workflow/summary.md)
+
+## Epic 6: Payments and Financial Transparency
+
+The sixth epic gives a brand one consolidated invoice for the whole pool instead of hundreds of individual ones, and gives each creator a visible, itemized breakdown of what they're owed and when, with no real Brazilian PSP/Pix integration bound yet (explicitly a pilot-stage placeholder). **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e6-payments-financial-transparency/stories.md](docs/epics/e6-payments-financial-transparency/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e6-payments-financial-transparency.md](docs/architecture/e6-payments-financial-transparency.md)
+- **Decisions:** no live payout processor in pilot, and the money-safety transaction model, each in its own ADR under [docs/adr/](docs/adr) (0033-0043)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e6-payments-financial-transparency/summary.md](docs/epics/e6-payments-financial-transparency/summary.md)
+
+## Epic 7: Analytics and Reporting
+
+The seventh epic gives a brand one dashboard of results by creator and by pool instead of assembling metrics from several platforms, and an exportable report built to support an ROI argument to a CMO or CFO. **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e7-analytics-reporting/stories.md](docs/epics/e7-analytics-reporting/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e7-analytics-reporting.md](docs/architecture/e7-analytics-reporting.md)
+- **Decisions:** the social-metrics adapter remaining a stub in pilot, and the agency branding surface, each in its own ADR under [docs/adr/](docs/adr) (0044-0048)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e7-analytics-reporting/summary.md](docs/epics/e7-analytics-reporting/summary.md)
+
+## Epic 8: Creator Recruitment and Growth
+
+The eighth epic gives creators real self-registration, email verification, social-account linking, a media kit, and rate preferences, and replaces Epic 3's pilot creator-ID-only login with the creator portal's real authentication. **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e8-creator-recruitment-growth/stories.md](docs/epics/e8-creator-recruitment-growth/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e8-creator-recruitment-growth.md](docs/architecture/e8-creator-recruitment-growth.md)
+- **Decisions:** OAuth token storage via envelope encryption, among others, each in its own ADR under [docs/adr/](docs/adr) (0049-0058)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e8-creator-recruitment-growth/summary.md](docs/epics/e8-creator-recruitment-growth/summary.md)
+
+## Epic 9: Agency Multi-Client Operations
+
+The ninth and final epic gives an agency a client-context selector, the ability to copy templates across clients, white-label branding, an audit-log viewer, and a token-gated public share link for client reports — closing a cross-tenant IDOR and a cache-staleness bug in that share-link mechanism before merge. **Status: implemented, tested, and merged to `main`.**
+
+- **Stories:** [docs/epics/e9-agency-multi-client-operations/stories.md](docs/epics/e9-agency-multi-client-operations/stories.md)
+- **Architecture and API contracts:** [docs/architecture/e9-agency-multi-client-operations.md](docs/architecture/e9-agency-multi-client-operations.md)
+- **Decisions:** client-context selector and campaign attribution, among others, each in its own ADR under [docs/adr/](docs/adr) (0059-0062)
+- **What was built, tested, and any deviations from the design:** [docs/epics/e9-agency-multi-client-operations/summary.md](docs/epics/e9-agency-multi-client-operations/summary.md). This is the project's closing assessment across all nine epics.
+
+## Tenant Isolation Remediation
+
+A same-day, cross-cutting fix (not tied to a single epic) for the single most-repeated critical finding across every epic review above: tenant-context row-level security was correctly specified in every migration since Epic 1 but never actually engaged at runtime, and a related RolesGuard bug let a creator-portal token skip role checks on brand-scoped routes. **Status: implemented, unit-tested (518/518 passing), independently reviewed — but not yet proven against a real PostgreSQL instance, and a new, unconfirmed hypothesis about the app's database role could make the whole fix moot. Read the summary before treating tenant isolation as solved.**
+
+- **Decisions:** [docs/adr/0063-tenant-context-engagement-via-post-guard-interceptor.md](docs/adr/0063-tenant-context-engagement-via-post-guard-interceptor.md) and [docs/adr/0064-roles-guard-fail-closed-on-unresolved-account.md](docs/adr/0064-roles-guard-fail-closed-on-unresolved-account.md)
+- **What was built, tested, and what remains open:** [docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md)
 
 ## Institution
 
