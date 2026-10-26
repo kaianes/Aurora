@@ -2,7 +2,7 @@ import { Controller, Post, Get, Param, Req, UseGuards, HttpCode, HttpStatus } fr
 import { Request } from 'express';
 import { OpportunityService } from './opportunity.service';
 import { CreatorAuthGuard } from './creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 
 // E8 / ADR-0050 replaces this controller's former pilot-only login stub
 // (a bare creator_id, no password, no verification) with real creator
@@ -21,6 +21,7 @@ export class CreatorPortalController {
   }
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Get('opportunities')
   @HttpCode(HttpStatus.OK)
   async list(@CurrentUser() user: any) {
@@ -28,6 +29,7 @@ export class CreatorPortalController {
   }
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Post('opportunities/:id/accept')
   @HttpCode(HttpStatus.OK)
   async accept(@Param('id') id: string, @CurrentUser() user: any, @Req() req: Request) {
@@ -35,6 +37,7 @@ export class CreatorPortalController {
   }
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Post('opportunities/:id/decline')
   @HttpCode(HttpStatus.OK)
   async decline(@Param('id') id: string, @CurrentUser() user: any, @Req() req: Request) {

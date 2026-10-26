@@ -18,7 +18,7 @@ import { PublicationService } from './publication.service';
 import { ConfirmPublicationDto } from './dto/confirm-publication.dto';
 import { CreateContentSubmissionDto } from '../brand-safety/dto/create-content-submission.dto';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 
 // Replaces E4's stub ContentSubmissionIntakeController at the same route
 // (ADR-0032, section 4.4/7.4 of the E5 architecture doc) -- US-32a (intake),
@@ -26,6 +26,7 @@ import { CurrentUser } from '../common/decorators';
 // confirmation, FR-42).
 @Controller('creator-portal')
 @UseGuards(CreatorAuthGuard)
+@CreatorPortalRoute()
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class CreatorPortalContentSubmissionController {
   constructor(
