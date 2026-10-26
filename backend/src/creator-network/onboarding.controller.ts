@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 import { OnboardingService } from './onboarding.service';
 import { UpdateCreatorProfileDto } from './dto';
 
@@ -8,6 +8,7 @@ import { UpdateCreatorProfileDto } from './dto';
 // (PATCH /creator-portal/profile).
 @Controller('creator-portal')
 @UseGuards(CreatorAuthGuard)
+@CreatorPortalRoute()
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class OnboardingController {
   constructor(private onboardingService: OnboardingService) {}
