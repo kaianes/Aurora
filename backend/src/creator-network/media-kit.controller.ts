@@ -1,11 +1,12 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Post, UseGuards } from '@nestjs/common';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 import { MediaKitService } from './media-kit.service';
 
 // US-25 (section 6 of the E8 architecture doc).
 @Controller('creator-portal/media-kit')
 @UseGuards(CreatorAuthGuard)
+@CreatorPortalRoute()
 export class MediaKitController {
   constructor(private mediaKitService: MediaKitService) {}
 

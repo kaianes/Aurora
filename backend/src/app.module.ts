@@ -3,9 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { ScheduleModule } from '@nestjs/schedule';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { CommonModule } from './common/common.module';
+import { TenantContextModule } from './common/tenant-context/tenant-context.module';
+import { TenantContextInterceptor } from './common/interceptors/tenant-context.interceptor';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import { PricingModule } from './pricing/pricing.module';
@@ -157,6 +159,18 @@ import {
         ],
         synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
         logging: configService.get('DB_LOGGING', 'false') === 'true',
+        // Explicit pool size (ADR-0063), rather than the pg driver default of
+        // 10. After TenantContextInterceptor engages, a connection is held for
+        // an entire request's duration, not just a single query, so this now
+        // matters. 25 is a pilot-scale default sized against NFR-07 (200
+        // concurrent creator sessions, 20 concurrent brand sessions -- a
+        // session count, not an in-flight-request count) and NFR-04 (p95
+        // request durations of 500ms reads / 1500ms writes, which bound how
+        // long any one request actually holds its connection), leaving
+        // headroom under Postgres's own default max_connections (100), which
+        // this pool shares with the Bull job workers (see ADR-0063's "Known
+        // gap" section). Revisit against real pilot traffic once available.
+        extra: { max: 25 },
       }),
       inject: [ConfigService],
     }),
@@ -173,6 +187,7 @@ import {
     }),
     ScheduleModule.forRoot(),
     CommonModule,
+    TenantContextModule,
     AuditModule,
     AuthModule,
     PricingModule,
@@ -197,6 +212,10 @@ import {
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantContextInterceptor,
     },
   ],
 })

@@ -163,8 +163,16 @@ describe('RolesGuard - US-04 Scenario 4: Insufficient privileges', () => {
     const { Role } = await import('../database/entities');
 
     const auditService = { log: vi.fn().mockResolvedValue(undefined) };
+    const { IS_PUBLIC_KEY, CREATOR_PORTAL_ROUTE_KEY, ROLES_KEY } = await import(
+      '../common/decorators'
+    );
     const reflector = {
-      getAllAndOverride: vi.fn().mockReturnValue([Role.BRAND_OWNER, Role.AGENCY_ADMIN]),
+      getAllAndOverride: vi.fn().mockImplementation((key: string) => {
+        if (key === IS_PUBLIC_KEY) return false;
+        if (key === CREATOR_PORTAL_ROUTE_KEY) return false;
+        if (key === ROLES_KEY) return [Role.BRAND_OWNER, Role.AGENCY_ADMIN];
+        return undefined;
+      }),
     };
 
     const accountAccessService = {

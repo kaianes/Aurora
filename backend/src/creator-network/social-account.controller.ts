@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser, Public } from '../common/decorators';
+import { CurrentUser, Public, CreatorPortalRoute } from '../common/decorators';
 import { SocialAccountService } from './social-account.service';
 
 // US-24.1 (sections 5.3-5.6 of the E8 architecture doc).
@@ -21,6 +21,7 @@ export class SocialAccountController {
   constructor(private socialAccountService: SocialAccountService) {}
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Post(':platform/authorize')
   @HttpCode(HttpStatus.OK)
   async authorize(@Param('platform') platform: string, @CurrentUser() user: any) {
@@ -49,6 +50,7 @@ export class SocialAccountController {
   }
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Get()
   @HttpCode(HttpStatus.OK)
   async list(@CurrentUser() user: any) {
@@ -56,6 +58,7 @@ export class SocialAccountController {
   }
 
   @UseGuards(CreatorAuthGuard)
+  @CreatorPortalRoute()
   @Delete(':platform')
   @HttpCode(HttpStatus.NO_CONTENT)
   async disconnect(@Param('platform') platform: string, @CurrentUser() user: any) {

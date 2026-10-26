@@ -9,7 +9,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CreatorAuthGuard } from '../matching/creator-auth.guard';
-import { CurrentUser } from '../common/decorators';
+import { CurrentUser, CreatorPortalRoute } from '../common/decorators';
 import { PayoutObligationService } from './payout-obligation.service';
 import { TaxDocumentService } from './tax-document.service';
 import { PayoutObligationStatus } from '../database/entities';
@@ -22,6 +22,7 @@ import {
 // endpoints, authenticated with E3's CreatorAuthGuard, unchanged.
 @Controller('creator-portal/payout-obligations')
 @UseGuards(CreatorAuthGuard)
+@CreatorPortalRoute()
 @UseInterceptors(FinancialAccessAuditInterceptor)
 export class CreatorPortalPayoutController {
   constructor(
