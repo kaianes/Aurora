@@ -185,6 +185,21 @@ export class AuthService {
     await queryRunner.startTransaction();
 
     try {
+      // account's id is generated here, before its own INSERT, rather than
+      // left to the column's DB-side default, so it can be pinned as this
+      // transaction's tenant context below -- account's tenant_isolation
+      // policy (id = current_setting('app.current_account_id')) applies to
+      // INSERT too (it's the same USING expression, no separate WITH CHECK),
+      // and self-registration has no pre-existing account to have pinned it
+      // from. Pinning to the row's own id, rather than leaving it unset,
+      // satisfies the policy for both this account row and the membership
+      // row inserted below (account_id = that same setting).
+      const accountId = crypto.randomUUID();
+      await queryRunner.query(
+        `SELECT set_config('app.current_account_id', $1, true)`,
+        [accountId],
+      );
+
       // Create user
       const user = queryRunner.manager.create(User, {
         email,
@@ -207,6 +222,7 @@ export class AuthService {
 
       // Create account
       const account = queryRunner.manager.create(Account, {
+        id: accountId,
         workspaceId: workspace.id,
         name: dto.workspace_name,
       });
@@ -451,10 +467,7 @@ export class AuthService {
       }
     }
 
-    const memberships = await this.membershipRepo.find({
-      where: { userId: user.id },
-      relations: { account: { workspace: true } },
-    });
+    const memberships = await this.findMembershipsForUser(user.id);
 
     const tokens = await this.issueTokens(user, memberships);
 
@@ -591,6 +604,25 @@ export class AuthService {
     };
   }
 
+  // membership's tenant_isolation policy is scoped by account_id, which is
+  // exactly what this lookup doesn't have yet -- it's how login (and
+  // email verification, via issueTokens below) discover which accounts a
+  // user belongs to in the first place. membership_self_lookup (migration
+  // 1740000000000) is a second, SELECT-only permissive policy keyed on the
+  // caller's own user id for exactly this case; every read of membership
+  // by a not-yet-account-scoped user id must go through this helper so
+  // that policy's app.current_user_id actually gets set, rather than
+  // querying membershipRepo directly and silently getting zero rows.
+  private async findMembershipsForUser(userId: string): Promise<Membership[]> {
+    return this.dataSource.transaction(async (manager) => {
+      await manager.query(`SELECT set_config('app.current_user_id', $1, true)`, [userId]);
+      return manager.find(Membership, {
+        where: { userId },
+        relations: { account: { workspace: true } },
+      });
+    });
+  }
+
   private async issueTokens(user: User, memberships?: Membership[]) {
     let membershipData: any[] = [];
     if (memberships) {
@@ -599,9 +631,7 @@ export class AuthService {
         role: m.role,
       }));
     } else {
-      const mems = await this.membershipRepo.find({
-        where: { userId: user.id },
-      });
+      const mems = await this.findMembershipsForUser(user.id);
       membershipData = mems.map((m) => ({
         account_id: m.accountId,
         role: m.role,

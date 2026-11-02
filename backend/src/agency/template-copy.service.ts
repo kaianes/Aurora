@@ -36,7 +36,11 @@ export class TemplateCopyService {
     await queryRunner.startTransaction();
     try {
       await queryRunner.query(`SET LOCAL app.agency_template_copy = 'true'`);
-      await queryRunner.query(`SET LOCAL app.current_workspace_id = $1`, [workspaceId]);
+      // SET LOCAL's grammar does not accept a bind parameter in the value
+      // position ("syntax error at or near $1", found 2026-11-02 fixing the
+      // same defect in TenantContextRunner) -- set_config() is the
+      // parameterized equivalent.
+      await queryRunner.query(`SELECT set_config('app.current_workspace_id', $1, true)`, [workspaceId]);
 
       const sourceTemplates = await queryRunner.manager.find(CampaignTemplate, {
         where: { accountId: sourceAccountId },
@@ -74,7 +78,11 @@ export class TemplateCopyService {
     await queryRunner.startTransaction();
     try {
       await queryRunner.query(`SET LOCAL app.agency_template_copy = 'true'`);
-      await queryRunner.query(`SET LOCAL app.current_workspace_id = $1`, [workspaceId]);
+      // SET LOCAL's grammar does not accept a bind parameter in the value
+      // position ("syntax error at or near $1", found 2026-11-02 fixing the
+      // same defect in TenantContextRunner) -- set_config() is the
+      // parameterized equivalent.
+      await queryRunner.query(`SELECT set_config('app.current_workspace_id', $1, true)`, [workspaceId]);
 
       const saved = await queryRunner.manager.save(
         queryRunner.manager.create(

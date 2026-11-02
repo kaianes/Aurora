@@ -27,7 +27,14 @@ export class TenantContextRunner {
       // accountId is already UUID-validated by RolesGuard/AccountAccessService
       // before this is ever called -- never string-interpolated here, bound
       // as a parameter instead, same as the middleware this replaces.
-      await this.dataSource.query('SET LOCAL app.current_account_id = $1', [accountId]);
+      // SET LOCAL's grammar does not accept a bind parameter in the value
+      // position ("syntax error at or near $1") -- set_config() is the
+      // parameterized equivalent; its third argument (is_local = true) makes
+      // it transaction-scoped exactly like SET LOCAL.
+      await this.dataSource.query(
+        `SELECT set_config('app.current_account_id', $1, true)`,
+        [accountId],
+      );
       return work();
     });
   }
