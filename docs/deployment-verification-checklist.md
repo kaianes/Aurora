@@ -8,6 +8,26 @@ Use this after redeploying `main` to Railway + Vercel (see the rollout plan disc
 
 ---
 
+## Live verification log
+
+A pass against the live deployment on 2026-11-02, **before** the Fase 4 Postgres role switch (so section 1 below was not yet meaningful — RLS was still bypassed), confirmed:
+
+- E1: register (brand), login, brand-profile save, team page all work (as Marina).
+- E2: Marina's existing campaigns (confirmed/cancelled/draft) load; the confirmed one's quote/locked-price/pool view loads.
+- E3: shortlist generation and creator approval work on a confirmed campaign.
+- E4: both brand-level and campaign-level safety-ruleset pages load correctly.
+- E5: briefing composer loads and saves a draft successfully.
+- E6: invoice generation correctly *refuses* with "campaign hasn't reached a billable state" — this is the already-known `CONFIRMED → ACTIVE` gap surfacing here too, not a new bug.
+- E7: campaign dashboard loads (empty, expected with no delivered pool); **"Comparar Clientes" (cross-client comparison) ran successfully as Renata** — this is the exact code path with today's `SET LOCAL app.current_workspace_id = $1` syntax fix, confirmed working live.
+- E8: creator self-registration (`/creator-portal/register`) completes successfully.
+- E9: Renata's account-switcher, client list, and audit log all work; the audit log even showed this session's own `user.login` entry, confirming the `AuditService.log()` no-`RETURNING` fix is live too.
+
+**Not yet verified live** (needs Fase 4, the Postgres role switch, to mean anything): the actual tenant-isolation cross-account block (section 1), register→verify→login under real RLS, and the brand-safety cron under real RLS. Run section 1 again after Fase 4.
+
+**Side effects of this pass, for the record:** Marina's brand profile name was set to "Checklist Marina Brand" (it was blank before), one creator was approved on campaign "TESTE NOVA CAMPANHA"'s shortlist, and a briefing draft was saved on that same campaign. Two new, never-verified accounts were also registered and left as-is: `live-checklist-tenant-a@example.com` and `live-checklist-creator@example.com`.
+
+---
+
 ## 1. Tenant isolation — the actual point of this deploy
 
 This is the one section that directly proves today's fix landed. Do this first; if it fails, nothing below matters yet.
