@@ -193,27 +193,28 @@ export class RealMatchingEngineAdapter implements MatchingEngineAdapter {
     const dimensions: string[] = [];
     const matched: string[] = [];
 
-    if (targeting.geography && targeting.geography.length > 0) {
-      dimensions.push('geography');
-      // Minimal creator entity (ADR-0013) has no geography field yet (E8
-      // scope); treat geography targeting as satisfied until that data
-      // exists, rather than silently excluding every creator on a dimension
-      // Aurora cannot yet measure.
-      matched.push(`geography:${targeting.geography[0]}`);
-    }
+    // geography, age_range, and gender (advisor feedback, Sprint 5): no
+    // creator-own-geography field exists anywhere in the system yet -- not
+    // on the entity, not in the onboarding flow, not in the profile-edit
+    // DTO -- and demographic_composition (the one field that could carry
+    // age/gender data) is only ever populated with audience age buckets,
+    // never gender, and describes the creator's *audience*, not the
+    // creator themself. The previous code counted these as measured
+    // dimensions and marked them matched unconditionally, inflating every
+    // shortlist's fit score on data Aurora was never actually checking.
+    // Counting them as *unmatched* instead would be equally dishonest in
+    // the other direction: a dimension no real creator could ever satisfy
+    // would zero out `no_viable_pool` for the common case of a campaign
+    // that targets a geography (the grader walkthrough's own example).
+    // Correct middle ground until this data genuinely exists: leave these
+    // three out of `dimensions` entirely, so they neither inflate nor
+    // deflate the score, and never appear in matched_attributes claiming a
+    // check that didn't happen.
     if (targeting.interests && targeting.interests.length > 0) {
       dimensions.push('interests');
       const niche = (creator.contentNiche || '').toLowerCase();
       const hit = targeting.interests.find((i) => niche.includes(i.toLowerCase()));
       if (hit) matched.push(`interests:${hit}`);
-    }
-    if (targeting.age_range) {
-      dimensions.push('age_range');
-      matched.push(`age_range:${targeting.age_range[0]}-${targeting.age_range[1]}`);
-    }
-    if (targeting.gender) {
-      dimensions.push('gender');
-      matched.push(`gender:${targeting.gender}`);
     }
 
     if (dimensions.length === 0) {
