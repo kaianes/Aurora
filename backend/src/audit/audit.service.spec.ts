@@ -29,9 +29,24 @@ describe('AuditService - FR-60 audit log read path', () => {
     service = new AuditService(auditLogRepository as any, userRepository as any);
   });
 
-  // ---- log() is unchanged by this epic -- a regression guard, not new
-  // coverage, since no spec file existed for this method before. ----
+  // ---- log() writes via insert().updateEntity(false) rather than
+  // create()/save(), skipping the implicit RETURNING .save() would issue --
+  // audit_log's read policy (target_account_id = current session's pinned
+  // account) would reject that RETURNING whenever a write legitimately
+  // targets a different account or none at all (tenant-isolation
+  // remediation fallout, 2026-11-02). A regression guard, not new coverage,
+  // since no spec file existed for this method before. ----
   it('writes an audit log entry with the given fields', async () => {
+    const values = vi.fn().mockReturnThis();
+    const insertQb: any = {
+      insert: vi.fn().mockReturnThis(),
+      into: vi.fn().mockReturnThis(),
+      values,
+      updateEntity: vi.fn().mockReturnThis(),
+      execute: vi.fn().mockResolvedValue({}),
+    };
+    auditLogRepository.createQueryBuilder.mockReturnValue(insertQb);
+
     await service.log({
       actorUserId: 'user-1',
       targetAccountId: 'acct-1',
@@ -41,8 +56,9 @@ describe('AuditService - FR-60 audit log read path', () => {
       userAgent: 'vitest',
     });
 
-    expect(auditLogRepository.save).toHaveBeenCalled();
-    const created = auditLogRepository.create.mock.calls[0][0];
+    expect(insertQb.updateEntity).toHaveBeenCalledWith(false);
+    expect(insertQb.execute).toHaveBeenCalled();
+    const created = values.mock.calls[0][0];
     expect(created.action).toBe('client_account.created');
     expect(created.metadata).toEqual({ foo: 'bar' });
   });

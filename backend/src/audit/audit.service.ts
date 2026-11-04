@@ -25,15 +25,30 @@ export class AuditService {
   ) {}
 
   async log(entry: AuditLogEntry): Promise<void> {
-    const auditLog = this.auditLogRepository.create({
-      actorUserId: entry.actorUserId,
-      targetAccountId: entry.targetAccountId,
-      action: entry.action,
-      metadata: entry.metadata || {},
-      ipAddress: entry.ipAddress || null,
-      userAgent: entry.userAgent || null,
-    });
-    await this.auditLogRepository.save(auditLog);
+    // .save() asks Postgres to RETURNING the inserted row so it can update
+    // the in-memory entity's generated columns. audit_log's write policy is
+    // intentionally unconditional (WITH CHECK (true), ADR-0062) because
+    // writes legitimately target another account or no account at all --
+    // but RETURNING is evaluated against the *read* policy
+    // (target_account_id = current session's account), which an off-tenant
+    // or pre-account-context write (e.g. user.registered, user.login) will
+    // never satisfy. Nothing here reads the inserted row back, so skip
+    // RETURNING entirely via updateEntity(false) rather than widen the read
+    // policy to cover a case it was deliberately written not to.
+    await this.auditLogRepository
+      .createQueryBuilder()
+      .insert()
+      .into(AuditLog)
+      .values({
+        actorUserId: entry.actorUserId,
+        targetAccountId: entry.targetAccountId,
+        action: entry.action,
+        metadata: entry.metadata || {},
+        ipAddress: entry.ipAddress || null,
+        userAgent: entry.userAgent || null,
+      })
+      .updateEntity(false)
+      .execute();
   }
 
   // FR-60, section 5.4 of the E9 architecture doc. The tenant boundary is

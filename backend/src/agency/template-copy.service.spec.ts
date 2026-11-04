@@ -61,7 +61,7 @@ describe('TemplateCopyService - US-41', () => {
       const count = await service.copyAllTemplates('source-acct', 'target-acct', 'ws-1');
 
       expect(queryRunner.query).toHaveBeenCalledWith(`SET LOCAL app.agency_template_copy = 'true'`);
-      expect(queryRunner.query).toHaveBeenCalledWith(`SET LOCAL app.current_workspace_id = $1`, ['ws-1']);
+      expect(queryRunner.query).toHaveBeenCalledWith(`SELECT set_config('app.current_workspace_id', $1, true)`, ['ws-1']);
       expect(count).toBe(2);
       expect(queryRunner.manager.save).toHaveBeenCalledTimes(2);
 
@@ -111,7 +111,7 @@ describe('TemplateCopyService - US-41', () => {
       const result = await service.copyOne(source as any, 'target-acct', 'ws-1');
 
       expect(queryRunner.query).toHaveBeenCalledWith(`SET LOCAL app.agency_template_copy = 'true'`);
-      expect(queryRunner.query).toHaveBeenCalledWith(`SET LOCAL app.current_workspace_id = $1`, ['ws-1']);
+      expect(queryRunner.query).toHaveBeenCalledWith(`SELECT set_config('app.current_workspace_id', $1, true)`, ['ws-1']);
       const created = queryRunner.manager.create.mock.calls[0][1];
       expect(created.accountId).toBe('target-acct');
       expect(created.copiedFromTemplateId).toBe('tmpl-source');

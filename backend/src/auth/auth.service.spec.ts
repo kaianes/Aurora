@@ -18,6 +18,7 @@ const mockQueryRunner = {
   commitTransaction: vi.fn(),
   rollbackTransaction: vi.fn(),
   release: vi.fn(),
+  query: vi.fn().mockResolvedValue(undefined),
   manager: {
     create: vi.fn((_Entity: any, data: any) => ({ id: 'generated-id', ...data })),
     save: vi.fn((entity: any) => Promise.resolve(entity)),
