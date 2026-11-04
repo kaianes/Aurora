@@ -22,7 +22,7 @@ A pass against the live deployment on 2026-11-02, **before** the Fase 4 Postgres
 - E8: creator self-registration (`/creator-portal/register`) completes successfully.
 - E9: Renata's account-switcher, client list, and audit log all work; the audit log even showed this session's own `user.login` entry, confirming the `AuditService.log()` no-`RETURNING` fix is live too.
 
-**Not yet verified live** (needs Fase 4, the Postgres role switch, to mean anything): the actual tenant-isolation cross-account block (section 1), register→verify→login under real RLS, and the brand-safety cron under real RLS. Run section 1 again after Fase 4.
+**Update 2026-11-04:** Fase 4 (the Postgres role switch) is done. Section 1's actual cross-account block is now verified — see that section for details. Still not verified: the brand-safety cron and `template-copy.service.ts` under real RLS (no Railway log access, no template existed to copy with the accounts available).
 
 **Side effects of this pass, for the record:** Marina's brand profile name was set to "Checklist Marina Brand" (it was blank before), one creator was approved on campaign "TESTE NOVA CAMPANHA"'s shortlist, and a briefing draft was saved on that same campaign. Two new, never-verified accounts were also registered and left as-is: `live-checklist-tenant-a@example.com` and `live-checklist-creator@example.com`.
 
@@ -30,7 +30,18 @@ A pass against the live deployment on 2026-11-02, **before** the Fase 4 Postgres
 
 ## 1. Tenant isolation — the actual point of this deploy
 
-This is the one section that directly proves today's fix landed. Do this first; if it fails, nothing below matters yet.
+**✅ Done, 2026-11-04.** The user switched Railway's `DB_USERNAME`/`DB_PASSWORD` to the new `aurora_app` role (non-superuser, `NOBYPASSRLS`). Immediately after, verified directly against production using the two real, independent demo accounts (Marina/brand, Renata/agency — no fresh registration needed since both were already verified):
+
+- [x] Marina and Renata both log in with a correctly-populated `memberships` array.
+- [x] A fresh `POST /v1/auth/register` succeeds with no 500.
+- [x] Marina `PATCH`ing Renata's `brand_profile` by its real UUID → `404 PROFILE_NOT_FOUND`.
+- [x] Renata `PATCH`ing Marina's `brand_profile` by its real UUID → `404 PROFILE_NOT_FOUND` (symmetric).
+- [x] Each still reads her own profile normally via `GET /v1/brand-profiles/current`.
+
+**Tenant isolation is proven in production, not just locally.** The steps below are kept for future reference (e.g. re-verifying after a schema change) but don't need to be repeated right now.
+
+<details>
+<summary>Original step-by-step (for future re-verification)</summary>
 
 - [ ] Register Tenant A: `POST /v1/auth/register` (or the `/register` page) with a fresh email, `workspace_type: "brand"`.
 - [ ] Find A's verification link in Railway's backend **Logs** tab (`EMAIL_PROVIDER=console`, so it's printed, not emailed) and open it, or call `/v1/auth/verify-email`.
@@ -38,11 +49,13 @@ This is the one section that directly proves today's fix landed. Do this first; 
 - [ ] Repeat the three steps above for Tenant B, a second, independent new account.
 - [ ] As A, create a brand profile (`POST /v1/brand-profiles` or `/app/brand-profile`). Note its `id`.
 - [ ] As B, create a brand profile too. Note its `id`.
-- [ ] **As B, try to `PATCH /v1/brand-profiles/{A's id}`** (with B's token and B's `X-Account-Id`). Expected: `404 PROFILE_NOT_FOUND` — the row must be invisible, not merely forbidden.
-- [ ] **As A, try to `PATCH /v1/brand-profiles/{B's id}`** the same way. Expected: `404` too (symmetric).
-- [ ] As A, confirm `GET /v1/brand-profiles/current` still returns A's own profile normally (the fix didn't just lock everyone out).
+- [ ] As B, try to `PATCH /v1/brand-profiles/{A's id}` (with B's token and B's `X-Account-Id`). Expected: `404 PROFILE_NOT_FOUND`.
+- [ ] As A, try to `PATCH /v1/brand-profiles/{B's id}` the same way. Expected: `404` too (symmetric).
+- [ ] As A, confirm `GET /v1/brand-profiles/current` still returns A's own profile normally.
 
-If any of these behave differently from expected, check Railway's **Logs** for the exact error before reporting — compare against section 3 below, since several of these exact failure modes were already seen and fixed once.
+If any of these ever behave differently from expected, check Railway's **Logs** for the exact error before reporting — compare against section 3 below, since several of these exact failure modes were already seen and fixed once.
+
+</details>
 
 ---
 
@@ -121,12 +134,13 @@ Each item names the role needed. Skip items under roles you don't have a seeded 
 
 ## 3. What this session fixed — re-verify these specifically live
 
-These are new as of 2026-11-02 and have no automated test against a real deployed Postgres yet — the local verification is in `project_rls_bypassrls_confirmed.md`, but the live environment hasn't been checked.
+These were new as of 2026-11-02; most are now confirmed live as of 2026-11-04 (after the Fase 4 role switch).
 
-- [ ] Section 1 above (tenant isolation) passing at all *is* the primary proof.
-- [ ] Register → verify → login completes without a 500 (previously broke under real RLS enforcement).
-- [ ] Watch Railway's **Logs** for `BrandSafetyScheduledTasksService` — within ~2 minutes of any deploy, you should see either nothing (no stale checks) or `Expired N pending safety checks to check_unavailable` with **no** `invalid input syntax for type uuid` error.
-- [ ] If you exercise E7's agency cross-client comparison or E9's template copy (the two other places with the same `SET LOCAL = $1` syntax bug, also fixed today), confirm no `syntax error at or near "$1"` in the logs.
+- [x] Section 1 above (tenant isolation) — the primary proof, confirmed.
+- [x] Register → verify → login completes without a 500.
+- [x] E7's agency cross-client comparison (`SET LOCAL = $1` fix) — ran successfully live as Renata, no `syntax error at or near "$1"`.
+- [ ] Watch Railway's **Logs** for `BrandSafetyScheduledTasksService` — within ~2 minutes of any deploy, you should see either nothing (no stale checks) or `Expired N pending safety checks to check_unavailable` with **no** `invalid input syntax for type uuid` error. **Not checked** — no Railway log access this session.
+- [ ] E9's template copy (the other place with the same `SET LOCAL = $1` syntax bug). **Not checked** — no template existed to copy with the accounts available.
 
 ---
 
