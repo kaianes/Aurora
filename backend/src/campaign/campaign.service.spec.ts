@@ -160,8 +160,10 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
     );
   });
 
-  // US-07 scenario 1: confirming locks the price and moves to confirmed.
-  it('confirms a quoted campaign and locks the price', async () => {
+  // US-07 scenario 1 + E2 architecture section 2.6: confirming locks the
+  // price, and with no timeline_start to wait for, launches immediately
+  // rather than stranding the campaign in confirmed indefinitely.
+  it('confirms a quoted campaign, locks the price, and activates immediately when there is no timeline_start to wait for', async () => {
     const campaign = { id: 'camp-1', state: CampaignState.QUOTED, timelineStart: null };
     campaignRepo.findOne.mockResolvedValue(campaign);
     quoteRepo.findOne.mockResolvedValue({
@@ -173,9 +175,38 @@ describe('CampaignService - US-05/US-06/US-07/US-09', () => {
 
     const result = await service.confirm('camp-1', 'account-1', actor);
 
-    expect(result.state).toBe(CampaignState.CONFIRMED);
+    expect(result.state).toBe(CampaignState.ACTIVE);
     expect(result.locked_price).toBe('5000.00');
+    expect(result.activated_at).toBeDefined();
     expect(boundsRepo.save).toHaveBeenCalled();
+    expect(campaignRepo.save).toHaveBeenLastCalledWith(
+      expect.objectContaining({ state: CampaignState.ACTIVE }),
+    );
+  });
+
+  // E2 architecture section 2.6: a future timeline_start stays confirmed --
+  // CampaignScheduledTasksService.activateDueCampaigns() is what eventually
+  // moves it to active once that date arrives.
+  it('stays confirmed (not active) when timeline_start is still in the future', async () => {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const campaign = { id: 'camp-1', state: CampaignState.QUOTED, timelineStart: future };
+    campaignRepo.findOne.mockResolvedValue(campaign);
+    quoteRepo.findOne.mockResolvedValue({
+      id: 'quote-1',
+      status: CampaignQuoteStatus.READY,
+      totalPrice: '5000.00',
+      guaranteedMinPoolSize: 10,
+    });
+
+    const result = await service.confirm('camp-1', 'account-1', actor);
+
+    expect(result.state).toBe(CampaignState.CONFIRMED);
+    expect(result.activated_at).toBeUndefined();
+    expect(campaignQueue.add).toHaveBeenCalledWith(
+      'pool-fill-check',
+      { campaignId: 'camp-1' },
+      expect.objectContaining({ delay: expect.any(Number) }),
+    );
   });
 
   it('rejects confirmation when the quote is not ready', async () => {

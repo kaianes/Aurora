@@ -3,15 +3,17 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { LessThan, Repository } from 'typeorm';
+import { LessThan, LessThanOrEqual, Repository } from 'typeorm';
 import {
   CampaignQuote,
   CampaignQuoteStatus,
   Campaign,
   CampaignState,
+  CampaignStateTransition,
   ReallocationBounds,
 } from '../database/entities';
 import { PerformanceScoringService } from '../analytics/performance-scoring.service';
+import { AuditService } from '../audit/audit.service';
 
 const PENDING_QUOTE_SAFETY_WINDOW_MS = (90 + 120) * 1000; // 90s timeout + 2min safety net
 
@@ -29,6 +31,9 @@ export class CampaignScheduledTasksService {
     @InjectQueue('campaign')
     private campaignQueue: Queue,
     private performanceScoringService: PerformanceScoringService,
+    @InjectRepository(CampaignStateTransition)
+    private transitionRepo: Repository<CampaignStateTransition>,
+    private auditService: AuditService,
   ) {}
 
   // Enqueues a reallocate-budget job for every active campaign that has
@@ -60,6 +65,44 @@ export class CampaignScheduledTasksService {
         performance,
       });
     }
+  }
+
+  // E2 architecture section 2.6: the "launch date reached (scheduled job)"
+  // half of confirmed -> active. CampaignService.confirm() already handles
+  // the "immediate launch if timeline_start <= now" half synchronously at
+  // confirm time -- any campaign still sitting in confirmed by the time
+  // this runs necessarily has a future timeline_start (confirmed campaigns
+  // aren't editable, so it can't have been pushed into the past since).
+  // No system-attributable user for this transition (actorUserId: null),
+  // same convention as every other cron-triggered state change in this
+  // codebase (e.g. BrandSafetyScheduledTasksService.expirePendingChecks).
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async activateDueCampaigns() {
+    const due = await this.campaignRepo.find({
+      where: { state: CampaignState.CONFIRMED, timelineStart: LessThanOrEqual(new Date()) },
+    });
+    if (due.length === 0) return;
+
+    for (const campaign of due) {
+      campaign.state = CampaignState.ACTIVE;
+      await this.campaignRepo.save(campaign);
+
+      const transition = this.transitionRepo.create({
+        campaignId: campaign.id,
+        fromState: CampaignState.CONFIRMED,
+        toState: CampaignState.ACTIVE,
+        actorUserId: null,
+      });
+      await this.transitionRepo.save(transition);
+
+      await this.auditService.log({
+        actorUserId: null,
+        targetAccountId: campaign.accountId,
+        action: 'campaign.activated',
+        metadata: { campaign_id: campaign.id, trigger: 'timeline_start_reached' },
+      });
+    }
+    this.logger.log(`Activated ${due.length} campaign(s) whose launch date was reached`);
   }
 
   // Safety net for a crashed worker: any quote stuck pending past its

@@ -481,12 +481,37 @@ export class CampaignService {
       );
     }
 
+    // E2 architecture section 2.6: confirmed -> active fires "on launch date
+    // reached (scheduled job) or immediate launch if timeline_start <= now".
+    // No timeline_start at all is treated the same as "already due" -- there
+    // is no future date to wait for. A future timeline_start is left in
+    // confirmed; CampaignScheduledTasksService.activateDueCampaigns() is the
+    // scheduled-job half of this same rule.
+    let finalState: CampaignState = saved.state;
+    let activatedAt: Date | null = null;
+    if (!saved.timelineStart || new Date(saved.timelineStart) <= new Date()) {
+      saved.state = CampaignState.ACTIVE;
+      const activated = await this.campaignRepo.save(saved);
+      await this.writeTransition(id, CampaignState.CONFIRMED, CampaignState.ACTIVE, actor.userId);
+      await this.auditService.log({
+        actorUserId: actor.userId,
+        targetAccountId: accountId,
+        action: 'campaign.activated',
+        metadata: { campaign_id: id, trigger: 'immediate_on_confirm' },
+        ipAddress: actor.ipAddress,
+        userAgent: actor.userAgent,
+      });
+      finalState = activated.state;
+      activatedAt = activated.updatedAt;
+    }
+
     return {
       id: saved.id,
-      state: saved.state,
+      state: finalState,
       locked_price: saved.lockedPrice,
       guaranteed_min_pool_size: saved.guaranteedMinPoolSize,
       confirmed_at: saved.updatedAt.toISOString(),
+      ...(activatedAt ? { activated_at: activatedAt.toISOString() } : {}),
     };
   }
 
