@@ -29,6 +29,7 @@ interface AuthContextType extends AuthState {
   logout: () => void;
   refreshWorkspace: () => Promise<void>;
   switchAccount: (accountId: string) => void;
+  updateUser: (patch: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -116,6 +117,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refreshWorkspace],
   );
 
+  const updateUser = useCallback((patch: Partial<User>) => {
+    setUser((current) => {
+      if (!current) return current;
+      const updated = { ...current, ...patch };
+      localStorage.setItem(USER_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -128,8 +138,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       refreshWorkspace,
       switchAccount,
+      updateUser,
     }),
-    [user, memberships, workspace, isAuthenticated, isLoading, currentRole, login, logout, refreshWorkspace, switchAccount],
+    [
+      user,
+      memberships,
+      workspace,
+      isAuthenticated,
+      isLoading,
+      currentRole,
+      login,
+      logout,
+      refreshWorkspace,
+      switchAccount,
+      updateUser,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
