@@ -104,6 +104,7 @@ cd backend
 cp .env.example .env
 npm install
 npx tsx src/database/run-migrations.ts
+npm run seed:creators     # populates 30 qualified creators -- without this, every shortlist comes back empty
 npm run start:dev        # http://localhost:3001/v1
 
 # 3. Frontend (separate terminal)
