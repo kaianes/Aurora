@@ -39,6 +39,34 @@ backend:test:
     - npm ci --cache .npm --prefer-offline
     - npm test
 
+# Tier 3 item (advisor feedback): real-Postgres integration tests. The
+# service's hostname is the image name by default on GitLab's docker
+# executor ("postgres" below, not "localhost" as in GitHub Actions' own
+# service-container networking). test/e2e/global-setup.ts creates its own
+# aurora_test database, runs migrations, and provisions the real
+# aurora_app role itself, same as locally.
+backend:test:e2e:
+  stage: test
+  <<: *backend-rules
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+  variables:
+    POSTGRES_USER: aurora
+    POSTGRES_PASSWORD: aurora
+    POSTGRES_DB: aurora
+    DB_HOST: postgres
+    DB_MIGRATION_USERNAME: aurora
+    DB_MIGRATION_PASSWORD: aurora
+  cache:
+    key: backend-npm
+    paths:
+      - backend/.npm/
+  script:
+    - cd backend
+    - npm ci --cache .npm --prefer-offline
+    - npm run test:e2e
+
 backend:build:
   stage: build
   <<: *backend-rules
