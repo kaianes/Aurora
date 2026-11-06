@@ -12,6 +12,7 @@ import { LoginPage } from '@/pages/auth/login-page';
 import { AcceptInvitationPage } from '@/pages/auth/accept-invitation-page';
 import { BrandProfilePage } from '@/pages/app/brand-profile-page';
 import { TeamPage } from '@/pages/app/team-page';
+import { SecurityPage } from '@/pages/app/security-page';
 import { ClientsPage } from '@/pages/app/clients-page';
 import { ClientDetailPage } from '@/pages/app/client-detail-page';
 import { CampaignsPage } from '@/pages/app/campaigns-page';
@@ -99,6 +100,7 @@ export default function App() {
             >
               <Route path="brand-profile" element={<BrandProfilePage />} />
               <Route path="team" element={<TeamPage />} />
+              <Route path="security" element={<SecurityPage />} />
               <Route path="campaigns" element={<CampaignsPage />} />
               <Route path="campaigns/new" element={<CampaignFormPage />} />
               <Route path="campaigns/:id/edit" element={<CampaignFormPage />} />

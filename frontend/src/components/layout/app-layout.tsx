@@ -107,6 +107,9 @@ export function AppLayout() {
             <NavLink to="/app/team" className={navLinkClass}>
               Equipe
             </NavLink>
+            <NavLink to="/app/security" className={navLinkClass}>
+              Seguranca
+            </NavLink>
             {isAgency && (
               <NavLink to="/app/clients" className={navLinkClass}>
                 Clientes
