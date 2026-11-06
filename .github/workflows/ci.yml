@@ -12,6 +12,24 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: aurora
+          POSTGRES_PASSWORD: aurora
+          POSTGRES_DB: aurora
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_HOST: localhost
+      DB_MIGRATION_USERNAME: aurora
+      DB_MIGRATION_PASSWORD: aurora
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,6 +41,12 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm test
+      # Tier 3 item (advisor feedback): real-Postgres integration tests,
+      # against the same postgres:16-alpine superuser the docker-compose.yml
+      # local setup uses -- the e2e harness (test/e2e/global-setup.ts)
+      # creates its own aurora_test database, runs migrations, and
+      # provisions the real aurora_app role itself, same as locally.
+      - run: npm run test:e2e
 
   frontend:
     runs-on: ubuntu-latest
