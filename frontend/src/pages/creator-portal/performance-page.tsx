@@ -28,7 +28,7 @@ const INGESTION_LABEL: Record<IngestionStatus, string> = {
   pending_first_pull: 'Aguardando primeira coleta',
   fresh: 'Atualizado',
   stale_rate_limited: 'Desatualizado (limite da plataforma)',
-  stale_unreachable: 'Desatualizado (plataforma indisponivel)',
+  stale_unreachable: 'Desatualizado (plataforma indisponível)',
   stale_auth_revoked: 'Autorizacao perdida',
 };
 
@@ -48,14 +48,14 @@ function PerformanceCard({ entry }: { entry: CreatorPerformanceEntry }) {
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-text-dark">{entry.campaign_name}</h3>
+          <h3 className="text-sm font-semibold text-text-primary">{entry.campaign_name}</h3>
           <a
             href={entry.published_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-primary hover:underline"
+            className="text-xs text-violet-400 hover:underline"
           >
-            Ver publicacao
+            Ver publicação
           </a>
         </div>
         <Badge variant={INGESTION_BADGE[entry.ingestion_status]} className="shrink-0">
@@ -63,16 +63,16 @@ function PerformanceCard({ entry }: { entry: CreatorPerformanceEntry }) {
         </Badge>
       </div>
 
-      <div className="mt-4 space-y-1.5 border-t border-border pt-3">
-        <p className="flex items-center font-mono text-sm text-text-dark">
+      <div className="mt-4 space-y-1.5 border-t border-border-default pt-3">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-signal-green)" />
           Alcance: {formatNumber(entry.reach)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-performance-orange)" />
           Engajamento: {formatNumber(entry.engagement)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-strategy-violet)" />
           Impressoes: {formatNumber(entry.impressions)}
         </p>
@@ -84,7 +84,7 @@ function PerformanceCard({ entry }: { entry: CreatorPerformanceEntry }) {
         </Alert>
       )}
 
-      <p className="font-mono text-xs text-muted mt-3">Publicado em {formatDateTime(entry.published_at)}</p>
+      <p className="font-mono text-xs text-text-secondary mt-3">Publicado em {formatDateTime(entry.published_at)}</p>
     </Card>
   );
 }
@@ -116,7 +116,7 @@ export function CreatorPerformancePage() {
       <Alert variant="error">
         {isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel carregar seu desempenho agora.'}
+          : 'Não foi possível carregar seu desempenho agora.'}
       </Alert>
     );
   }
@@ -127,12 +127,12 @@ export function CreatorPerformancePage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
         <CardTitle>Seu desempenho</CardTitle>
-        <CardDescription>Alcance e engajamento de cada conteudo que voce publicou.</CardDescription>
+        <CardDescription>Alcance e engajamento de cada conteúdo que voce publicou.</CardDescription>
       </CardHeader>
 
       {entries.length === 0 ? (
         <Card>
-          <p className="text-sm text-muted py-6 text-center">Nenhum conteudo publicado ainda.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Nenhum conteúdo publicado ainda.</p>
         </Card>
       ) : (
         <div className="space-y-4">

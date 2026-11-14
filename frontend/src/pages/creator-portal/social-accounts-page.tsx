@@ -18,7 +18,7 @@ const PLATFORMS: { value: SocialPlatform; label: string }[] = [
 
 const DISCONNECT_REASON_LABEL: Record<string, string> = {
   revoked_by_platform: 'Acesso revogado pela plataforma',
-  refresh_failed: 'Nao foi possivel renovar a autorizacao',
+  refresh_failed: 'Não foi possível renovar a autorizacao',
   manual: 'Desconectado manualmente',
 };
 
@@ -48,9 +48,9 @@ function AccountRow({ platform, label, account }: { platform: SocialPlatform; la
             aria-hidden="true"
           />
           <div>
-            <p className="text-sm font-semibold text-text-dark">{label}</p>
+            <p className="text-sm font-semibold text-text-primary">{label}</p>
             {account && (
-              <p className="text-xs text-muted font-mono">
+              <p className="text-xs text-text-secondary font-mono">
                 {account.platform_handle ?? ''}
                 {isConnected
                   ? ` · conectado em ${new Date(account.connected_at).toLocaleDateString('pt-BR')}`
@@ -78,7 +78,7 @@ function AccountRow({ platform, label, account }: { platform: SocialPlatform; la
       {account?.status === 'disconnected' && account.disconnect_reason && (
         <Alert variant={account.disconnect_reason === 'manual' ? 'info' : 'warning'} className="mt-3">
           {DISCONNECT_REASON_LABEL[account.disconnect_reason] ?? account.disconnect_reason}
-          {account.disconnect_reason !== 'manual' && ' -- reconecte para voltar a receber metricas atualizadas.'}
+          {account.disconnect_reason !== 'manual' && ' -- reconecte para voltar a receber métricas atualizadas.'}
         </Alert>
       )}
 
@@ -86,7 +86,7 @@ function AccountRow({ platform, label, account }: { platform: SocialPlatform; la
         <Alert variant="error" className="mt-3">
           {isAxiosError(authorizeMutation.error) && authorizeMutation.error.response?.data?.error?.message
             ? authorizeMutation.error.response.data.error.message
-            : 'Nao foi possivel iniciar a conexao agora.'}
+            : 'Não foi possível iniciar a conexao agora.'}
         </Alert>
       )}
     </Card>
@@ -125,7 +125,7 @@ export function SocialAccountsPage() {
         <CardDescription>Gerencie as redes sociais ligadas ao seu perfil.</CardDescription>
       </CardHeader>
 
-      {error && <Alert variant="error">Nao foi possivel carregar suas conexoes agora.</Alert>}
+      {error && <Alert variant="error">Não foi possível carregar suas conexoes agora.</Alert>}
 
       <div className="space-y-3">
         {PLATFORMS.map(({ value, label }) => (

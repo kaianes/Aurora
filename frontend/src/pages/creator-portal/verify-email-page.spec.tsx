@@ -68,7 +68,7 @@ describe('CreatorVerifyEmailPage - email verification (section 5.2)', () => {
     searchParamsValue = '';
     renderPage();
 
-    expect(await screen.findByText(/Token de verificacao ausente/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Token de verificação ausente/i)).toBeInTheDocument();
     expect(creatorPortalApi.verifyEmail).not.toHaveBeenCalled();
   });
 
@@ -82,7 +82,7 @@ describe('CreatorVerifyEmailPage - email verification (section 5.2)', () => {
         data: {
           error: {
             code: 'VERIFICATION_EXPIRED',
-            message: 'O link de verificacao expirou. Solicite um novo link.',
+            message: 'O link de verificação expirou. Solicite um novo link.',
           },
         },
       },
@@ -90,7 +90,7 @@ describe('CreatorVerifyEmailPage - email verification (section 5.2)', () => {
 
     renderPage();
 
-    expect(await screen.findByText('O link de verificacao expirou. Solicite um novo link.')).toBeInTheDocument();
+    expect(await screen.findByText('O link de verificação expirou. Solicite um novo link.')).toBeInTheDocument();
     expect(setCreatorToken).not.toHaveBeenCalled();
     expect(navigateMock).not.toHaveBeenCalled();
   });

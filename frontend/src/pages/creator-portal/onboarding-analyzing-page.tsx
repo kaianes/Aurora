@@ -45,7 +45,7 @@ export function OnboardingAnalyzingPage() {
       <Card>
         <div className="flex flex-col items-center gap-3 py-8 text-center">
           <Spinner />
-          <p className="text-sm text-muted">Isso leva apenas alguns instantes.</p>
+          <p className="text-sm text-text-secondary">Isso leva apenas alguns instantes.</p>
         </div>
       </Card>
     </div>

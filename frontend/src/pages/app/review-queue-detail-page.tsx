@@ -73,7 +73,7 @@ export function ReviewQueueDetailPage() {
       setDecideError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel registrar a decisao.',
+          : 'Não foi possível registrar a decisão.',
       );
     },
   });
@@ -83,7 +83,7 @@ export function ReviewQueueDetailPage() {
     return (
       <div className="mx-auto max-w-2xl space-y-3">
         <Alert variant="error">
-          Nao foi possivel carregar este item da fila de revisao agora. O conteudo permanece bloqueado e nao
+          Não foi possível carregar este item da fila de revisão agora. O conteúdo permanece bloqueado e não
           publicado enquanto isso.
         </Alert>
         <Button size="sm" variant="outline" onClick={() => refetch()}>
@@ -106,43 +106,43 @@ export function ReviewQueueDetailPage() {
       </CardHeader>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Conteudo submetido</h3>
-        <div className="space-y-3 text-sm text-text-dark">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Conteudo submetido</h3>
+        <div className="space-y-3 text-sm text-text-primary">
           <div>
-            <p className="text-xs font-semibold text-muted uppercase">Legenda</p>
+            <p className="text-xs font-semibold text-text-secondary uppercase">Legenda</p>
             <p className="font-mono">{item.caption_text}</p>
           </div>
           {item.on_screen_text && (
             <div>
-              <p className="text-xs font-semibold text-muted uppercase">Texto na tela</p>
+              <p className="text-xs font-semibold text-text-secondary uppercase">Texto na tela</p>
               <p className="font-mono">{item.on_screen_text}</p>
             </div>
           )}
           {item.audio_transcript && (
             <div>
-              <p className="text-xs font-semibold text-muted uppercase">Transcricao de audio</p>
+              <p className="text-xs font-semibold text-text-secondary uppercase">Transcricao de audio</p>
               <p className="font-mono">{item.audio_transcript}</p>
             </div>
           )}
         </div>
         {item.tier_reached && (
-          <p className="font-mono text-xs text-muted mt-3">Verificacao resolvida em: {item.tier_reached}</p>
+          <p className="font-mono text-xs text-text-secondary mt-3">Verificacao resolvida em: {item.tier_reached}</p>
         )}
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">
-          {item.reason_category === 'check_unavailable' ? 'Verificacao nao pode ser concluida' : 'Regras violadas'}
+        <h3 className="text-sm font-semibold text-text-primary mb-3">
+          {item.reason_category === 'check_unavailable' ? 'Verificacao não pode ser concluida' : 'Regras violadas'}
         </h3>
         <ul className="space-y-2">
           {item.triggered_rules.map((rule, i) => (
-            <li key={i} className="font-mono text-xs text-text-dark bg-surface rounded px-3 py-2">
+            <li key={i} className="font-mono text-xs text-text-primary bg-bg-surface rounded px-3 py-2">
               <p className="font-semibold">
                 {CHANNEL_LABEL[rule.channel] ?? rule.channel}
                 {rule.rule_type && ` · ${rule.rule_type}`}
               </p>
-              {rule.matched_excerpt && <p className="text-muted mt-1">"{rule.matched_excerpt}"</p>}
-              {rule.definition && <p className="text-muted mt-1">{JSON.stringify(rule.definition)}</p>}
+              {rule.matched_excerpt && <p className="text-text-secondary mt-1">"{rule.matched_excerpt}"</p>}
+              {rule.definition && <p className="text-text-secondary mt-1">{JSON.stringify(rule.definition)}</p>}
             </li>
           ))}
         </ul>
@@ -150,7 +150,7 @@ export function ReviewQueueDetailPage() {
 
       {item.status === 'pending' && canDecide && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Decisao</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Decisao</h3>
           {decideError && (
             <Alert variant="error" className="mb-3">
               {decideError}
@@ -165,7 +165,7 @@ export function ReviewQueueDetailPage() {
                 Rejeitar
               </Button>
               <Button size="sm" variant="outline" onClick={() => setMode('revision')}>
-                Solicitar revisao
+                Solicitar revisão
               </Button>
             </div>
           ) : (
@@ -208,12 +208,12 @@ export function ReviewQueueDetailPage() {
 
       {item.status !== 'pending' && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-2">Decisao registrada</h3>
-          <p className="text-sm text-text-dark">Status: {STATUS_LABEL[item.status]}</p>
+          <h3 className="text-sm font-semibold text-text-primary mb-2">Decisao registrada</h3>
+          <p className="text-sm text-text-primary">Status: {STATUS_LABEL[item.status]}</p>
           {item.decided_at && (
-            <p className="font-mono text-xs text-muted mt-1">{new Date(item.decided_at).toLocaleString('pt-BR')}</p>
+            <p className="font-mono text-xs text-text-secondary mt-1">{new Date(item.decided_at).toLocaleString('pt-BR')}</p>
           )}
-          {item.decision_reason && <p className="text-sm text-muted mt-2">Motivo: {item.decision_reason}</p>}
+          {item.decision_reason && <p className="text-sm text-text-secondary mt-2">Motivo: {item.decision_reason}</p>}
         </Card>
       )}
 

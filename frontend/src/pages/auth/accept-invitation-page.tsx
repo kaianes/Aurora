@@ -18,9 +18,9 @@ const newUserSchema = z.object({
   password: z
     .string()
     .min(10, 'Senha deve ter pelo menos 10 caracteres')
-    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiuscula')
-    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minuscula')
-    .regex(/[0-9]/, 'Deve conter pelo menos um numero')
+    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Deve conter pelo menos um número')
     .regex(/[^A-Za-z0-9]/, 'Deve conter pelo menos um caractere especial'),
 });
 
@@ -62,8 +62,8 @@ export function AcceptInvitationPage() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Convite aceito!</h1>
-          <p className="text-sm text-muted mb-4">
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Convite aceito!</h1>
+          <p className="text-sm text-text-secondary mb-4">
             Voce agora faz parte do workspace. Faca login para comecar.
           </p>
           <Button onClick={() => navigate('/login')}>Ir para o login</Button>
@@ -77,7 +77,7 @@ export function AcceptInvitationPage() {
     apiError && isAxiosError(apiError) && apiError.response?.data?.error?.message
       ? apiError.response.data.error.message
       : apiError
-        ? 'Nao foi possivel aceitar o convite. Tente novamente.'
+        ? 'Não foi possível aceitar o convite. Tente novamente.'
         : null;
 
   // Existing user: just confirm
@@ -85,8 +85,8 @@ export function AcceptInvitationPage() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md">
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Aceitar convite</h1>
-          <p className="text-sm text-muted mb-4">
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Aceitar convite</h1>
+          <p className="text-sm text-text-secondary mb-4">
             Voce foi convidado para um workspace na Aurora. Clique abaixo para aceitar.
           </p>
           {errorMessage && <Alert variant="error" className="mb-4">{errorMessage}</Alert>}
@@ -110,8 +110,8 @@ export function AcceptInvitationPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-text-dark mb-1">Aceitar convite</h1>
-        <p className="text-sm text-muted mb-6">
+        <h1 className="text-xl font-semibold text-text-primary mb-1">Aceitar convite</h1>
+        <p className="text-sm text-text-secondary mb-6">
           Crie sua conta para aceitar o convite e acessar o workspace.
         </p>
 
@@ -129,7 +129,7 @@ export function AcceptInvitationPage() {
             type="password"
             {...register('password')}
             error={errors.password?.message}
-            hint="Minimo 10 caracteres, com maiuscula, minuscula, numero e caractere especial"
+            hint="Mínimo 10 caracteres, com maiúscula, minúscula, número e caractere especial"
             autoComplete="new-password"
           />
           <Button type="submit" loading={mutation.isPending} className="w-full">

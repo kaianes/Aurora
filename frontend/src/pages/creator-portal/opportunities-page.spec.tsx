@@ -111,7 +111,7 @@ describe('OpportunitiesPage - US-29', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/Previsao de pagamento/)).toBeInTheDocument();
+    expect(await screen.findByText(/Previsão de pagamento/)).toBeInTheDocument();
     expect(screen.getByText(/\(estimativa\)/)).toBeInTheDocument();
   });
 
@@ -160,7 +160,7 @@ describe('OpportunitiesPage - US-29', () => {
     renderPage();
 
     expect(await screen.findByText(/Oportunidade encerrada/)).toBeInTheDocument();
-    expect(screen.queryByText(/Previsao de pagamento/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Previsão de pagamento/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Aceitar' })).not.toBeInTheDocument();
   });
 });

@@ -65,7 +65,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     renderPage();
 
     expect(
-      await screen.findByText(/Apenas administradores da agencia podem ver e configurar/),
+      await screen.findByText(/Apenas administradores da agência podem ver e configurar/),
     ).toBeInTheDocument();
     expect(screen.queryByLabelText('URL do logo')).not.toBeInTheDocument();
     expect(agencyApi.getBranding).not.toHaveBeenCalled();
@@ -81,8 +81,8 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
 
     expect(await screen.findByText('Sem logo')).toBeInTheDocument();
     expect(screen.getByLabelText('URL do logo')).toHaveValue('');
-    expect(screen.getByText(/Cor primaria \(nao definida\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Cor secundaria \(nao definida\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Cor primaria \(não definida\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Cor secundaria \(não definida\)/)).toBeInTheDocument();
   });
 
   // ---- Once a profile exists, the form is pre-filled with its current
@@ -93,7 +93,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     renderPage();
 
     expect(await screen.findByLabelText('URL do logo')).toHaveValue('https://cdn.example.com/logo.png');
-    expect(screen.getByAltText('Logo da agencia')).toHaveAttribute('src', 'https://cdn.example.com/logo.png');
+    expect(screen.getByAltText('Logo da agência')).toHaveAttribute('src', 'https://cdn.example.com/logo.png');
     expect(screen.getByText(/Cor primaria #3DDC97/)).toBeInTheDocument();
     expect(screen.getByText(/Cor secundaria #7F77DD/)).toBeInTheDocument();
   });
@@ -113,7 +113,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     await userEvent.type(screen.getByLabelText('Cor secundaria'), '#7F77DD');
     await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
 
-    expect(await screen.findByText('Marca da agencia salva com sucesso.')).toBeInTheDocument();
+    expect(await screen.findByText('Marca da agência salva com sucesso.')).toBeInTheDocument();
     expect(agencyApi.configureBranding).toHaveBeenCalledWith({
       logo_url: 'https://cdn.example.com/logo.png',
       primary_color_hex: '#3DDC97',
@@ -156,7 +156,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     (agencyApi.getBranding as any).mockResolvedValue(unconfiguredProfile);
     (agencyApi.configureBranding as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Nao foi possivel salvar a marca da agencia.' } } },
+      response: { data: { error: { message: 'Não foi possível salvar a marca da agência.' } } },
     });
 
     renderPage();
@@ -165,18 +165,18 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
     await userEvent.type(screen.getByLabelText('URL do logo'), 'https://cdn.example.com/logo.png');
     await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
 
-    expect(await screen.findByText('Nao foi possivel salvar a marca da agencia.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível salvar a marca da agência.')).toBeInTheDocument();
   });
 
   it('shows an explicit error state when loading the existing profile fails', async () => {
     (agencyApi.getBranding as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Nao foi possivel carregar a marca da agencia.' } } },
+      response: { data: { error: { message: 'Não foi possível carregar a marca da agência.' } } },
     });
 
     renderPage();
 
-    expect(await screen.findByText('Nao foi possivel carregar a marca da agencia.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível carregar a marca da agência.')).toBeInTheDocument();
   });
 
   // ---- US-44 (ADR-0061): the domain field is format-validated only, and reference-only
@@ -187,7 +187,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
 
       renderPage();
 
-      expect(await screen.findByLabelText('Dominio personalizado')).toHaveValue(
+      expect(await screen.findByLabelText('Domínio personalizado')).toHaveValue(
         'relatorios.agenciacriativa.com.br',
       );
       expect(screen.getByText('Ativacao pendente')).toBeInTheDocument();
@@ -198,7 +198,7 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
 
       renderPage();
 
-      expect(await screen.findByLabelText('Dominio personalizado')).toHaveValue('');
+      expect(await screen.findByLabelText('Domínio personalizado')).toHaveValue('');
       expect(screen.queryByText('Ativacao pendente')).not.toBeInTheDocument();
     });
 
@@ -207,12 +207,12 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
 
       renderPage();
 
-      await screen.findByLabelText('Dominio personalizado');
-      await userEvent.type(screen.getByLabelText('Dominio personalizado'), 'Not A Domain!!');
+      await screen.findByLabelText('Domínio personalizado');
+      await userEvent.type(screen.getByLabelText('Domínio personalizado'), 'Not A Domain!!');
       await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
 
       expect(
-        await screen.findByText('Use um dominio valido, em letras minusculas (ex: relatorios.suaagencia.com.br).'),
+        await screen.findByText('Use um domínio válido, em letras minúsculas (ex: relatorios.suaagencia.com.br).'),
       ).toBeInTheDocument();
       expect(agencyApi.configureBranding).not.toHaveBeenCalled();
     });
@@ -223,11 +223,11 @@ describe('AgencyBrandingPage - ADR-0048 (US-43 branding configuration)', () => {
 
       renderPage();
 
-      await screen.findByLabelText('Dominio personalizado');
-      await userEvent.type(screen.getByLabelText('Dominio personalizado'), 'relatorios.agenciacriativa.com.br');
+      await screen.findByLabelText('Domínio personalizado');
+      await userEvent.type(screen.getByLabelText('Domínio personalizado'), 'relatorios.agenciacriativa.com.br');
       await userEvent.click(screen.getByRole('button', { name: 'Salvar marca' }));
 
-      expect(await screen.findByText('Marca da agencia salva com sucesso.')).toBeInTheDocument();
+      expect(await screen.findByText('Marca da agência salva com sucesso.')).toBeInTheDocument();
       expect(agencyApi.configureBranding).toHaveBeenCalledWith(
         expect.objectContaining({ custom_domain: 'relatorios.agenciacriativa.com.br' }),
       );

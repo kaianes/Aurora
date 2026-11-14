@@ -40,7 +40,7 @@ describe('CreatorBriefingPage - US-30', () => {
       campaign_id: 'camp-1234',
       status: 'issued',
       dos: ['Mostrar o produto sendo aplicado'],
-      donts: ['Nao mencionar concorrentes'],
+      donts: ['Não mencionar concorrentes'],
       reference_examples: ['https://instagram.com/p/exemplo123'],
       deliverable_spec: { format: 'instagram_reel', aspect_ratio: '9:16', caption_length_limit: 150 },
       deadline: '2026-11-05T23:59:59Z',
@@ -52,7 +52,7 @@ describe('CreatorBriefingPage - US-30', () => {
     renderPage();
 
     expect(await screen.findByText('Mostrar o produto sendo aplicado')).toBeInTheDocument();
-    expect(screen.getByText('Nao mencionar concorrentes')).toBeInTheDocument();
+    expect(screen.getByText('Não mencionar concorrentes')).toBeInTheDocument();
     expect(screen.getByText('https://instagram.com/p/exemplo123')).toBeInTheDocument();
     expect(screen.getByText('9:16')).toBeInTheDocument();
     expect(screen.getByText('150')).toBeInTheDocument();
@@ -66,7 +66,7 @@ describe('CreatorBriefingPage - US-30', () => {
     renderPage();
 
     expect(
-      await screen.findByText(/Nenhum briefing disponivel para voce nesta campanha/),
+      await screen.findByText(/Nenhum briefing disponível para voce nesta campanha/),
     ).toBeInTheDocument();
     expect(screen.queryByText('O que fazer')).not.toBeInTheDocument();
   });

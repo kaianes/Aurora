@@ -13,8 +13,8 @@ import { Alert } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
 
 const loginSchema = z.object({
-  email: z.string().email('Email invalido'),
-  password: z.string().min(1, 'Senha e obrigatoria'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(1, 'Senha e obrigatória'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -76,8 +76,8 @@ export function LoginPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-text-dark mb-1">Entrar</h1>
-        <p className="text-sm text-muted mb-6">Acesse sua conta Aurora.</p>
+        <h1 className="text-xl font-semibold text-text-primary mb-1">Entrar</h1>
+        <p className="text-sm text-text-secondary mb-6">Acesse sua conta Aurora.</p>
 
         {errorMessage && !mfaRequired && (
           <Alert variant="error" className="mb-4">
@@ -113,10 +113,10 @@ export function LoginPage() {
         ) : (
           <div className="space-y-4">
             <Alert variant="info">
-              Sua conta tem autenticacao de dois fatores ativada. Insira o codigo do seu aplicativo autenticador.
+              Sua conta tem autenticação de dois fatores ativada. Insira o código do seu aplicativo autenticador.
             </Alert>
             <Input
-              label="Codigo MFA"
+              label="Código MFA"
               value={mfaCode}
               onChange={(e) => setMfaCode(e.target.value)}
               placeholder="000000"
@@ -133,9 +133,9 @@ export function LoginPage() {
           </div>
         )}
 
-        <p className="mt-4 text-center text-sm text-muted">
-          Nao tem uma conta?{' '}
-          <Link to="/register" className="text-primary hover:underline">
+        <p className="mt-4 text-center text-sm text-text-muted">
+          Não tem uma conta?{' '}
+          <Link to="/register" className="text-violet-400 hover:underline">
             Criar conta
           </Link>
         </p>

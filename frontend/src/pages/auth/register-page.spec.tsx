@@ -60,7 +60,7 @@ describe('RegisterPage - US-01 Self-Service Sign-Up', () => {
 
     // Label should change
     await waitFor(() => {
-      expect(screen.getByLabelText(/Nome da agencia/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Nome da agência/i)).toBeInTheDocument();
     });
   });
 
@@ -121,6 +121,6 @@ describe('RegisterPage - US-01 Self-Service Sign-Up', () => {
     });
 
     // Password hint visible
-    expect(screen.getByText(/Minimo 10 caracteres/i)).toBeInTheDocument();
+    expect(screen.getByText(/Mínimo 10 caracteres/i)).toBeInTheDocument();
   });
 });

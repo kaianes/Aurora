@@ -32,7 +32,7 @@ const rateSchema = z.object({
   rate_amount: z
     .string()
     .min(1, 'Informe um valor')
-    .refine((v) => !Number.isNaN(Number(v)), 'Valor invalido')
+    .refine((v) => !Number.isNaN(Number(v)), 'Valor inválido')
     .refine((v) => Number(v) > 0, 'O valor deve ser maior que zero')
     .refine((v) => Number(v) <= 50000, 'O valor maximo permitido e R$ 50.000,00'),
 });
@@ -92,8 +92,8 @@ export function RatePreferencesPage() {
       ? mutation.error.response.data.error.message
       : mutation.isError
         ? errorCode === 'INVALID_RATE'
-          ? 'Valor invalido. O valor deve ser maior que zero e no maximo R$ 50.000,00.'
-          : 'Nao foi possivel salvar essa preferencia agora.'
+          ? 'Valor inválido. O valor deve ser maior que zero e no maximo R$ 50.000,00.'
+          : 'Não foi possível salvar essa preferencia agora.'
         : null;
 
   const preferences = data?.data ?? [];
@@ -148,22 +148,22 @@ export function RatePreferencesPage() {
       {isLoading ? (
         <Spinner />
       ) : error ? (
-        <Alert variant="error">Nao foi possivel carregar suas preferencias agora.</Alert>
+        <Alert variant="error">Não foi possível carregar suas preferencias agora.</Alert>
       ) : preferences.length === 0 ? (
         <Card>
-          <p className="text-sm text-muted py-6 text-center">Voce ainda nao definiu nenhum valor.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Voce ainda não definiu nenhum valor.</p>
         </Card>
       ) : (
         <div className="space-y-3">
           {preferences.map((pref) => (
             <Card key={pref.deliverable_format}>
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-text-dark">
+                <p className="text-sm font-semibold text-text-primary">
                   {DELIVERABLE_LABEL[pref.deliverable_format] ?? pref.deliverable_format}
                 </p>
-                <p className="font-mono text-sm text-text-dark">{formatCurrency(pref.rate_amount)}</p>
+                <p className="font-mono text-sm text-text-primary">{formatCurrency(pref.rate_amount)}</p>
               </div>
-              <p className="text-xs text-muted mt-1">
+              <p className="text-xs text-text-secondary mt-1">
                 Atualizado em {new Date(pref.updated_at).toLocaleString('pt-BR')} · vale apenas para
                 novas oportunidades
               </p>

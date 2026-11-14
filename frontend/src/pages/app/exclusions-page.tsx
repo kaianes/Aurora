@@ -78,16 +78,16 @@ export function ExclusionsPage() {
     createError && isAxiosError(createError) && createError.response?.data?.error?.message
       ? createError.response.data.error.message
       : createError
-        ? 'Nao foi possivel adicionar a exclusao.'
+        ? 'Não foi possível adicionar a exclusão.'
         : null;
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar a lista de exclusao.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar a lista de exclusão.</Alert>;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>{scope === 'brand' ? 'Lista de exclusao da marca' : 'Lista de exclusao da campanha'}</CardTitle>
+        <CardTitle>{scope === 'brand' ? 'Lista de exclusão da marca' : 'Lista de exclusão da campanha'}</CardTitle>
         <CardDescription>
           Criadores e marcas concorrentes que nunca devem aparecer em um shortlist.
           {scope === 'brand' ? ' Aplica-se a todas as campanhas desta conta.' : ' Aplica-se apenas a esta campanha.'}
@@ -96,7 +96,7 @@ export function ExclusionsPage() {
 
       {createMutation.isSuccess && (
         <Alert variant="success">
-          Exclusao adicionada. Ela se aplica apenas a proximas geracoes de shortlist; aprovacoes ja feitas nao sao
+          Exclusao adicionada. Ela se aplica apenas a proximas geracoes de shortlist; aprovacoes ja feitas não sao
           afetadas.
         </Alert>
       )}
@@ -105,7 +105,7 @@ export function ExclusionsPage() {
         <Card>
           {!showForm ? (
             <Button size="sm" onClick={() => setShowForm(true)}>
-              Adicionar exclusao
+              Adicionar exclusão
             </Button>
           ) : (
             <form
@@ -154,12 +154,12 @@ export function ExclusionsPage() {
             {data.data.map((exclusion) => (
               <div key={exclusion.id} className="flex items-center justify-between py-3">
                 <div>
-                  <p className="text-sm font-medium text-text-dark">
+                  <p className="text-sm font-medium text-text-primary">
                     {exclusion.exclusion_type === 'creator'
                       ? `Criador ${exclusion.creator_id}`
                       : exclusion.competitor_name}
                   </p>
-                  <p className="text-xs text-muted font-mono mt-0.5">
+                  <p className="text-xs text-text-secondary font-mono mt-0.5">
                     <Badge variant="default" className="mr-2">
                       {exclusion.scope === 'brand' ? 'Marca' : 'Campanha'}
                     </Badge>
@@ -180,7 +180,7 @@ export function ExclusionsPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted py-8 text-center">Nenhuma exclusao cadastrada.</p>
+          <p className="text-sm text-text-secondary py-8 text-center">Nenhuma exclusão cadastrada.</p>
         )}
       </Card>
     </div>

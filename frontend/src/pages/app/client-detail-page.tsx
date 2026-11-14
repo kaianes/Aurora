@@ -176,7 +176,7 @@ export function ClientDetailPage() {
     saveError && isAxiosError(saveError) && saveError.response?.data?.error?.message
       ? saveError.response.data.error.message
       : saveError
-        ? 'Nao foi possivel salvar o perfil.'
+        ? 'Não foi possível salvar o perfil.'
         : null;
 
   // Filter operators from members list
@@ -207,20 +207,20 @@ export function ClientDetailPage() {
 
       {/* Per-client report (E7, US-43) */}
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Relatorios</h3>
-        <p className="text-xs text-muted mb-3">
-          Gere um relatorio consolidado de todas as campanhas deste cliente, sob a marca da sua agencia.
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Relatorios</h3>
+        <p className="text-xs text-text-secondary mb-3">
+          Gere um relatório consolidado de todas as campanhas deste cliente, sob a marca da sua agencia.
         </p>
         <Link to={`/app/clients/${clientId}/reports`}>
           <Button variant="outline" size="sm">
-            Ver relatorio do cliente
+            Ver relatório do cliente
           </Button>
         </Link>
       </Card>
 
       {/* Brand profile form */}
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Perfil da Marca</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Perfil da Marca</h3>
 
         {profile && (
           <div className="mb-4">
@@ -229,10 +229,10 @@ export function ClientDetailPage() {
                 <img
                   src={profile.logo_url}
                   alt="Logo do cliente"
-                  className="h-16 w-16 rounded-lg object-cover border border-border"
+                  className="h-16 w-16 rounded-lg object-cover border border-border-default"
                 />
               ) : (
-                <div className="h-16 w-16 rounded-lg bg-surface border border-border flex items-center justify-center text-muted text-xs">
+                <div className="h-16 w-16 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center text-text-secondary text-xs">
                   Sem logo
                 </div>
               )}
@@ -257,7 +257,7 @@ export function ClientDetailPage() {
             </div>
             {logoMutation.error && (
               <p className="mt-2 text-sm text-error" role="alert">
-                Nao foi possivel enviar o logo. Verifique o formato e tamanho.
+                Não foi possível enviar o logo. Verifique o formato e tamanho.
               </p>
             )}
           </div>
@@ -271,9 +271,9 @@ export function ClientDetailPage() {
             placeholder="Ex: Informal, divertido, inclusivo"
           />
           <Textarea
-            label="Diretrizes de conteudo"
+            label="Diretrizes de conteúdo"
             {...register('content_guidelines')}
-            placeholder="Instrucoes para criacao de conteudo..."
+            placeholder="Instrucoes para criacao de conteúdo..."
           />
           <Textarea
             label="Topicos proibidos"
@@ -291,8 +291,8 @@ export function ClientDetailPage() {
       {/* Operator management */}
       {isAdmin && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Operadores</h3>
-          <p className="text-xs text-muted mb-3">
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Operadores</h3>
+          <p className="text-xs text-text-secondary mb-3">
             Atribua operadores a este cliente para que possam gerenciar campanhas.
           </p>
 
@@ -301,8 +301,8 @@ export function ClientDetailPage() {
               {operators.map((op) => (
                 <div key={op.user_id} className="flex items-center justify-between py-2">
                   <div>
-                    <p className="text-sm text-text-dark">{op.name}</p>
-                    <p className="text-xs text-muted">{op.email}</p>
+                    <p className="text-sm text-text-primary">{op.name}</p>
+                    <p className="text-xs text-text-secondary">{op.email}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button
@@ -327,7 +327,7 @@ export function ClientDetailPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted py-4 text-center">
+            <p className="text-sm text-text-secondary py-4 text-center">
               Nenhum operador no workspace. Convide operadores pela pagina de Equipe.
             </p>
           )}
@@ -336,7 +336,7 @@ export function ClientDetailPage() {
             <Alert variant="error">
               {isAxiosError(addOperatorMutation.error) && addOperatorMutation.error.response?.data?.error?.message
                 ? addOperatorMutation.error.response.data.error.message
-                : 'Nao foi possivel atribuir o operador.'}
+                : 'Não foi possível atribuir o operador.'}
             </Alert>
           )}
         </Card>

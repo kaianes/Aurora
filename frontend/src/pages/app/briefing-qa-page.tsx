@@ -50,13 +50,13 @@ export function BriefingQaPage() {
       setAnswerError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel enviar a resposta agora.',
+          : 'Não foi possível enviar a resposta agora.',
       );
     },
   });
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar as perguntas sobre este briefing.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar as perguntas sobre este briefing.</Alert>;
 
   const threads = list?.data ?? [];
 
@@ -70,7 +70,7 @@ export function BriefingQaPage() {
 
         {threads.length === 0 ? (
           <Card>
-            <p className="text-sm text-muted py-6 text-center">Nenhuma pergunta ainda.</p>
+            <p className="text-sm text-text-secondary py-6 text-center">Nenhuma pergunta ainda.</p>
           </Card>
         ) : (
           <div className="space-y-2">
@@ -80,16 +80,16 @@ export function BriefingQaPage() {
                 type="button"
                 onClick={() => setSelectedThreadId(t.thread_id)}
                 className={`w-full text-left rounded-xl border p-4 transition-colors ${
-                  selectedThreadId === t.thread_id ? 'border-primary bg-primary/5' : 'border-border bg-white hover:bg-surface'
+                  selectedThreadId === t.thread_id ? 'border-primary bg-primary/5' : 'border-border-default bg-bg-elevated hover:bg-bg-hover'
                 }`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-text-dark">{t.creator_display_name}</span>
+                  <span className="text-sm font-medium text-text-primary">{t.creator_display_name}</span>
                   <Badge variant={t.answered ? 'success' : 'warning'}>
                     {t.answered ? 'Respondida' : 'Aguardando resposta'}
                   </Badge>
                 </div>
-                <p className="font-mono text-xs text-muted mt-1">
+                <p className="font-mono text-xs text-text-secondary mt-1">
                   {t.message_count} mensagem(ns) &middot; {new Date(t.last_message_at).toLocaleString('pt-BR')}
                 </p>
               </button>
@@ -104,7 +104,7 @@ export function BriefingQaPage() {
         </CardHeader>
         {!selectedThreadId ? (
           <Card>
-            <p className="text-sm text-muted py-6 text-center">Selecione uma pergunta para ver a conversa.</p>
+            <p className="text-sm text-text-secondary py-6 text-center">Selecione uma pergunta para ver a conversa.</p>
           </Card>
         ) : isThreadLoading ? (
           <Spinner />
@@ -115,14 +115,14 @@ export function BriefingQaPage() {
                 <div
                   key={i}
                   className={`rounded-lg p-3 text-sm ${
-                    m.sender_type === 'creator' ? 'bg-surface text-text-dark' : 'bg-primary/10 text-text-dark'
+                    m.sender_type === 'creator' ? 'bg-bg-surface text-text-primary' : 'bg-primary-muted text-text-primary'
                   }`}
                 >
-                  <p className="text-xs font-semibold text-muted uppercase mb-1">
+                  <p className="text-xs font-semibold text-text-secondary uppercase mb-1">
                     {m.sender_type === 'creator' ? 'Criador' : 'Equipe da marca'}
                   </p>
                   <p>{m.body}</p>
-                  <p className="font-mono text-xs text-muted mt-1">{new Date(m.created_at).toLocaleString('pt-BR')}</p>
+                  <p className="font-mono text-xs text-text-secondary mt-1">{new Date(m.created_at).toLocaleString('pt-BR')}</p>
                 </div>
               ))}
             </div>

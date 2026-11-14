@@ -46,7 +46,7 @@ const v1Rejected = {
   version_number: 1,
   supersedes_submission_id: null,
   review_status: 'rejected' as const,
-  review_reason: 'O produto nao aparece em nenhum momento do video.',
+  review_reason: 'O produto não aparece em nenhum momento do video.',
   review_decided_at: new Date().toISOString(),
   review_deadline_at: new Date().toISOString(),
   review_escalated: false,
@@ -84,11 +84,11 @@ describe('DraftsPage - US-32a/US-32b/US-33', () => {
     expect(await screen.findByText('Versao 1')).toBeInTheDocument();
     expect(screen.getByText('Versao 2')).toBeInTheDocument();
     expect(
-      screen.getByText('Motivo registrado para a versao 1: O produto nao aparece em nenhum momento do video.'),
+      screen.getByText('Motivo registrado para a versao 1: O produto não aparece em nenhum momento do video.'),
     ).toBeInTheDocument();
     // Version 2's own card has no reason of its own, and v1's reason is never duplicated onto it.
     const v2Card = screen.getByText('Versao 2').closest('div')!.parentElement!;
-    expect(v2Card.textContent).not.toContain('O produto nao aparece');
+    expect(v2Card.textContent).not.toContain('O produto não aparece');
   });
 
   // Normal: the stated review deadline is visible, not merely a pending status with no
@@ -98,7 +98,7 @@ describe('DraftsPage - US-32a/US-32b/US-33', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/Prazo de revisao:/)).toBeInTheDocument();
+    expect(await screen.findByText(/Prazo de revisão:/)).toBeInTheDocument();
   });
 
   // Hard: when the deadline has been breached, Duda's own view reflects the escalation
@@ -111,7 +111,7 @@ describe('DraftsPage - US-32a/US-32b/US-33', () => {
     renderPage();
 
     expect(
-      await screen.findByText(/a revisao foi escalada/),
+      await screen.findByText(/a revisão foi escalada/),
     ).toBeInTheDocument();
   });
 
@@ -144,7 +144,7 @@ describe('DraftsPage - US-32a/US-32b/US-33', () => {
 
     renderPage();
 
-    expect(await screen.findByRole('link', { name: 'Confirmar publicacao' })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Confirmar publicação' })).toBeInTheDocument();
   });
 
   it('shows an empty state when no draft has ever been submitted for this opportunity', async () => {

@@ -29,7 +29,7 @@ const MOCK_PRICING = {
       name: 'Agencia',
       platform_fee: { amount: '1497.00', currency: 'BRL', interval: 'month' },
       commission: { rate: '0.12', description: '12% sobre o valor pago aos criadores' },
-      features: ['1 workspace de agencia', 'Ate 10 contas de clientes'],
+      features: ['1 workspace de agência', 'Ate 10 contas de clientes'],
       client_account_limit: 10,
     },
   ],
@@ -60,7 +60,7 @@ describe('PricingPage - US-02 Transparent Pricing', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Precos transparentes')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Preços transparentes');
     });
 
     // Should show price amount
@@ -79,14 +79,14 @@ describe('PricingPage - US-02 Transparent Pricing', () => {
     renderPage();
 
     await waitFor(() => {
-      expect(screen.getByText('Precos transparentes')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Preços transparentes');
     });
 
     // Brand is default - should show brand pricing
     expect(screen.getByText(/497/)).toBeInTheDocument();
 
     // Toggle to agency
-    const agencyTab = screen.getByRole('tab', { name: /Agencia/i });
+    const agencyTab = screen.getByRole('tab', { name: /Agência/i });
     await user.click(agencyTab);
 
     // Should now show agency pricing
@@ -104,7 +104,7 @@ describe('PricingPage - US-02 Transparent Pricing', () => {
 
     // Wait for loading to finish and fallback to render
     await waitFor(() => {
-      expect(screen.getByText('Precos transparentes')).toBeInTheDocument();
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Preços transparentes');
     }, { timeout: 10000 });
 
     // Should show warning about cached data

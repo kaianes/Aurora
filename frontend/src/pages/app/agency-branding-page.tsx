@@ -29,7 +29,7 @@ const brandingSchema = z.object({
     message: 'Use o formato hexadecimal #RRGGBB.',
   }),
   custom_domain: z.string().refine((v) => v === '' || DOMAIN_RE.test(v), {
-    message: 'Use um dominio valido, em letras minusculas (ex: relatorios.suaagencia.com.br).',
+    message: 'Use um domínio válido, em letras minúsculas (ex: relatorios.suaagencia.com.br).',
   }),
 });
 
@@ -108,17 +108,17 @@ export function AgencyBrandingPage() {
     saveMutation.error && isAxiosError(saveMutation.error) && saveMutation.error.response?.data?.error?.message
       ? saveMutation.error.response.data.error.message
       : saveMutation.error
-        ? 'Nao foi possivel salvar a marca da agencia.'
+        ? 'Não foi possível salvar a marca da agência.'
         : null;
 
   if (!canManage) {
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <CardHeader>
-          <CardTitle>Marca da Agencia</CardTitle>
+          <CardTitle>Marca da Agência</CardTitle>
         </CardHeader>
         <Alert variant="warning">
-          Apenas administradores da agencia podem ver e configurar a marca usada nos relatorios de clientes.
+          Apenas administradores da agência podem ver e configurar a marca usada nos relatórios de clientes.
         </Alert>
       </div>
     );
@@ -131,19 +131,19 @@ export function AgencyBrandingPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Marca da Agencia</CardTitle>
+        <CardTitle>Marca da Agência</CardTitle>
         <CardDescription>
-          Configure o logo e as cores que aparecem nos relatorios de desempenho entregues aos seus clientes.
+          Configure o logo e as cores que aparecem nos relatórios de desempenho entregues aos seus clientes.
         </CardDescription>
       </CardHeader>
 
-      {saveSuccess && <Alert variant="success">Marca da agencia salva com sucesso.</Alert>}
+      {saveSuccess && <Alert variant="success">Marca da agência salva com sucesso.</Alert>}
       {saveErrorMessage && <Alert variant="error">{saveErrorMessage}</Alert>}
       {error && (
         <Alert variant="error">
           {isAxiosError(error) && error.response?.data?.error?.message
             ? error.response.data.error.message
-            : 'Nao foi possivel carregar a marca da agencia.'}
+            : 'Não foi possível carregar a marca da agência.'}
         </Alert>
       )}
 
@@ -153,11 +153,11 @@ export function AgencyBrandingPage() {
             {logoUrl ? (
               <img
                 src={logoUrl}
-                alt="Logo da agencia"
-                className="h-16 w-16 rounded-lg object-cover border border-border"
+                alt="Logo da agência"
+                className="h-16 w-16 rounded-lg object-cover border border-border-default"
               />
             ) : (
-              <div className="h-16 w-16 rounded-lg bg-surface border border-border flex items-center justify-center text-muted text-xs">
+              <div className="h-16 w-16 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center text-text-secondary text-xs">
                 Sem logo
               </div>
             )}
@@ -173,7 +173,7 @@ export function AgencyBrandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-text-dark mb-1" htmlFor="primary_color_hex">
+              <label className="block text-sm font-medium text-text-primary mb-1" htmlFor="primary_color_hex">
                 Cor primaria
               </label>
               <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export function AgencyBrandingPage() {
                   aria-label="Selecionar cor primaria"
                   value={HEX_RE.test(primaryColor) ? primaryColor : '#000000'}
                   onChange={(e) => setValue('primary_color_hex', e.target.value, { shouldDirty: true })}
-                  className="h-10 w-10 rounded border border-border cursor-pointer"
+                  className="h-10 w-10 rounded border border-border-default cursor-pointer"
                 />
                 <input
                   id="primary_color_hex"
@@ -192,7 +192,7 @@ export function AgencyBrandingPage() {
                   className={`block w-full rounded-lg border px-3 py-2 text-sm font-mono transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                     errors.primary_color_hex
                       ? 'border-error text-error focus:ring-error/50'
-                      : 'border-border text-text-dark focus:border-primary focus:ring-primary/50'
+                      : 'border-border-default text-text-primary focus:border-primary focus:ring-primary/50'
                   }`}
                 />
               </div>
@@ -204,7 +204,7 @@ export function AgencyBrandingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-dark mb-1" htmlFor="secondary_color_hex">
+              <label className="block text-sm font-medium text-text-primary mb-1" htmlFor="secondary_color_hex">
                 Cor secundaria
               </label>
               <div className="flex items-center gap-2">
@@ -213,7 +213,7 @@ export function AgencyBrandingPage() {
                   aria-label="Selecionar cor secundaria"
                   value={HEX_RE.test(secondaryColor) ? secondaryColor : '#000000'}
                   onChange={(e) => setValue('secondary_color_hex', e.target.value, { shouldDirty: true })}
-                  className="h-10 w-10 rounded border border-border cursor-pointer"
+                  className="h-10 w-10 rounded border border-border-default cursor-pointer"
                 />
                 <input
                   id="secondary_color_hex"
@@ -223,7 +223,7 @@ export function AgencyBrandingPage() {
                   className={`block w-full rounded-lg border px-3 py-2 text-sm font-mono transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                     errors.secondary_color_hex
                       ? 'border-error text-error focus:ring-error/50'
-                      : 'border-border text-text-dark focus:border-primary focus:ring-primary/50'
+                      : 'border-border-default text-text-primary focus:border-primary focus:ring-primary/50'
                   }`}
                 />
               </div>
@@ -242,8 +242,8 @@ export function AgencyBrandingPage() {
               it, never implying real-time self-service activation. */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-text-dark" htmlFor="custom_domain">
-                Dominio personalizado
+              <label className="block text-sm font-medium text-text-primary" htmlFor="custom_domain">
+                Domínio personalizado
               </label>
               {profile?.domain_status === 'pending_activation' && (
                 <Badge variant="warning">Ativacao pendente</Badge>
@@ -255,22 +255,22 @@ export function AgencyBrandingPage() {
               {...register('custom_domain')}
               error={errors.custom_domain?.message}
             />
-            <p className="mt-1 text-xs text-muted">
-              Esse dominio e exibido para referencia da sua equipe ao compartilhar relatorios com
+            <p className="mt-1 text-xs text-text-secondary">
+              Esse domínio é exibido para referência da sua equipe ao compartilhar relatórios com
               clientes. A ativacao real (DNS e certificado) depende da equipe de infraestrutura
-              da Aurora e nao acontece automaticamente ao salvar.
+              da Aurora e não acontece automaticamente ao salvar.
             </p>
           </div>
 
           {/* Preview strip: brand motif, colored data points on a thin horizontal grid */}
-          <div className="border-t border-b border-border py-3">
-            <p className="flex items-center font-mono text-xs text-muted">
+          <div className="border-t border-b border-border-default py-3">
+            <p className="flex items-center font-mono text-xs text-text-secondary">
               <MetricDot color={HEX_RE.test(primaryColor) ? primaryColor : '#3DDC97'} />
-              Cor primaria {HEX_RE.test(primaryColor) ? primaryColor.toUpperCase() : '(nao definida)'}
+              Cor primaria {HEX_RE.test(primaryColor) ? primaryColor.toUpperCase() : '(não definida)'}
             </p>
-            <p className="flex items-center font-mono text-xs text-muted mt-1">
+            <p className="flex items-center font-mono text-xs text-text-secondary mt-1">
               <MetricDot color={HEX_RE.test(secondaryColor) ? secondaryColor : '#7F77DD'} />
-              Cor secundaria {HEX_RE.test(secondaryColor) ? secondaryColor.toUpperCase() : '(nao definida)'}
+              Cor secundaria {HEX_RE.test(secondaryColor) ? secondaryColor.toUpperCase() : '(não definida)'}
             </p>
           </div>
 

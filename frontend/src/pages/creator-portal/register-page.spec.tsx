@@ -91,7 +91,7 @@ describe('RegisterPage - US-24.1 step 1 (self-registration)', () => {
   it('shows the server error message when registration fails', async () => {
     (creatorPortalApi.register as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { code: 'INTERNAL_ERROR', message: 'Nao foi possivel criar sua conta agora.' } } },
+      response: { data: { error: { code: 'INTERNAL_ERROR', message: 'Não foi possível criar sua conta agora.' } } },
     });
     const user = userEvent.setup();
     renderPage();
@@ -99,6 +99,6 @@ describe('RegisterPage - US-24.1 step 1 (self-registration)', () => {
     await fillValidForm(user);
     await user.click(screen.getByRole('button', { name: 'Criar conta' }));
 
-    expect(await screen.findByText('Nao foi possivel criar sua conta agora.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível criar sua conta agora.')).toBeInTheDocument();
   });
 });

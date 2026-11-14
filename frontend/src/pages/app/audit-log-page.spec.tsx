@@ -132,11 +132,11 @@ describe('AuditLogPage - FR-60', () => {
     vi.mocked(useAuth).mockReturnValue(withAccount('acct-client-2'));
     vi.mocked(auditApi.list).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Voce nao tem acesso a esta conta.' } } },
+      response: { data: { error: { message: 'Voce não tem acesso a esta conta.' } } },
     });
 
     renderPage();
 
-    expect(await screen.findByText('Voce nao tem acesso a esta conta.')).toBeInTheDocument();
+    expect(await screen.findByText('Voce não tem acesso a esta conta.')).toBeInTheDocument();
   });
 });

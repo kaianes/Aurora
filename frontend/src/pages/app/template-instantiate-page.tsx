@@ -67,7 +67,7 @@ export function TemplateInstantiatePage() {
       <CardHeader>
         <CardTitle>Nova campanha a partir de modelo</CardTitle>
         <CardDescription>
-          Preencha o orcamento e a data de inicio. Os demais campos sao herdados do modelo e uma nova cotacao sera
+          Preencha o orçamento e a data de inicio. Os demais campos sao herdados do modelo e uma nova cotação sera
           gerada.
         </CardDescription>
       </CardHeader>
@@ -78,7 +78,7 @@ export function TemplateInstantiatePage() {
             <Alert variant="error" className="mb-4">
               {isAxiosError(instantiateMutation.error) && instantiateMutation.error.response?.data?.error?.message
                 ? instantiateMutation.error.response.data.error.message
-                : 'Nao foi possivel criar a campanha a partir do modelo.'}
+                : 'Não foi possível criar a campanha a partir do modelo.'}
             </Alert>
           )}
           <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
@@ -93,7 +93,7 @@ export function TemplateInstantiatePage() {
             <Input
               label="Data de inicio"
               type="date"
-              {...register('timeline_start', { required: 'Data de inicio e obrigatoria' })}
+              {...register('timeline_start', { required: 'Data de inicio e obrigatória' })}
               error={errors.timeline_start?.message}
             />
             <Button type="submit" loading={instantiateMutation.isPending}>
@@ -105,11 +105,11 @@ export function TemplateInstantiatePage() {
         <Card>
           <Alert variant="warning" className="mb-4">
             O perfil da marca mudou desde que este modelo foi salvo. Confirme os campos abaixo antes de solicitar uma
-            cotacao.
+            cotação.
           </Alert>
           <div className="space-y-2 mb-4">
             {drift.map((field) => (
-              <label key={field} className="flex items-center gap-2 text-sm text-text-dark">
+              <label key={field} className="flex items-center gap-2 text-sm text-text-primary">
                 <input
                   type="checkbox"
                   checked={!!acknowledged[field]}
@@ -128,7 +128,7 @@ export function TemplateInstantiatePage() {
           </Button>
           {acknowledgeMutation.error && (
             <Alert variant="error" className="mt-3">
-              Nao foi possivel confirmar as alteracoes do perfil.
+              Não foi possível confirmar as alteracoes do perfil.
             </Alert>
           )}
         </Card>

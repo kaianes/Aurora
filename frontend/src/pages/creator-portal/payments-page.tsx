@@ -48,7 +48,7 @@ function PaymentCard({ obligation }: { obligation: PayoutObligationListItem }) {
       setDownloadError(null);
       window.open(data.document_url, '_blank', 'noopener,noreferrer');
     },
-    onError: () => setDownloadError('Nao foi possivel gerar o extrato agora.'),
+    onError: () => setDownloadError('Não foi possível gerar o extrato agora.'),
   });
 
   // US-35c: a failed attempt never moves the obligation out of `owed` -- it stays listed as
@@ -60,8 +60,8 @@ function PaymentCard({ obligation }: { obligation: PayoutObligationListItem }) {
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-semibold text-text-dark">{obligation.campaign_name}</h3>
-          <p className="text-xs text-muted mt-0.5">{obligation.buyer_name}</p>
+          <h3 className="text-sm font-semibold text-text-primary">{obligation.campaign_name}</h3>
+          <p className="text-xs text-text-secondary mt-0.5">{obligation.buyer_name}</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {obligation.escalated_for_manual_review && obligation.status !== 'settled' && (
@@ -71,22 +71,22 @@ function PaymentCard({ obligation }: { obligation: PayoutObligationListItem }) {
         </div>
       </div>
 
-      <div className="mt-4 space-y-1.5 border-t border-border pt-3">
-        <p className="flex items-center font-mono text-sm text-text-dark">
+      <div className="mt-4 space-y-1.5 border-t border-border-default pt-3">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-signal-green)" />
           Pagamento bruto: {formatCurrency(obligation.payout_gross)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-performance-orange)" />
           Comissao: {formatCurrency(obligation.payout_commission)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-creator-pink)" />
           Pagamento liquido: {formatCurrency(obligation.payout_net)}
         </p>
       </div>
 
-      <p className="font-mono text-xs text-muted mt-2">
+      <p className="font-mono text-xs text-text-secondary mt-2">
         {obligation.status === 'settled' && obligation.settled_at
           ? `Pago em ${formatDateTime(obligation.settled_at)}`
           : `Prazo combinado: ${formatDateTime(obligation.committed_deadline_at)}`}
@@ -149,7 +149,7 @@ export function PaymentsPage() {
       <Alert variant="error">
         {isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel carregar seu historico de pagamentos.'}
+          : 'Não foi possível carregar seu historico de pagamentos.'}
       </Alert>
     );
   }
@@ -179,7 +179,7 @@ export function PaymentsPage() {
 
       {obligations.length === 0 ? (
         <Card>
-          <p className="text-sm text-muted py-6 text-center">Nenhum pagamento registrado ainda.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Nenhum pagamento registrado ainda.</p>
         </Card>
       ) : (
         <div className="space-y-4">

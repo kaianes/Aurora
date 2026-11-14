@@ -76,7 +76,7 @@ describe('ShortlistPage - US-11', () => {
 
     expect(await screen.findByText(/Nenhum shortlist gerado ainda/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Gerar shortlist/i })).toBeInTheDocument();
-    expect(screen.queryByText(/Nao foi possivel carregar o shortlist/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Não foi possível carregar o shortlist/)).not.toBeInTheDocument();
   });
 
   // Hard: pool below the guaranteed minimum is flagged explicitly, not padded silently (US-11 scenario 2).
@@ -104,7 +104,7 @@ describe('ShortlistPage - US-11', () => {
     (shortlistApi.get as any).mockResolvedValue({
       id: 'sl-1',
       status: 'failed',
-      failure_reason: 'Nao foi possivel gerar o shortlist agora. Tente novamente em alguns minutos.',
+      failure_reason: 'Não foi possível gerar o shortlist agora. Tente novamente em alguns minutos.',
       below_guaranteed_minimum: false,
       locked: false,
       entries: [],
@@ -114,7 +114,7 @@ describe('ShortlistPage - US-11', () => {
 
     renderPage();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/Nao foi possivel gerar o shortlist/);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/Não foi possível gerar o shortlist/);
   });
 
   // US-13 scenario 1: approving/rejecting individual entries calls the decide API and clears prior errors.

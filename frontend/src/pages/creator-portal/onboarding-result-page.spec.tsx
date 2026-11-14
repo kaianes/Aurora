@@ -69,11 +69,11 @@ describe('OnboardingResultPage - US-24.4 Qualification Decision at the End of On
 
     renderPage();
 
-    expect(await screen.findByText('Ainda nao qualificada')).toBeInTheDocument();
+    expect(await screen.findByText('Ainda não qualificada')).toBeInTheDocument();
     expect(screen.getByText('Taxa de engajamento minima')).toBeInTheDocument();
     expect(screen.getByText('Tamanho minimo de audiencia')).toBeInTheDocument();
     // Never a vague, unnamed rejection.
-    expect(screen.queryByText(/motivo nao especificado/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/motivo não especificado/i)).not.toBeInTheDocument();
   });
 
   // Humanizes an unknown criterion key gracefully rather than fabricating a translation.
@@ -96,7 +96,7 @@ describe('OnboardingResultPage - US-24.4 Qualification Decision at the End of On
     (creatorPortalApi.getOnboardingStatus as any).mockResolvedValue({
       onboarding_status: 'pending',
       qualification_expected_ready_at: '2026-10-21T10:09:00Z',
-      message: 'Ainda estamos analisando seu perfil. Avisaremos por email quando a decisao estiver pronta.',
+      message: 'Ainda estamos analisando seu perfil. Avisaremos por email quando a decisão estiver pronta.',
     });
 
     renderPage();

@@ -66,7 +66,7 @@ describe('MonitoringPage - US-16b', () => {
     expect(screen.getByText('https://instagram.com/p/def456')).toBeInTheDocument();
 
     expect(screen.getByText(/Campo "caption_text" mudou/)).toBeInTheDocument();
-    expect(screen.getByText(/nao pode ser acessado ou o conteudo foi removido/)).toBeInTheDocument();
+    expect(screen.getByText(/não pode ser acessado ou o conteúdo foi removido/)).toBeInTheDocument();
     expect(screen.getByText(/Verificacoes consecutivas sem acesso: 2/)).toBeInTheDocument();
   });
 });

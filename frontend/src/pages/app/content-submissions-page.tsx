@@ -53,7 +53,7 @@ function DecideControls({ submissionId }: { submissionId: string }) {
       setDecideError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel registrar a decisao.',
+          : 'Não foi possível registrar a decisão.',
       );
     },
   });
@@ -70,7 +70,7 @@ function DecideControls({ submissionId }: { submissionId: string }) {
             Rejeitar
           </Button>
           <Button size="sm" variant="outline" onClick={() => setMode('revision')}>
-            Solicitar revisao
+            Solicitar revisão
           </Button>
         </div>
       ) : (
@@ -107,9 +107,9 @@ function DecideControls({ submissionId }: { submissionId: string }) {
 
 function SafetyGateBadge({ cleared, blockingReason }: { cleared: boolean; blockingReason: string | null }) {
   return cleared ? (
-    <Badge variant="success">Seguranca: liberado</Badge>
+    <Badge variant="success">Segurança: liberado</Badge>
   ) : (
-    <Badge variant="warning">Seguranca: {blockingReason ?? 'nao liberado'}</Badge>
+    <Badge variant="warning">Segurança: {blockingReason ?? 'não liberado'}</Badge>
   );
 }
 
@@ -118,15 +118,15 @@ function SubmissionRow({ item, canDecide }: { item: BrandContentSubmissionVersio
     <div className="py-3">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-text-dark">
+          <p className="text-sm font-medium text-text-primary">
             {item.creator_display_name} &middot; versao {item.version_number}
           </p>
-          <p className="font-mono text-xs text-muted mt-0.5">
+          <p className="font-mono text-xs text-text-secondary mt-0.5">
             Enviado em {new Date(item.submitted_at).toLocaleString('pt-BR')}
           </p>
           {item.review_deadline_at && (
-            <p className="font-mono text-xs text-muted mt-0.5">
-              Prazo de revisao: {new Date(item.review_deadline_at).toLocaleString('pt-BR')}
+            <p className="font-mono text-xs text-text-secondary mt-0.5">
+              Prazo de revisão: {new Date(item.review_deadline_at).toLocaleString('pt-BR')}
               {item.review_escalated && <span className="text-error"> &middot; atrasado, escalado</span>}
             </p>
           )}
@@ -138,15 +138,15 @@ function SubmissionRow({ item, canDecide }: { item: BrandContentSubmissionVersio
       </div>
 
       {item.review_reason && (
-        <p className="text-sm text-muted mt-2">
+        <p className="text-sm text-text-secondary mt-2">
           Motivo registrado para a versao {item.version_number}: {item.review_reason}
         </p>
       )}
 
       {item.published_url && (
-        <p className="text-sm text-text-dark mt-2">
+        <p className="text-sm text-text-primary mt-2">
           Publicado:{' '}
-          <a href={item.published_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          <a href={item.published_url} target="_blank" rel="noreferrer" className="text-violet-400 hover:underline">
             {item.published_url}
           </a>
         </p>
@@ -223,9 +223,9 @@ export function ContentSubmissionsPage() {
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <CardTitle>Rascunhos de conteudo</CardTitle>
+            <CardTitle>Rascunhos de conteúdo</CardTitle>
             <CardDescription>
-              A versao mais atual de cada envio, com o status de seguranca de marca ao lado da decisao criativa.
+              A versao mais atual de cada envio, com o status de segurança de marca ao lado da decisão criativa.
             </CardDescription>
           </div>
           <Select
@@ -245,7 +245,7 @@ export function ContentSubmissionsPage() {
 
       {error && (
         <Alert variant="error">
-          <p>Nao foi possivel carregar os rascunhos agora.</p>
+          <p>Não foi possível carregar os rascunhos agora.</p>
           <Button size="sm" variant="outline" className="mt-2" onClick={() => refetch()}>
             Tentar novamente
           </Button>
@@ -254,7 +254,7 @@ export function ContentSubmissionsPage() {
 
       {!error && visibleGroups.length === 0 && (
         <Card>
-          <p className="text-sm text-muted py-8 text-center">Nenhum rascunho nesse status.</p>
+          <p className="text-sm text-text-secondary py-8 text-center">Nenhum rascunho nesse status.</p>
         </Card>
       )}
 
@@ -264,11 +264,11 @@ export function ContentSubmissionsPage() {
             <Card key={group.root}>
               <SubmissionRow item={group.latest} canDecide={canDecide} />
               {group.versions.length > 1 && (
-                <div className="border-t border-border mt-2 pt-2">
+                <div className="border-t border-border-default mt-2 pt-2">
                   <button
                     type="button"
                     onClick={() => toggleExpanded(group.root)}
-                    className="text-sm text-primary hover:underline"
+                    className="text-sm text-violet-400 hover:underline"
                   >
                     {expandedRoots.has(group.root)
                       ? 'Ocultar historico de versoes'

@@ -75,7 +75,7 @@ describe('SocialAccountsPage - US-24.1 scenario 2 (ongoing connection management
 
     expect(await screen.findByText('Desconectado')).toBeInTheDocument();
     expect(screen.getByText(/Acesso revogado pela plataforma/i)).toBeInTheDocument();
-    expect(screen.getByText(/reconecte para voltar a receber metricas atualizadas/i)).toBeInTheDocument();
+    expect(screen.getByText(/reconecte para voltar a receber métricas atualizadas/i)).toBeInTheDocument();
     // TikTok, still connected, is shown as connected and untouched.
     expect(screen.getByText('Conectado')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reconectar' })).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('SocialAccountsPage - US-24.1 scenario 2 (ongoing connection management
     renderPage();
 
     expect(await screen.findByText('Desconectado manualmente')).toBeInTheDocument();
-    expect(screen.queryByText(/reconecte para voltar a receber metricas atualizadas/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/reconecte para voltar a receber métricas atualizadas/i)).not.toBeInTheDocument();
   });
 
   // Relinking after a revocation: clicking "Reconectar" starts the same OAuth flow as a

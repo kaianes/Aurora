@@ -70,7 +70,7 @@ describe('CreatorPerformancePage - US-37', () => {
     renderPage();
 
     expect(await screen.findByText(/Alcance: 500/)).toBeInTheDocument();
-    expect(screen.getByText('Desatualizado (plataforma indisponivel)')).toBeInTheDocument();
+    expect(screen.getByText('Desatualizado (plataforma indisponível)')).toBeInTheDocument();
     expect(screen.getByText(/Metricas desatualizadas\. Ultima coleta bem-sucedida/)).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe('CreatorPerformancePage - US-37', () => {
 
     renderPage();
 
-    expect(await screen.findByText('Nenhum conteudo publicado ainda.')).toBeInTheDocument();
+    expect(await screen.findByText('Nenhum conteúdo publicado ainda.')).toBeInTheDocument();
     expect(screen.queryByText(/Alcance: 0/)).not.toBeInTheDocument();
   });
 
@@ -96,17 +96,17 @@ describe('CreatorPerformancePage - US-37', () => {
     renderPage();
 
     await screen.findByText('Lancamento Serum Vitamina C');
-    expect(screen.getAllByText(/Ver publicacao/)).toHaveLength(1);
+    expect(screen.getAllByText(/Ver publicação/)).toHaveLength(1);
   });
 
   it('shows an explicit error state when performance fails to load', async () => {
     (creatorPortalApi.listPerformance as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Nao foi possivel carregar seu desempenho agora.' } } },
+      response: { data: { error: { message: 'Não foi possível carregar seu desempenho agora.' } } },
     });
 
     renderPage();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Nao foi possivel carregar seu desempenho agora.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível carregar seu desempenho agora.');
   });
 });

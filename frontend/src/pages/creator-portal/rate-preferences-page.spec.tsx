@@ -51,7 +51,7 @@ describe('RatePreferencesPage - US-27 Creator-Set Rate Preferences', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await screen.findByText(/ainda nao definiu nenhum valor/i);
+    await screen.findByText(/ainda não definiu nenhum valor/i);
     await user.selectOptions(screen.getByLabelText(/Formato/i), 'instagram_reel');
     await user.type(screen.getByLabelText(/Valor \(BRL\)/i), '350.00');
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
@@ -95,7 +95,7 @@ describe('RatePreferencesPage - US-27 Creator-Set Rate Preferences', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await screen.findByText(/ainda nao definiu nenhum valor/i);
+    await screen.findByText(/ainda não definiu nenhum valor/i);
     await user.selectOptions(screen.getByLabelText(/Formato/i), 'instagram_reel');
     await user.type(screen.getByLabelText(/Valor \(BRL\)/i), value);
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
@@ -127,7 +127,7 @@ describe('RatePreferencesPage - US-27 Creator-Set Rate Preferences', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await screen.findByText(/ainda nao definiu nenhum valor/i);
+    await screen.findByText(/ainda não definiu nenhum valor/i);
     await user.selectOptions(screen.getByLabelText(/Formato/i), 'instagram_reel');
     await user.type(screen.getByLabelText(/Valor \(BRL\)/i), '40000');
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
@@ -140,7 +140,7 @@ describe('RatePreferencesPage - US-27 Creator-Set Rate Preferences', () => {
     const user = userEvent.setup();
     renderPage();
 
-    await screen.findByText(/ainda nao definiu nenhum valor/i);
+    await screen.findByText(/ainda não definiu nenhum valor/i);
     await user.type(screen.getByLabelText(/Valor \(BRL\)/i), '350');
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
 

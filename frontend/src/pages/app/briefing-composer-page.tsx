@@ -16,7 +16,7 @@ import type { DeliverableSpec } from '@/types/api';
 
 const MISSING_FIELD_LABEL: Record<string, string> = {
   dos: "Do's (o que fazer)",
-  donts: "Don'ts (o que nao fazer)",
+  donts: "Don'ts (o que não fazer)",
   reference_examples: 'Exemplos de referencia',
   deliverable_spec: 'Especificacao do entregavel',
   deadline: 'Prazo',
@@ -134,7 +134,7 @@ export function BriefingComposerPage() {
       setSaveErrorMessage(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel salvar o briefing agora.',
+          : 'Não foi possível salvar o briefing agora.',
       );
     },
   });
@@ -153,7 +153,7 @@ export function BriefingComposerPage() {
         setMissingFields(fields);
         setIssueErrorMessage(
           err.response.data.error.message ??
-            'O briefing nao pode ser emitido: os seguintes campos estao vazios.',
+            'O briefing não pode ser emitido: os seguintes campos estao vazios.',
         );
         return;
       }
@@ -161,7 +161,7 @@ export function BriefingComposerPage() {
       setIssueErrorMessage(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel emitir o briefing agora.',
+          : 'Não foi possível emitir o briefing agora.',
       );
     },
   });
@@ -173,7 +173,7 @@ export function BriefingComposerPage() {
   };
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o briefing desta campanha.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o briefing desta campanha.</Alert>;
 
   const isIssued = briefing?.status === 'issued';
   const readOnly = isIssued || !canManage;
@@ -186,7 +186,7 @@ export function BriefingComposerPage() {
             <CardTitle>Briefing da campanha</CardTitle>
             <CardDescription>
               Do's, don'ts, exemplos de referencia, especificacao do entregavel e prazo -- tudo em um unico
-              briefing estruturado enviado ao pool em uma unica acao.
+              briefing estruturado enviado ao pool em uma única acao.
             </CardDescription>
           </div>
           {briefing && (
@@ -198,7 +198,7 @@ export function BriefingComposerPage() {
       {isIssued && briefing?.issued_at && (
         <Alert variant="success">
           <p>
-            Este briefing foi emitido em {new Date(briefing.issued_at).toLocaleString('pt-BR')} e nao pode mais ser
+            Este briefing foi emitido em {new Date(briefing.issued_at).toLocaleString('pt-BR')} e não pode mais ser
             editado.
           </p>
           <div className="mt-2 flex gap-3">
@@ -248,7 +248,7 @@ export function BriefingComposerPage() {
       >
         <Card>
           <fieldset disabled={readOnly}>
-            <legend className="text-sm font-semibold text-text-dark mb-3">Do's -- o que o criador deve fazer</legend>
+            <legend className="text-sm font-semibold text-text-primary mb-3">Do's -- o que o criador deve fazer</legend>
             <Textarea
               label="Do's (um por linha)"
               value={dosText}
@@ -262,12 +262,12 @@ export function BriefingComposerPage() {
 
         <Card>
           <fieldset disabled={readOnly}>
-            <legend className="text-sm font-semibold text-text-dark mb-3">Don'ts -- o que o criador deve evitar</legend>
+            <legend className="text-sm font-semibold text-text-primary mb-3">Don'ts -- o que o criador deve evitar</legend>
             <Textarea
               label="Don'ts (um por linha)"
               value={dontsText}
               onChange={(e) => setDontsText(e.target.value)}
-              placeholder={'Nao mencionar concorrentes\nNao usar filtros pesados'}
+              placeholder={'Não mencionar concorrentes\nNão usar filtros pesados'}
               rows={4}
               error={missingFields.includes('donts') ? 'Obrigatorio para emitir o briefing: adicione ao menos um item.' : undefined}
             />
@@ -276,7 +276,7 @@ export function BriefingComposerPage() {
 
         <Card>
           <fieldset disabled={readOnly}>
-            <legend className="text-sm font-semibold text-text-dark mb-3">Exemplos de referencia</legend>
+            <legend className="text-sm font-semibold text-text-primary mb-3">Exemplos de referencia</legend>
             <Textarea
               label="Exemplos (um link ou descricao por linha)"
               value={examplesText}
@@ -285,7 +285,7 @@ export function BriefingComposerPage() {
               rows={3}
               error={
                 missingFields.includes('reference_examples')
-                  ? 'Obrigatorio para emitir o briefing: adicione ao menos um exemplo (link, descricao ou qualquer texto nao vazio).'
+                  ? 'Obrigatorio para emitir o briefing: adicione ao menos um exemplo (link, descricao ou qualquer texto não vazio).'
                   : undefined
               }
             />
@@ -294,7 +294,7 @@ export function BriefingComposerPage() {
 
         <Card>
           <fieldset disabled={readOnly}>
-            <legend className="text-sm font-semibold text-text-dark mb-3">Especificacao do entregavel</legend>
+            <legend className="text-sm font-semibold text-text-primary mb-3">Especificacao do entregavel</legend>
             {missingFields.includes('deliverable_spec') && (
               <p className="text-sm text-error mb-3" role="alert">
                 Obrigatorio para emitir o briefing: informe ao menos o formato do entregavel.
@@ -328,7 +328,7 @@ export function BriefingComposerPage() {
               />
             </div>
             <Textarea
-              label="Hashtags obrigatorias (uma por linha, opcional)"
+              label="Hashtags obrigatórias (uma por linha, opcional)"
               value={hashtagsText}
               onChange={(e) => setHashtagsText(e.target.value)}
               rows={2}
@@ -346,7 +346,7 @@ export function BriefingComposerPage() {
 
         <Card>
           <fieldset disabled={readOnly}>
-            <legend className="text-sm font-semibold text-text-dark mb-3">Prazo</legend>
+            <legend className="text-sm font-semibold text-text-primary mb-3">Prazo</legend>
             <Input
               label="Prazo (data e hora)"
               type="datetime-local"

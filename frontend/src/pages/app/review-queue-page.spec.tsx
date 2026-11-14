@@ -77,14 +77,14 @@ describe('ReviewQueuePage - US-17', () => {
     const confirmButton = screen.getByRole('button', { name: 'Confirmar' });
     expect(confirmButton).toBeDisabled();
 
-    await userEvent.type(screen.getByLabelText(/Motivo da rejeicao/), 'Linguagem de resultado garantido nao permitida');
+    await userEvent.type(screen.getByLabelText(/Motivo da rejeicao/), 'Linguagem de resultado garantido não permitida');
     expect(confirmButton).not.toBeDisabled();
 
     await userEvent.click(confirmButton);
     await waitFor(() =>
       expect(reviewQueueApi.decide).toHaveBeenCalledWith('rq-1', {
         decision: 'rejected',
-        reason: 'Linguagem de resultado garantido nao permitida',
+        reason: 'Linguagem de resultado garantido não permitida',
       }),
     );
   });
@@ -98,7 +98,7 @@ describe('ReviewQueuePage - US-17', () => {
         isAxiosError: true,
         response: {
           status: 503,
-          data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'Servico de revisao indisponivel. Tente novamente.' } },
+          data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'Servico de revisão indisponível. Tente novamente.' } },
         },
       });
     (reviewQueueApi.decide as any).mockResolvedValue({ id: 'rq-1', status: 'approved', decided_at: new Date().toISOString() });
@@ -109,10 +109,10 @@ describe('ReviewQueuePage - US-17', () => {
     // Approving triggers a refetch of the list, which this time fails (503).
     await userEvent.click(screen.getByRole('button', { name: 'Aprovar' }));
 
-    expect(await screen.findByText(/Nao foi possivel carregar a fila de revisao agora/)).toBeInTheDocument();
+    expect(await screen.findByText(/Não foi possível carregar a fila de revisão agora/)).toBeInTheDocument();
     // The flagged item from the last successful load must still be visibly present, not emptied out.
     expect(screen.getByText('Lancamento Serum Vitamina C')).toBeInTheDocument();
-    expect(screen.getByText(/permanece bloqueado e nao publicado/)).toBeInTheDocument();
+    expect(screen.getByText(/permanece bloqueado e não publicado/)).toBeInTheDocument();
     expect(screen.queryByText('Nenhum item nesta fila.')).not.toBeInTheDocument();
   });
 });

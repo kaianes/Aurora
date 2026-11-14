@@ -107,7 +107,7 @@ describe('MediaKitPage - US-25 Automatic Media Kit', () => {
       id: 'mk-003',
       status: 'failed',
       failure_reason: 'render_error',
-      message: 'Nao foi possivel gerar seu media kit. Tente novamente.',
+      message: 'Não foi possível gerar seu media kit. Tente novamente.',
     });
 
     const user = userEvent.setup();
@@ -115,7 +115,7 @@ describe('MediaKitPage - US-25 Automatic Media Kit', () => {
 
     await user.click(screen.getByRole('button', { name: 'Gerar media kit' }));
 
-    expect(await screen.findByText('Nao foi possivel gerar seu media kit. Tente novamente.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível gerar seu media kit. Tente novamente.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tentar novamente' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Baixar PDF' })).not.toBeInTheDocument();
   });
@@ -125,7 +125,7 @@ describe('MediaKitPage - US-25 Automatic Media Kit', () => {
   it('shows an error message when the initial media kit request itself fails', async () => {
     (creatorPortalApi.requestMediaKit as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { code: 'INTERNAL_ERROR', message: 'Nao foi possivel solicitar seu media kit agora.' } } },
+      response: { data: { error: { code: 'INTERNAL_ERROR', message: 'Não foi possível solicitar seu media kit agora.' } } },
     });
 
     const user = userEvent.setup();
@@ -133,7 +133,7 @@ describe('MediaKitPage - US-25 Automatic Media Kit', () => {
 
     await user.click(screen.getByRole('button', { name: 'Gerar media kit' }));
 
-    expect(await screen.findByText('Nao foi possivel solicitar seu media kit agora.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível solicitar seu media kit agora.')).toBeInTheDocument();
   });
 
   it('redirects to login when there is no creator session', async () => {

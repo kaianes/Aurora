@@ -51,7 +51,7 @@ export function OnboardingReviewPage() {
     mutation.error && isAxiosError(mutation.error) && mutation.error.response?.data?.error?.message
       ? mutation.error.response.data.error.message
       : mutation.isError
-        ? 'Nao foi possivel salvar agora. Voce pode tentar novamente ou pular esta etapa.'
+        ? 'Não foi possível salvar agora. Voce pode tentar novamente ou pular esta etapa.'
         : null;
 
   return (
@@ -59,8 +59,8 @@ export function OnboardingReviewPage() {
       <CardHeader>
         <CardTitle>Revise seu perfil</CardTitle>
         <CardDescription>
-          Confira ou ajuste seu nome de exibicao e nicho de conteudo. Isso aparece para as marcas
-          junto com suas metricas reais.
+          Confira ou ajuste seu nome de exibicao e nicho de conteúdo. Isso aparece para as marcas
+          junto com suas métricas reais.
         </CardDescription>
       </CardHeader>
 
@@ -72,7 +72,7 @@ export function OnboardingReviewPage() {
         )}
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
           <Input label="Nome de exibicao" {...register('display_name')} placeholder="Como voce quer aparecer" />
-          <Input label="Nicho de conteudo" {...register('content_niche')} placeholder="Ex: skincare e maquiagem" />
+          <Input label="Nicho de conteúdo" {...register('content_niche')} placeholder="Ex: skincare e maquiagem" />
 
           <div className="flex gap-2">
             <Button type="submit" loading={mutation.isPending} className="flex-1">

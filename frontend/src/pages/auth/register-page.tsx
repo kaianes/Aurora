@@ -13,13 +13,13 @@ import { Card } from '@/components/ui/card';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100),
-  email: z.string().email('Email invalido'),
+  email: z.string().email('Email inválido'),
   password: z
     .string()
     .min(10, 'Senha deve ter pelo menos 10 caracteres')
-    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiuscula')
-    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minuscula')
-    .regex(/[0-9]/, 'Deve conter pelo menos um numero')
+    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Deve conter pelo menos um número')
     .regex(/[^A-Za-z0-9]/, 'Deve conter pelo menos um caractere especial'),
   workspace_name: z.string().min(2, 'Nome do workspace deve ter pelo menos 2 caracteres').max(100),
   workspace_type: z.enum(['brand', 'agency']),
@@ -70,11 +70,11 @@ export function RegisterPage() {
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
           <div className="mb-4 text-4xl" aria-hidden="true">&#9993;</div>
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Verifique seu email</h1>
-          <p className="text-sm text-muted">
-            Enviamos um link de verificacao para o seu email. Clique no link para ativar sua conta.
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Verifique seu email</h1>
+          <p className="text-sm text-text-secondary">
+            Enviamos um link de verificação para o seu email. Clique no link para ativar sua conta.
           </p>
-          <Link to="/login" className="mt-4 inline-block text-sm text-primary hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-sm text-violet-400 hover:underline">
             Ir para o login
           </Link>
         </Card>
@@ -85,8 +85,8 @@ export function RegisterPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-text-dark mb-1">Criar conta</h1>
-        <p className="text-sm text-muted mb-6">Comece a usar a Aurora sem precisar falar com vendas.</p>
+        <h1 className="text-xl font-semibold text-text-primary mb-1">Criar conta</h1>
+        <p className="text-sm text-text-secondary mb-6">Comece a usar a Aurora sem precisar falar com vendas.</p>
 
         {errorMessage && (
           <Alert variant="error" className="mb-4">
@@ -95,17 +95,16 @@ export function RegisterPage() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-          {/* Workspace type toggle */}
           <fieldset>
-            <legend className="block text-sm font-medium text-text-dark mb-2">Tipo de workspace</legend>
-            <div className="flex rounded-lg border border-border overflow-hidden">
+            <legend className="block text-sm font-medium text-text-secondary mb-2">Tipo de workspace</legend>
+            <div className="flex rounded-lg border border-border-default overflow-hidden bg-bg-elevated">
               <button
                 type="button"
                 onClick={() => setValue('workspace_type', 'brand')}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 text-sm font-semibold transition-all ${
                   workspaceType === 'brand'
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-muted hover:bg-surface'
+                    ? 'bg-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                    : 'text-text-muted hover:text-text-primary'
                 }`}
                 aria-pressed={workspaceType === 'brand'}
               >
@@ -114,10 +113,10 @@ export function RegisterPage() {
               <button
                 type="button"
                 onClick={() => setValue('workspace_type', 'agency')}
-                className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                className={`flex-1 py-2 text-sm font-semibold transition-all ${
                   workspaceType === 'agency'
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-muted hover:bg-surface'
+                    ? 'bg-violet-500 text-white shadow-[0_0_15px_rgba(139,92,246,0.3)]'
+                    : 'text-text-muted hover:text-text-primary'
                 }`}
                 aria-pressed={workspaceType === 'agency'}
               >
@@ -144,11 +143,11 @@ export function RegisterPage() {
             type="password"
             {...register('password')}
             error={errors.password?.message ?? fieldErrors?.password?.[0]}
-            hint="Minimo 10 caracteres, com maiuscula, minuscula, numero e caractere especial"
+            hint="Mínimo 10 caracteres, com maiúscula, minúscula, número e caractere especial"
             autoComplete="new-password"
           />
           <Input
-            label={workspaceType === 'brand' ? 'Nome da marca' : 'Nome da agencia'}
+            label={workspaceType === 'brand' ? 'Nome da marca' : 'Nome da agência'}
             {...register('workspace_name')}
             error={errors.workspace_name?.message ?? fieldErrors?.workspace_name?.[0]}
           />
@@ -158,9 +157,9 @@ export function RegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-muted">
-          Ja tem uma conta?{' '}
-          <Link to="/login" className="text-primary hover:underline">
+        <p className="mt-4 text-center text-sm text-text-muted">
+          Já tem uma conta?{' '}
+          <Link to="/login" className="text-violet-400 hover:underline">
             Entrar
           </Link>
         </p>

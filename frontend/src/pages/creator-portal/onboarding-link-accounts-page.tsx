@@ -18,7 +18,7 @@ const PLATFORMS: { value: SocialPlatform; label: string }[] = [
 
 const RESULT_MESSAGE: Record<string, string> = {
   denied: 'Voce negou a autorizacao para',
-  unavailable: 'A plataforma esta indisponivel no momento para',
+  unavailable: 'A plataforma esta indisponível no momento para',
 };
 
 /**
@@ -84,11 +84,11 @@ export function OnboardingLinkAccountsPage() {
         </CardDescription>
       </CardHeader>
 
-      {error && <Alert variant="error">Nao foi possivel carregar suas conexoes agora.</Alert>}
+      {error && <Alert variant="error">Não foi possível carregar suas conexoes agora.</Alert>}
 
       {callbackResult && callbackResult !== 'granted' && (
         <Alert variant="warning">
-          {(RESULT_MESSAGE[callbackResult] ?? 'Nao foi possivel conectar')}{' '}
+          {(RESULT_MESSAGE[callbackResult] ?? 'Não foi possível conectar')}{' '}
           {PLATFORMS.find((p) => p.value === callbackPlatform)?.label ?? callbackPlatform}. Voce pode
           tentar novamente ou seguir em frente com as redes ja conectadas.
           <button onClick={dismissCallbackBanner} className="ml-2 underline">
@@ -122,9 +122,9 @@ export function OnboardingLinkAccountsPage() {
                     aria-hidden="true"
                   />
                   <div>
-                    <p className="text-sm font-semibold text-text-dark">{label}</p>
+                    <p className="text-sm font-semibold text-text-primary">{label}</p>
                     {account && (
-                      <p className="text-xs text-muted font-mono">
+                      <p className="text-xs text-text-secondary font-mono">
                         {account.platform_handle ?? ''}
                         {isConnected
                           ? ` · conectado em ${new Date(account.connected_at).toLocaleDateString('pt-BR')}`
@@ -162,7 +162,7 @@ export function OnboardingLinkAccountsPage() {
               {account?.status === 'disconnected' && account.disconnect_reason === 'revoked_by_platform' && (
                 <p className="text-xs text-error mt-2">
                   A autorizacao foi revogada pela plataforma. Reconecte para continuar recebendo
-                  metricas atualizadas.
+                  métricas atualizadas.
                 </p>
               )}
             </Card>
@@ -174,12 +174,12 @@ export function OnboardingLinkAccountsPage() {
         <Alert variant="error">
           {isAxiosError(authorizeMutation.error) && authorizeMutation.error.response?.data?.error?.message
             ? authorizeMutation.error.response.data.error.message
-            : 'Nao foi possivel iniciar a conexao agora.'}
+            : 'Não foi possível iniciar a conexao agora.'}
         </Alert>
       )}
 
       <div className="flex items-center justify-between">
-        <p className="text-xs text-muted">
+        <p className="text-xs text-text-secondary">
           {hasAnyConnected ? 'Voce ja pode continuar.' : 'Conecte pelo menos uma rede para continuar.'}
         </p>
         <Button disabled={!hasAnyConnected} onClick={() => navigate('/creator-portal/onboarding/review')}>

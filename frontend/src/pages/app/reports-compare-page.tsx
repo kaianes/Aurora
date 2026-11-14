@@ -61,7 +61,7 @@ export function ReportsComparePage() {
     isAxiosError(error) && error.response?.data?.error?.message
       ? error.response.data.error.message
       : error
-        ? 'Nao foi possivel comparar os clientes selecionados.'
+        ? 'Não foi possível comparar os clientes selecionados.'
         : null;
 
   if (loadingClients) return <Spinner />;
@@ -74,18 +74,18 @@ export function ReportsComparePage() {
       </CardHeader>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Selecione os clientes</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Selecione os clientes</h3>
         {clients && clients.data.length > 0 ? (
           <div className="space-y-2 mb-4">
             {clients.data.map((c) => (
-              <label key={c.id} className="flex items-center gap-2 text-sm text-text-dark">
+              <label key={c.id} className="flex items-center gap-2 text-sm text-text-primary">
                 <input type="checkbox" checked={selected.has(c.id)} onChange={() => toggle(c.id)} />
                 {c.name}
               </label>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted mb-4">Nenhuma conta de cliente disponivel.</p>
+          <p className="text-sm text-text-secondary mb-4">Nenhuma conta de cliente disponível.</p>
         )}
         <Button
           onClick={() => setComparedIds(Array.from(selected))}
@@ -100,12 +100,12 @@ export function ReportsComparePage() {
 
       {comparison && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Resultados</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Resultados</h3>
           <div className="divide-y divide-border">
             {comparison.data.map((entry) => (
               <div key={entry.client_account_id} className="py-3">
-                <p className="text-sm font-medium text-text-dark mb-2">{entry.client_name}</p>
-                <div className="grid grid-cols-2 gap-2 font-mono text-xs text-text-dark">
+                <p className="text-sm font-medium text-text-primary mb-2">{entry.client_name}</p>
+                <div className="grid grid-cols-2 gap-2 font-mono text-xs text-text-primary">
                   <p className="flex items-center">
                     <MetricDot color="var(--color-strategy-violet)" />
                     {entry.campaign_count} campanha(s)
@@ -122,28 +122,28 @@ export function ReportsComparePage() {
                     <MetricDot color="var(--color-performance-orange)" />
                     Engajamento total: {formatNumber(entry.total_delivered_engagement)}
                   </p>
-                  <p className="text-muted">
+                  <p className="text-text-secondary">
                     Media de alcance/campanha: {formatNumber(entry.average_reach_per_campaign)}
                   </p>
-                  <p className="text-muted">
+                  <p className="text-text-secondary">
                     Media de engajamento/campanha: {formatNumber(entry.average_engagement_per_campaign)}
                   </p>
                 </div>
               </div>
             ))}
             {comparison.data.length === 0 && (
-              <p className="text-sm text-muted py-6 text-center">
-                Nenhum dos clientes selecionados pode ser incluido na comparacao.
+              <p className="text-sm text-text-secondary py-6 text-center">
+                Nenhum dos clientes selecionados pode ser incluido na comparação.
               </p>
             )}
           </div>
 
           {comparison.refused.length > 0 && (
-            <div className="mt-4 border-t border-border pt-3 space-y-2">
-              <h4 className="text-xs font-semibold text-muted uppercase">Nao incluidos na comparacao</h4>
+            <div className="mt-4 border-t border-border-default pt-3 space-y-2">
+              <h4 className="text-xs font-semibold text-text-secondary uppercase">Não incluidos na comparação</h4>
               {comparison.refused.map((r) => (
                 <div key={r.client_account_id} className="flex items-center justify-between text-sm">
-                  <span className="font-mono text-xs text-muted">{r.client_account_id}</span>
+                  <span className="font-mono text-xs text-text-secondary">{r.client_account_id}</span>
                   <Badge variant="warning">Sem acesso</Badge>
                 </div>
               ))}

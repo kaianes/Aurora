@@ -95,14 +95,14 @@ export function ClientReportPage() {
     isAxiosError(shareLinkMutation.error) && shareLinkMutation.error.response?.data?.error?.message
       ? shareLinkMutation.error.response.data.error.message
       : shareLinkMutation.isError
-        ? 'Nao foi possivel gerar o link compartilhavel agora.'
+        ? 'Não foi possível gerar o link compartilhavel agora.'
         : null;
 
   const requestErrorMessage =
     isAxiosError(requestMutation.error) && requestMutation.error.response?.data?.error?.message
       ? requestMutation.error.response.data.error.message
       : requestMutation.isError
-        ? 'Nao foi possivel solicitar o relatorio agora.'
+        ? 'Não foi possível solicitar o relatório agora.'
         : null;
 
   return (
@@ -117,14 +117,14 @@ export function ClientReportPage() {
         <Alert variant="error">
           {isAxiosError(reportError) && reportError.response?.data?.error?.message
             ? reportError.response.data.error.message
-            : 'Nao foi possivel carregar o relatorio solicitado.'}
+            : 'Não foi possível carregar o relatório solicitado.'}
         </Alert>
       )}
 
       {!report && (
         <Card>
-          <p className="text-sm text-text-dark mb-4">
-            Gere um relatorio consolidado de todas as campanhas deste cliente, com alcance, engajamento e
+          <p className="text-sm text-text-primary mb-4">
+            Gere um relatório consolidado de todas as campanhas deste cliente, com alcance, engajamento e
             eficiencia de custo, pronto para entregar como trabalho da sua agencia.
           </p>
           <Button onClick={() => requestMutation.mutate()} loading={requestMutation.isPending}>
@@ -135,7 +135,7 @@ export function ClientReportPage() {
 
       {report?.status === 'pending' && (
         <Card>
-          <div className="flex items-center gap-3 text-sm text-muted">
+          <div className="flex items-center gap-3 text-sm text-text-secondary">
             <Spinner className="h-5 w-5" />
             Gerando relatorio. Isso pode levar alguns segundos.
           </div>
@@ -143,48 +143,48 @@ export function ClientReportPage() {
       )}
 
       {report?.status === 'failed' && (
-        <Alert variant="error">Nao foi possivel gerar o relatorio agora. Tente novamente.</Alert>
+        <Alert variant="error">Não foi possível gerar o relatório agora. Tente novamente.</Alert>
       )}
 
       {report?.status === 'ready' && (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-dark">Relatorio #{report.id}</h3>
+            <h3 className="text-sm font-semibold text-text-primary">Relatorio #{report.id}</h3>
             <Badge variant={report.branding_applied ? 'success' : 'default'}>
-              {report.branding_applied ? 'Com marca da agencia' : 'Sem marca configurada'}
+              {report.branding_applied ? 'Com marca da agência' : 'Sem marca configurada'}
             </Badge>
           </div>
 
           {!report.branding_applied && (
-            <p className="text-xs text-muted mb-3">
-              Configure o logo e as cores da sua agencia para que aparecam nos proximos relatorios.{' '}
-              <Link to="/app/agency/branding" className="text-primary underline">
-                Configurar marca da agencia
+            <p className="text-xs text-text-secondary mb-3">
+              Configure o logo e as cores da sua agencia para que aparecam nos proximos relatórios.{' '}
+              <Link to="/app/agency/branding" className="text-violet-400 underline">
+                Configurar marca da agência
               </Link>
             </p>
           )}
 
-          <div className="space-y-2 border-t border-border pt-3">
-            <p className="flex items-center font-mono text-sm text-text-dark">
+          <div className="space-y-2 border-t border-border-default pt-3">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-strategy-violet)" />
               Campanhas: {report.campaign_count ?? '-'}
             </p>
-            <p className="flex items-center font-mono text-sm text-text-dark">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-creator-pink)" />
               Investimento total: {formatCurrency(report.total_spend)}
             </p>
-            <p className="flex items-center font-mono text-sm text-text-dark">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-signal-green)" />
               Alcance entregue: {formatNumber(report.total_delivered_reach)}
             </p>
-            <p className="flex items-center font-mono text-sm text-text-dark">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-performance-orange)" />
               Engajamento entregue: {formatNumber(report.total_delivered_engagement)}
             </p>
-            <p className="font-mono text-sm text-text-dark">
+            <p className="font-mono text-sm text-text-primary">
               Custo por engajamento: {formatCurrency(report.cost_per_engagement)}
             </p>
-            <p className="font-mono text-sm text-text-dark">
+            <p className="font-mono text-sm text-text-primary">
               CPM equivalente: {formatCurrency(report.cpm_equivalent)}
             </p>
           </div>
@@ -208,8 +208,8 @@ export function ClientReportPage() {
 
           {/* US-44 (E9): share link for the agency's actual client company, who has no
               Aurora login at all -- section 5.5. */}
-          <div className="mt-4 border-t border-border pt-4">
-            <h4 className="text-xs font-semibold text-muted uppercase mb-2">Link compartilhavel</h4>
+          <div className="mt-4 border-t border-border-default pt-4">
+            <h4 className="text-xs font-semibold text-text-secondary uppercase mb-2">Link compartilhavel</h4>
             {shareLinkErrorMessage && <Alert variant="error" className="mb-2">{shareLinkErrorMessage}</Alert>}
             {!mintedLink ? (
               <Button
@@ -221,14 +221,14 @@ export function ClientReportPage() {
                 Gerar link compartilhavel
               </Button>
             ) : (
-              <div className="space-y-1 font-mono text-xs text-text-dark">
+              <div className="space-y-1 font-mono text-xs text-text-primary">
                 <p className="break-all">
-                  <span className="text-muted">Link: </span>
-                  <a href={mintedLink.share_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                  <span className="text-text-secondary">Link: </span>
+                  <a href={mintedLink.share_url} target="_blank" rel="noopener noreferrer" className="text-violet-400 underline">
                     {mintedLink.display_url}
                   </a>
                 </p>
-                <p className="text-muted">
+                <p className="text-text-secondary">
                   Expira em: {new Date(mintedLink.expires_at).toLocaleDateString('pt-BR')}
                 </p>
               </div>

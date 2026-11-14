@@ -64,6 +64,7 @@ import { CreatorPerformancePage } from '@/pages/creator-portal/performance-page'
 // E9 -- Agency Multi-Client Operations (US-39, US-41, US-44, FR-60)
 import { AuditLogPage } from '@/pages/app/audit-log-page';
 import { PublicClientReportPage } from '@/pages/public-client-report-page';
+import { LandingPage } from '@/pages/landing-page';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,7 +83,7 @@ export default function App() {
           <Routes>
             {/* Public routes */}
             <Route element={<PublicLayout />}>
-              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/verify-email" element={<VerifyEmailPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -98,6 +99,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             >
+              <Route path="pricing" element={<PricingPage />} />
               <Route path="brand-profile" element={<BrandProfilePage />} />
               <Route path="team" element={<TeamPage />} />
               <Route path="security" element={<SecurityPage />} />
@@ -222,9 +224,8 @@ export default function App() {
               <Route path="performance" element={<CreatorPerformancePage />} />
             </Route>
 
-            {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/pricing" replace />} />
-            <Route path="*" element={<Navigate to="/pricing" replace />} />
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

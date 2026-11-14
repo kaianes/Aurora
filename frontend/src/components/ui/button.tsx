@@ -10,11 +10,16 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-dark focus:ring-primary/50',
-  secondary: 'bg-secondary text-white hover:bg-secondary-light focus:ring-secondary/50',
-  outline: 'border border-border text-text-dark hover:bg-surface focus:ring-primary/50',
-  ghost: 'text-text-dark hover:bg-surface focus:ring-primary/50',
-  danger: 'bg-error text-white hover:bg-error/90 focus:ring-error/50',
+  primary:
+    'bg-violet-500 text-white hover:bg-violet-600 focus:ring-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.2)] hover:shadow-[0_0_24px_rgba(139,92,246,0.35)]',
+  secondary:
+    'bg-primary-muted text-primary hover:bg-[rgba(167,139,250,0.2)] focus:ring-violet-500/30',
+  outline:
+    'border border-border-default text-text-primary hover:bg-bg-hover hover:border-border-accent focus:ring-violet-500/30',
+  ghost:
+    'text-text-secondary hover:text-text-primary hover:bg-bg-hover focus:ring-violet-500/30',
+  danger:
+    'bg-error-muted text-error hover:bg-[rgba(248,113,113,0.2)] focus:ring-error/30',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -29,7 +34,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={disabled || loading}
-        className={`inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        className={`inline-flex items-center justify-center rounded-lg font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-bg disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
         {...props}
       >
         {loading && (

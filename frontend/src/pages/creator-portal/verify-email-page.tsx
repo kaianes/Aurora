@@ -41,7 +41,7 @@ export function CreatorVerifyEmailPage() {
     return (
       <div className="mx-auto max-w-md">
         <Card>
-          <Alert variant="error">Token de verificacao ausente. Verifique o link do email.</Alert>
+          <Alert variant="error">Token de verificação ausente. Verifique o link do email.</Alert>
         </Card>
       </div>
     );
@@ -52,7 +52,7 @@ export function CreatorVerifyEmailPage() {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="text-center">
           <Spinner />
-          <p className="mt-2 text-sm text-muted">Verificando seu email...</p>
+          <p className="mt-2 text-sm text-text-secondary">Verificando seu email...</p>
         </div>
       </div>
     );
@@ -61,7 +61,7 @@ export function CreatorVerifyEmailPage() {
   const errorMessage =
     isAxiosError(verifyMutation.error) && verifyMutation.error.response?.data?.error?.message
       ? verifyMutation.error.response.data.error.message
-      : 'Nao foi possivel verificar o email. O link pode ser invalido ou ja ter sido utilizado.';
+      : 'Não foi possível verificar o email. O link pode ser inválido ou já ter sido utilizado.';
 
   return (
     <div className="mx-auto max-w-md">
@@ -70,8 +70,8 @@ export function CreatorVerifyEmailPage() {
         <Button className="mt-4" onClick={() => navigate('/creator-portal/login')}>
           Ir para o login
         </Button>
-        <p className="mt-2 text-sm text-muted">
-          <Link to="/creator-portal/register" className="text-primary hover:underline">
+        <p className="mt-2 text-sm text-text-secondary">
+          <Link to="/creator-portal/register" className="text-violet-400 hover:underline">
             Criar uma nova conta
           </Link>
         </p>

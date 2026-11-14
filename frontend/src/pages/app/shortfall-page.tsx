@@ -40,7 +40,7 @@ export function ShortfallPage() {
   });
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o status do pool.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o status do pool.</Alert>;
 
   const shortfall = data?.shortfall;
 
@@ -61,21 +61,21 @@ export function ShortfallPage() {
       <CardHeader>
         <CardTitle>Pool abaixo do minimo garantido</CardTitle>
         <CardDescription>
-          Nao foi possivel preencher o pool minimo garantido antes do lancamento. Veja abaixo a resolucao.
+          Não foi possível preencher o pool minimo garantido antes do lancamento. Veja abaixo a resolucao.
         </CardDescription>
       </CardHeader>
 
       <Card>
         {shortfall.resolution_type === 'partial_refund' ? (
-          <p className="font-mono text-sm text-text-dark">
+          <p className="font-mono text-sm text-text-primary">
             Reembolso parcial: {formatCurrency(shortfall.refund_amount)}
           </p>
         ) : (
-          <p className="font-mono text-sm text-text-dark">
+          <p className="font-mono text-sm text-text-primary">
             Garantia revisada: {shortfall.revised_min_pool_size} criadores
           </p>
         )}
-        <p className="text-xs text-muted mt-2 font-mono">
+        <p className="text-xs text-text-secondary mt-2 font-mono">
           Notificado em {new Date(shortfall.notified_at).toLocaleString('pt-BR')}
         </p>
 
@@ -86,7 +86,7 @@ export function ShortfallPage() {
         ) : offersChoice ? (
           canResolve ? (
             <div className="mt-4 space-y-3">
-              <p className="text-sm text-text-dark">Escolha como deseja proceder:</p>
+              <p className="text-sm text-text-primary">Escolha como deseja proceder:</p>
               <div className="flex gap-2">
                 <Button
                   variant={choice === 'partial_refund' ? 'primary' : 'outline'}
@@ -112,13 +112,13 @@ export function ShortfallPage() {
                 <Alert variant="error">
                   {isAxiosError(resolveMutation.error) && resolveMutation.error.response?.data?.error?.message
                     ? resolveMutation.error.response.data.error.message
-                    : 'Nao foi possivel registrar a resolucao.'}
+                    : 'Não foi possível registrar a resolucao.'}
                 </Alert>
               )}
             </div>
           ) : (
             <Alert variant="warning" className="mt-4">
-              Apenas o proprietario da marca ou administrador da agencia pode escolher a resolucao.
+              Apenas o proprietario da marca ou administrador da agência pode escolher a resolucao.
             </Alert>
           )
         ) : (

@@ -85,7 +85,7 @@ describe('ShortlistOverridePage - US-40', () => {
         data: {
           error: {
             code: 'CREATOR_NOT_ELIGIBLE',
-            message: 'O criador creator-9999 ainda nao completou a qualificacao de onboarding.',
+            message: 'O criador creator-9999 ainda não completou a qualificacao de onboarding.',
             details: { creator_id: 'creator-9999', suggested_action: 'wait_for_onboarding' },
           },
         },
@@ -99,6 +99,6 @@ describe('ShortlistOverridePage - US-40', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
     await userEvent.click(screen.getByRole('button', { name: 'Salvar selecao final' }));
 
-    expect(await screen.findByText(/nao completou a qualificacao de onboarding/)).toBeInTheDocument();
+    expect(await screen.findByText(/não completou a qualificacao de onboarding/)).toBeInTheDocument();
   });
 });

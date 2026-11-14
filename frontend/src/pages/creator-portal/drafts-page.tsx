@@ -28,8 +28,8 @@ function VersionCard({ version }: { version: ContentSubmissionVersion }) {
     <Card>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-text-dark">Versao {version.version_number}</p>
-          <p className="font-mono text-xs text-muted mt-0.5">
+          <p className="text-sm font-semibold text-text-primary">Versao {version.version_number}</p>
+          <p className="font-mono text-xs text-text-secondary mt-0.5">
             Enviado em {new Date(version.submitted_at).toLocaleString('pt-BR')}
           </p>
         </div>
@@ -37,36 +37,36 @@ function VersionCard({ version }: { version: ContentSubmissionVersion }) {
       </div>
 
       {version.review_reason && (
-        <p className="text-sm text-text-dark mt-3">
+        <p className="text-sm text-text-primary mt-3">
           Motivo registrado para a versao {version.version_number}: {version.review_reason}
         </p>
       )}
 
       {version.review_deadline_at && version.review_status === 'pending' && (
-        <p className="font-mono text-xs text-muted mt-2">
-          Prazo de revisao: {new Date(version.review_deadline_at).toLocaleString('pt-BR')}
+        <p className="font-mono text-xs text-text-secondary mt-2">
+          Prazo de revisão: {new Date(version.review_deadline_at).toLocaleString('pt-BR')}
         </p>
       )}
 
       {version.review_escalated && (
         <Alert variant="warning" className="mt-3">
-          O prazo de revisao desta versao foi ultrapassado sem uma decisao e a revisao foi escalada. Isso nao
-          significa que sua versao foi recusada -- apenas que a decisao esta demorando mais do que o esperado.
+          O prazo de revisão desta versao foi ultrapassado sem uma decisão e a revisão foi escalada. Isso nao
+          significa que sua versao foi recusada -- apenas que a decisão esta demorando mais do que o esperado.
         </Alert>
       )}
 
       <div className="mt-3">
         <Badge variant={version.safety_gate.cleared ? 'success' : 'warning'}>
           {version.safety_gate.cleared
-            ? 'Seguranca de marca: liberado'
-            : `Seguranca de marca: ${version.safety_gate.blocking_reason ?? 'nao liberado'}`}
+            ? 'Segurança de marca: liberado'
+            : `Segurança de marca: ${version.safety_gate.blocking_reason ?? 'não liberado'}`}
         </Badge>
       </div>
 
       {version.published_url && (
-        <p className="text-sm text-text-dark mt-3">
+        <p className="text-sm text-text-primary mt-3">
           Publicado:{' '}
-          <a href={version.published_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
+          <a href={version.published_url} target="_blank" rel="noreferrer" className="text-violet-400 hover:underline">
             {version.published_url}
           </a>
         </p>
@@ -115,7 +115,7 @@ export function DraftsPage() {
         </CardHeader>
         {acceptedOpportunities.length === 0 ? (
           <Card>
-            <p className="text-sm text-muted py-6 text-center">Nenhuma oportunidade aceita ainda.</p>
+            <p className="text-sm text-text-secondary py-6 text-center">Nenhuma oportunidade aceita ainda.</p>
           </Card>
         ) : (
           <div className="space-y-2">
@@ -123,10 +123,10 @@ export function DraftsPage() {
               <Link
                 key={o.id}
                 to={`/creator-portal/drafts?opportunity_id=${o.id}`}
-                className="block rounded-xl border border-border bg-white p-4 hover:bg-surface transition-colors"
+                className="block rounded-xl border border-border-default bg-bg-elevated p-4 hover:bg-bg-hover transition-colors"
               >
-                <p className="text-sm font-medium text-text-dark">{o.brand_name}</p>
-                <p className="text-xs text-muted">{o.deliverable.format}</p>
+                <p className="text-sm font-medium text-text-primary">{o.brand_name}</p>
+                <p className="text-xs text-text-secondary">{o.deliverable.format}</p>
               </Link>
             ))}
           </div>
@@ -136,7 +136,7 @@ export function DraftsPage() {
   }
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o historico de versoes.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o historico de versoes.</Alert>;
 
   const versions = [...(submissionsData?.data ?? [])].sort((a, b) => a.version_number - b.version_number);
   const latest = versions[versions.length - 1] ?? null;
@@ -155,7 +155,7 @@ export function DraftsPage() {
 
       {versions.length === 0 ? (
         <Card>
-          <p className="text-sm text-muted py-6 text-center">Nenhum rascunho enviado ainda para esta oportunidade.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Nenhum rascunho enviado ainda para esta oportunidade.</p>
         </Card>
       ) : (
         <div className="space-y-4">
@@ -181,7 +181,7 @@ export function DraftsPage() {
         )}
         {canConfirmPublication && latest && (
           <Link to={`/creator-portal/drafts/${latest.id}/confirm-publication?opportunity_id=${opportunityId}`}>
-            <Button variant="outline">Confirmar publicacao</Button>
+            <Button variant="outline">Confirmar publicação</Button>
           </Link>
         )}
       </div>

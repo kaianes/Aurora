@@ -6,7 +6,7 @@ export function Spinner({ className = 'h-8 w-8' }: SpinnerProps) {
   return (
     <div className="flex items-center justify-center p-8" role="status" aria-label="Carregando">
       <svg
-        className={`animate-spin text-primary ${className}`}
+        className={`animate-spin text-violet-400 ${className}`}
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
         viewBox="0 0 24 24"
