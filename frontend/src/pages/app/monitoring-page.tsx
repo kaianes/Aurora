@@ -36,7 +36,7 @@ function MetricDot({ color }: { color: string }) {
 
 function deviationSummary(snapshot: MonitoringSnapshot): string | null {
   if (snapshot.last_result === 'unreachable') {
-    return 'O link publicado nao pode ser acessado ou o conteudo foi removido.';
+    return 'O link publicado não pode ser acessado ou o conteúdo foi removido.';
   }
   if (snapshot.last_result === 'deviated' && snapshot.deviation_details) {
     const details = snapshot.deviation_details as { field?: string; approved?: string; current?: string };
@@ -66,7 +66,7 @@ export function MonitoringPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <CardHeader>
-        <CardTitle>Monitoramento de conteudo publicado</CardTitle>
+        <CardTitle>Monitoramento de conteúdo publicado</CardTitle>
         <CardDescription>Acompanha links publicados em busca de edicoes ou remocao apos a aprovacao.</CardDescription>
       </CardHeader>
 
@@ -92,11 +92,11 @@ export function MonitoringPage() {
       </Card>
 
       {isLoading && <Spinner />}
-      {error && <Alert variant="error">Nao foi possivel carregar o monitoramento agora.</Alert>}
+      {error && <Alert variant="error">Não foi possível carregar o monitoramento agora.</Alert>}
 
       {!isLoading && !error && snapshots.length === 0 && (
         <Card>
-          <p className="text-sm text-muted py-8 text-center">Nenhum conteudo publicado monitorado ainda.</p>
+          <p className="text-sm text-text-secondary py-8 text-center">Nenhum conteúdo publicado monitorado ainda.</p>
         </Card>
       )}
 
@@ -110,22 +110,22 @@ export function MonitoringPage() {
                     href={snap.published_url}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm font-medium text-primary hover:underline break-all"
+                    className="text-sm font-medium text-violet-400 hover:underline break-all"
                   >
                     {snap.published_url}
                   </a>
-                  <p className="flex items-center font-mono text-xs text-muted mt-1">
+                  <p className="flex items-center font-mono text-xs text-text-secondary mt-1">
                     {snap.last_result && RESULT_DOT[snap.last_result] && <MetricDot color={RESULT_DOT[snap.last_result]!} />}
                     {snap.last_checked_at
                       ? `Verificado em ${new Date(snap.last_checked_at).toLocaleString('pt-BR')}`
-                      : 'Ainda nao verificado'}
+                      : 'Ainda não verificado'}
                   </p>
                 </div>
                 {snap.last_result && <Badge variant={RESULT_BADGE[snap.last_result]}>{RESULT_LABEL[snap.last_result]}</Badge>}
               </div>
-              {deviationSummary(snap) && <p className="text-sm text-text-dark mt-3">{deviationSummary(snap)}</p>}
+              {deviationSummary(snap) && <p className="text-sm text-text-primary mt-3">{deviationSummary(snap)}</p>}
               {snap.last_result === 'unreachable' && snap.consecutive_unreachable_count !== undefined && (
-                <p className="font-mono text-xs text-muted mt-1">
+                <p className="font-mono text-xs text-text-secondary mt-1">
                   Verificacoes consecutivas sem acesso: {snap.consecutive_unreachable_count}
                 </p>
               )}

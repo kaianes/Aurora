@@ -63,31 +63,31 @@ export function OnboardingResultPage() {
           <div className="flex items-center gap-2 mb-4">
             <Badge variant="success">Voce esta qualificada</Badge>
           </div>
-          <p className="text-sm text-text-dark mb-4">
+          <p className="text-sm text-text-primary mb-4">
             Seu perfil esta ativo e elegivel para campanhas que combinem com sua audiencia.
           </p>
-          <div className="space-y-1.5 border-t border-border pt-3">
-            <p className="flex items-center font-mono text-sm text-text-dark">
+          <div className="space-y-1.5 border-t border-border-default pt-3">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-signal-green)" />
               Tamanho da audiencia: {data.audience_size?.toLocaleString('pt-BR') ?? '-'}
             </p>
-            <p className="flex items-center font-mono text-sm text-text-dark">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-performance-orange)" />
               Taxa de engajamento: {data.engagement_rate ? `${data.engagement_rate}%` : '-'}
             </p>
-            <p className="flex items-center font-mono text-sm text-text-dark">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-strategy-violet)" />
               Score de autenticidade:{' '}
               {data.authenticity_status === 'scored' ? (data.authenticity_score ?? '-') : 'Pendente'}
             </p>
             {data.linked_platforms && (
-              <p className="flex items-center font-mono text-sm text-text-dark">
+              <p className="flex items-center font-mono text-sm text-text-primary">
                 <MetricDot color="var(--color-creator-pink)" />
                 Redes conectadas: {data.linked_platforms.join(', ')}
               </p>
             )}
           </div>
-          <p className="font-mono text-xs text-muted mt-3">
+          <p className="font-mono text-xs text-text-secondary mt-3">
             Decidido em {formatDateTime(data.qualification_decided_at)}
           </p>
           <Link to="/creator-portal/opportunities" className="mt-4 inline-block">
@@ -99,23 +99,23 @@ export function OnboardingResultPage() {
       {data.onboarding_status === 'not_qualified' && (
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Badge variant="warning">Ainda nao qualificada</Badge>
+            <Badge variant="warning">Ainda não qualificada</Badge>
           </div>
-          <p className="text-sm text-text-dark mb-3">
-            Seu perfil ainda nao atende aos criterios abaixo. Continuar crescendo sua audiencia e
+          <p className="text-sm text-text-primary mb-3">
+            Seu perfil ainda não atende aos criterios abaixo. Continuar crescendo sua audiencia e
             engajamento pode mudar este resultado nas proximas atualizacoes.
           </p>
           {data.qualification_missing_criteria && data.qualification_missing_criteria.length > 0 && (
-            <ul className="space-y-1.5 border-t border-border pt-3">
+            <ul className="space-y-1.5 border-t border-border-default pt-3">
               {data.qualification_missing_criteria.map((key) => (
-                <li key={key} className="flex items-center font-mono text-sm text-text-dark">
+                <li key={key} className="flex items-center font-mono text-sm text-text-primary">
                   <MetricDot color="var(--color-performance-orange)" />
                   {humanizeCriterion(key)}
                 </li>
               ))}
             </ul>
           )}
-          <p className="font-mono text-xs text-muted mt-3">
+          <p className="font-mono text-xs text-text-secondary mt-3">
             Decidido em {formatDateTime(data.qualification_decided_at)}
           </p>
           <Link to="/creator-portal/social-accounts" className="mt-4 inline-block">
@@ -127,11 +127,11 @@ export function OnboardingResultPage() {
       {data.onboarding_status === 'pending' && (
         <Card>
           <Alert variant="info">
-            {data.message ?? 'Ainda estamos analisando seu perfil. Avisaremos por email quando a decisao estiver pronta.'}
+            {data.message ?? 'Ainda estamos analisando seu perfil. Avisaremos por email quando a decisão estiver pronta.'}
           </Alert>
           {data.qualification_expected_ready_at && (
-            <p className="font-mono text-xs text-muted mt-3">
-              Previsao: {formatDateTime(data.qualification_expected_ready_at)}
+            <p className="font-mono text-xs text-text-secondary mt-3">
+              Previsão: {formatDateTime(data.qualification_expected_ready_at)}
             </p>
           )}
           <Button variant="outline" className="mt-4" onClick={() => refetch()} loading={isRefetching}>

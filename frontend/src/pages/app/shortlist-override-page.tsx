@@ -44,7 +44,7 @@ export function ShortlistOverridePage() {
           creatorId: newCreatorId,
           message:
             err.response.data.error.message ??
-            'Este criador ainda nao esta elegivel. Ele precisa concluir o onboarding ou ser convidado.',
+            'Este criador ainda não esta elegivel. Ele precisa concluir o onboarding ou ser convidado.',
         });
         void details;
       }
@@ -75,11 +75,11 @@ export function ShortlistOverridePage() {
     overrideMutation.error &&
     isAxiosError(overrideMutation.error) &&
     overrideMutation.error.response?.data?.error?.code !== 'CREATOR_NOT_ELIGIBLE'
-      ? overrideMutation.error.response?.data?.error?.message ?? 'Nao foi possivel salvar a selecao curada.'
+      ? overrideMutation.error.response?.data?.error?.message ?? 'Não foi possível salvar a selecao curada.'
       : null;
 
   if (isLoading) return <Spinner />;
-  if (error || !shortlist) return <Alert variant="error">Nao foi possivel carregar o shortlist para override.</Alert>;
+  if (error || !shortlist) return <Alert variant="error">Não foi possível carregar o shortlist para override.</Alert>;
 
   if (shortlist.locked) {
     return (
@@ -97,7 +97,7 @@ export function ShortlistOverridePage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Curadoria da agencia</CardTitle>
+        <CardTitle>Curadoria da agência</CardTitle>
         <CardDescription>
           Remova criadores ranqueados pelo sistema e adicione criadores da sua rede. Ao salvar, esta selecao se
           torna definitiva e o sistema nunca mais reordena ou substitui esta lista.
@@ -109,7 +109,7 @@ export function ShortlistOverridePage() {
         <Alert variant="warning">
           Esta selecao ficara abaixo do pool minimo garantido
           {shortlist.guaranteed_min_pool_size !== undefined ? ` (${remainingCount} de ${shortlist.guaranteed_min_pool_size})` : ''}.
-          Voce ainda pode salvar; isso sera registrado como um alerta, nao um bloqueio.
+          Voce ainda pode salvar; isso sera registrado como um alerta, não um bloqueio.
         </Alert>
       )}
 
@@ -121,13 +121,13 @@ export function ShortlistOverridePage() {
       {overrideError && <Alert variant="error">{overrideError}</Alert>}
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Shortlist atual</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Shortlist atual</h3>
         <div className="divide-y divide-border">
           {shortlist.entries.map((entry) => (
             <div key={entry.id} className="flex items-center justify-between py-2">
               <div>
-                <p className="text-sm text-text-dark">
-                  Criador {entry.creator_id} {entry.rank !== null && <span className="text-muted">· rank #{entry.rank}</span>}
+                <p className="text-sm text-text-primary">
+                  Criador {entry.creator_id} {entry.rank !== null && <span className="text-text-secondary">· rank #{entry.rank}</span>}
                 </p>
                 {!entry.included && <Badge variant="default">Ja fora do pool</Badge>}
               </div>
@@ -146,7 +146,7 @@ export function ShortlistOverridePage() {
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Adicionar criadores da sua rede</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Adicionar criadores da sua rede</h3>
         <div className="flex gap-2">
           <Input
             label="ID do criador na Aurora"
@@ -162,7 +162,7 @@ export function ShortlistOverridePage() {
         {addedCreatorIds.length > 0 && (
           <div className="mt-3 space-y-2">
             {addedCreatorIds.map((creatorId) => (
-              <div key={creatorId} className="flex items-center justify-between text-sm text-text-dark">
+              <div key={creatorId} className="flex items-center justify-between text-sm text-text-primary">
                 <span>Criador {creatorId}</span>
                 <Button size="sm" variant="ghost" onClick={() => removeAdded(creatorId)}>
                   Remover

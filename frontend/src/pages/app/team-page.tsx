@@ -17,7 +17,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { Spinner } from '@/components/ui/spinner';
 
 const inviteSchema = z.object({
-  email: z.string().email('Email invalido'),
+  email: z.string().email('Email inválido'),
   role: z.string().min(1, 'Selecione um papel'),
 });
 
@@ -99,7 +99,7 @@ export function TeamPage() {
     inviteError && isAxiosError(inviteError) && inviteError.response?.data?.error?.message
       ? inviteError.response.data.error.message
       : inviteError
-        ? 'Nao foi possivel enviar o convite.'
+        ? 'Não foi possível enviar o convite.'
         : null;
 
   const invitableRoles = getInvitableRoles(workspaceType);
@@ -119,7 +119,7 @@ export function TeamPage() {
       {/* Invite form (owner/admin only) */}
       {isManager && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Convidar membro</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Convidar membro</h3>
 
           {inviteSuccess && (
             <Alert variant="success" className="mb-3">Convite enviado com sucesso.</Alert>
@@ -160,14 +160,14 @@ export function TeamPage() {
 
       {/* Members list */}
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Membros</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Membros</h3>
         {membersData?.data && membersData.data.length > 0 ? (
           <div className="divide-y divide-border">
             {membersData.data.map((member) => (
               <div key={member.user_id} className="flex items-center justify-between py-3">
                 <div>
-                  <p className="text-sm font-medium text-text-dark">{member.name}</p>
-                  <p className="text-xs text-muted">{member.email}</p>
+                  <p className="text-sm font-medium text-text-primary">{member.name}</p>
+                  <p className="text-xs text-text-secondary">{member.email}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {isManager && member.user_id !== user?.id ? (
@@ -176,7 +176,7 @@ export function TeamPage() {
                       onChange={(e) =>
                         roleChangeMutation.mutate({ userId: member.user_id, role: e.target.value as Role })
                       }
-                      className="rounded border border-border px-2 py-1 text-xs"
+                      className="rounded border border-border-default px-2 py-1 text-xs"
                       aria-label={`Papel de ${member.name}`}
                     >
                       {/* Show current role + invitable roles */}
@@ -204,7 +204,7 @@ export function TeamPage() {
                       Remover
                     </Button>
                   )}
-                  <span className="text-xs text-muted font-mono">
+                  <span className="text-xs text-text-secondary font-mono">
                     {new Date(member.joined_at).toLocaleDateString('pt-BR')}
                   </span>
                 </div>
@@ -212,14 +212,14 @@ export function TeamPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted py-4 text-center">Nenhum membro encontrado.</p>
+          <p className="text-sm text-text-secondary py-4 text-center">Nenhum membro encontrado.</p>
         )}
       </Card>
 
       {/* Pending invitations */}
       {isManager && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Convites pendentes</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Convites pendentes</h3>
           {loadingInvitations ? (
             <Spinner className="h-5 w-5" />
           ) : invitationsData?.data && invitationsData.data.length > 0 ? (
@@ -227,8 +227,8 @@ export function TeamPage() {
               {invitationsData.data.map((inv) => (
                 <div key={inv.id} className="flex items-center justify-between py-3">
                   <div>
-                    <p className="text-sm text-text-dark">{inv.email}</p>
-                    <p className="text-xs text-muted">
+                    <p className="text-sm text-text-primary">{inv.email}</p>
+                    <p className="text-xs text-text-secondary">
                       {ROLE_LABELS[inv.role]} &middot; Expira em{' '}
                       <span className="font-mono">
                         {new Date(inv.expires_at).toLocaleDateString('pt-BR')}
@@ -257,7 +257,7 @@ export function TeamPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted py-4 text-center">Nenhum convite pendente.</p>
+            <p className="text-sm text-text-secondary py-4 text-center">Nenhum convite pendente.</p>
           )}
         </Card>
       )}
@@ -266,14 +266,14 @@ export function TeamPage() {
         <Alert variant="error">
           {isAxiosError(roleChangeMutation.error) && roleChangeMutation.error.response?.data?.error?.message
             ? roleChangeMutation.error.response.data.error.message
-            : 'Nao foi possivel alterar o papel do membro.'}
+            : 'Não foi possível alterar o papel do membro.'}
         </Alert>
       )}
       {removeMemberMutation.error && (
         <Alert variant="error">
           {isAxiosError(removeMemberMutation.error) && removeMemberMutation.error.response?.data?.error?.message
             ? removeMemberMutation.error.response.data.error.message
-            : 'Nao foi possivel remover o membro.'}
+            : 'Não foi possível remover o membro.'}
         </Alert>
       )}
     </div>

@@ -157,7 +157,7 @@ export function CampaignFormPage() {
   const errorMessage = isAxiosError(apiError)
     ? apiError.response?.data?.error?.message
     : apiError
-      ? 'Nao foi possivel salvar a campanha.'
+      ? 'Não foi possível salvar a campanha.'
       : null;
 
   if (isEditing && isLoading) {
@@ -169,7 +169,7 @@ export function CampaignFormPage() {
       <CardHeader>
         <CardTitle>{isEditing ? 'Editar campanha' : 'Nova campanha'}</CardTitle>
         <CardDescription>
-          Defina orcamento, publico, mensagem e formatos uma unica vez. Voce pode salvar como rascunho e
+          Defina orçamento, publico, mensagem e formatos uma única vez. Voce pode salvar como rascunho e
           completar depois.
         </CardDescription>
       </CardHeader>
@@ -179,7 +179,7 @@ export function CampaignFormPage() {
           {errorMessage}
           {preserved && (
             <span className="block mt-1 text-xs opacity-80">
-              {errorCode === 'BUDGET_BELOW_MINIMUM' && 'O orcamento minimo por campanha e R$ 2.000,00.'}
+              {errorCode === 'BUDGET_BELOW_MINIMUM' && 'O orçamento minimo por campanha e R$ 2.000,00.'}
               {errorCode === 'TARGETING_TOO_NARROW' && 'Amplie a geografia ou os interesses selecionados.'}
             </span>
           )}
@@ -188,7 +188,7 @@ export function CampaignFormPage() {
 
       {campaign && campaign.missing_fields.length > 0 && (
         <Alert variant="warning">
-          Campos pendentes antes de solicitar uma cotacao:{' '}
+          Campos pendentes antes de solicitar uma cotação:{' '}
           {campaign.missing_fields.map((f) => MISSING_FIELD_LABELS[f] ?? f).join(', ')}.
         </Alert>
       )}
@@ -208,12 +208,12 @@ export function CampaignFormPage() {
             label="Orcamento (BRL)"
             type="number"
             step="0.01"
-            hint="Minimo de R$ 2.000,00 por campanha"
+            hint="Mínimo de R$ 2.000,00 por campanha"
             {...register('budget_amount')}
           />
 
-          <fieldset className="space-y-3 border border-border rounded-lg p-4">
-            <legend className="text-sm font-medium text-text-dark px-1">Publico-alvo</legend>
+          <fieldset className="space-y-3 border border-border-default rounded-lg p-4">
+            <legend className="text-sm font-medium text-text-primary px-1">Publico-alvo</legend>
             <Input label="Geografia (separado por virgula)" placeholder="BR-SP, BR-RJ" {...register('geography')} />
             <div className="grid grid-cols-2 gap-3">
               <Input label="Idade minima" type="number" {...register('age_min')} />
@@ -238,10 +238,10 @@ export function CampaignFormPage() {
             control={control}
             name="deliverable_formats"
             render={({ field }) => (
-              <fieldset className="space-y-2 border border-border rounded-lg p-4">
-                <legend className="text-sm font-medium text-text-dark px-1">Formatos de entrega</legend>
+              <fieldset className="space-y-2 border border-border-default rounded-lg p-4">
+                <legend className="text-sm font-medium text-text-primary px-1">Formatos de entrega</legend>
                 {DELIVERABLE_OPTIONS.map((opt) => (
-                  <label key={opt.value} className="flex items-center gap-2 text-sm text-text-dark">
+                  <label key={opt.value} className="flex items-center gap-2 text-sm text-text-primary">
                     <input
                       type="checkbox"
                       checked={field.value.includes(opt.value)}

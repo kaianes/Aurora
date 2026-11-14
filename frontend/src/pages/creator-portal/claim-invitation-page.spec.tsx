@@ -107,7 +107,7 @@ describe('ClaimInvitationPage - US-23.2 Invitation and Claim Flow', () => {
     const nameInput = screen.getByLabelText(/Nome de exibicao/i);
     await user.clear(nameInput);
     await user.type(nameInput, 'Duda M. Oliveira');
-    const nicheInput = screen.getByLabelText(/Nicho de conteudo/i);
+    const nicheInput = screen.getByLabelText(/Nicho de conteúdo/i);
     await user.clear(nicheInput);
     await user.type(nicheInput, 'skincare e maquiagem');
     await user.type(screen.getByLabelText(/Seu email/i), 'duda@gmail.com');
@@ -152,7 +152,7 @@ describe('ClaimInvitationPage - US-23.2 Invitation and Claim Flow', () => {
   it('shows a clear expired/already-answered message for a 410, with no form rendered', async () => {
     (creatorPortalApi.getInvitation as any).mockRejectedValue({
       isAxiosError: true,
-      response: { status: 410, data: { error: { code: 'INVITATION_EXPIRED', message: 'Este convite nao esta mais disponivel.' } } },
+      response: { status: 410, data: { error: { code: 'INVITATION_EXPIRED', message: 'Este convite não esta mais disponível.' } } },
     });
 
     renderPage();
@@ -166,11 +166,11 @@ describe('ClaimInvitationPage - US-23.2 Invitation and Claim Flow', () => {
   it('shows a not-found message for an unknown invitation token', async () => {
     (creatorPortalApi.getInvitation as any).mockRejectedValue({
       isAxiosError: true,
-      response: { status: 404, data: { error: { code: 'INVITATION_NOT_FOUND', message: 'Convite nao encontrado.' } } },
+      response: { status: 404, data: { error: { code: 'INVITATION_NOT_FOUND', message: 'Convite não encontrado.' } } },
     });
 
     renderPage();
 
-    expect(await screen.findByText('Convite nao encontrado.')).toBeInTheDocument();
+    expect(await screen.findByText('Convite não encontrado.')).toBeInTheDocument();
   });
 });

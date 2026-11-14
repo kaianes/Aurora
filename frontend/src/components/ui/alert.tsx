@@ -9,10 +9,10 @@ interface AlertProps {
 }
 
 const variantClasses: Record<AlertVariant, string> = {
-  info: 'bg-primary/10 text-primary-dark border-primary/30',
-  success: 'bg-success/10 text-success border-success/30',
-  warning: 'bg-secondary/10 text-secondary border-secondary/30',
-  error: 'bg-error/10 text-error border-error/30',
+  info: 'bg-primary-muted text-violet-400 border-border-accent',
+  success: 'bg-success-muted text-success border-success/20',
+  warning: 'bg-warning-muted text-warning border-warning/20',
+  error: 'bg-error-muted text-error border-error/20',
 };
 
 export function Alert({ variant = 'info', children, className = '' }: AlertProps) {

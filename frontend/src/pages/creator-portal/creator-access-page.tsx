@@ -11,8 +11,8 @@ import { Alert } from '@/components/ui/alert';
 import { Card } from '@/components/ui/card';
 
 const loginSchema = z.object({
-  email: z.string().email('Email invalido'),
-  password: z.string().min(1, 'Senha e obrigatoria'),
+  email: z.string().email('Email inválido'),
+  password: z.string().min(1, 'Senha e obrigatória'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -60,8 +60,8 @@ export function CreatorAccessPage() {
   return (
     <div className="mx-auto max-w-md space-y-6">
       <Card>
-        <h1 className="text-xl font-semibold text-text-dark mb-1">Entrar</h1>
-        <p className="text-sm text-muted mb-6">Acesse sua conta de criadora na Aurora.</p>
+        <h1 className="text-xl font-semibold text-text-primary mb-1">Entrar</h1>
+        <p className="text-sm text-text-secondary mb-6">Acesse sua conta de criadora na Aurora.</p>
 
         {errorMessage && (
           <Alert variant="error" className="mb-4">
@@ -90,9 +90,9 @@ export function CreatorAccessPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-muted">
-          Ainda nao tem conta?{' '}
-          <Link to="/creator-portal/register" className="text-primary hover:underline">
+        <p className="mt-4 text-center text-sm text-text-secondary">
+          Ainda não tem conta?{' '}
+          <Link to="/creator-portal/register" className="text-violet-400 hover:underline">
             Criar conta
           </Link>
         </p>

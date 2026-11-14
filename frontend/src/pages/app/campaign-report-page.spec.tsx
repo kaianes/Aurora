@@ -157,7 +157,7 @@ describe('CampaignReportPage - US-22', () => {
     (campaignApi.get as any).mockResolvedValue({ id: 'camp-1', name: 'Lancamento Verao' });
     (campaignApi.requestReport as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Campanha nao encontrada.' } } },
+      response: { data: { error: { message: 'Campanha não encontrada.' } } },
     });
 
     renderPage();
@@ -165,6 +165,6 @@ describe('CampaignReportPage - US-22', () => {
     await screen.findByText('Lancamento Verao');
     await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
 
-    expect(await screen.findByText('Campanha nao encontrada.')).toBeInTheDocument();
+    expect(await screen.findByText('Campanha não encontrada.')).toBeInTheDocument();
   });
 });

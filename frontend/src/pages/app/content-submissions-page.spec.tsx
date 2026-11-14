@@ -35,7 +35,7 @@ const v1Rejected = {
   version_number: 1,
   supersedes_submission_id: null,
   review_status: 'rejected' as const,
-  review_reason: 'O produto nao aparece em nenhum momento do video.',
+  review_reason: 'O produto não aparece em nenhum momento do video.',
   review_decided_at: new Date().toISOString(),
   review_deadline_at: new Date().toISOString(),
   review_escalated: false,
@@ -79,7 +79,7 @@ describe('ContentSubmissionsPage - US-19', () => {
 
     expect(await screen.findByText(/Duda Oliveira · versao 1/)).toBeInTheDocument();
     expect(
-      screen.getByText('Motivo registrado para a versao 1: O produto nao aparece em nenhum momento do video.'),
+      screen.getByText('Motivo registrado para a versao 1: O produto não aparece em nenhum momento do video.'),
     ).toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe('ContentSubmissionsPage - US-19', () => {
     renderPage();
     await screen.findByText(/Duda Oliveira · versao 2/);
 
-    expect(screen.getByText(/Seguranca: pending/)).toBeInTheDocument();
+    expect(screen.getByText(/Segurança: pending/)).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Aprovar' }));
     await waitFor(() =>

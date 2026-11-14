@@ -27,7 +27,7 @@ const INGESTION_LABEL: Record<IngestionStatus, string> = {
   pending_first_pull: 'Aguardando primeira coleta',
   fresh: 'Atualizado',
   stale_rate_limited: 'Desatualizado (limite da plataforma)',
-  stale_unreachable: 'Desatualizado (plataforma indisponivel)',
+  stale_unreachable: 'Desatualizado (plataforma indisponível)',
   stale_auth_revoked: 'Autorizacao perdida',
 };
 
@@ -46,9 +46,9 @@ function CreatorRow({ creator }: { creator: DashboardCreatorEntry }) {
   return (
     <div className="flex items-center justify-between py-3 gap-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-text-dark">{creator.display_name}</p>
+        <p className="text-sm font-medium text-text-primary">{creator.display_name}</p>
         {creator.status === 'delivered' ? (
-          <div className="flex items-center flex-wrap gap-x-3 font-mono text-xs text-muted mt-1">
+          <div className="flex items-center flex-wrap gap-x-3 font-mono text-xs text-text-secondary mt-1">
             <span className="flex items-center">
               <MetricDot color="var(--color-signal-green)" />
               Alcance: {formatNumber(creator.reach)}
@@ -64,10 +64,10 @@ function CreatorRow({ creator }: { creator: DashboardCreatorEntry }) {
           </div>
         ) : (
           // US-21b scenario 2: never a zeroed figure, indistinguishable from a real zero result.
-          <p className="text-xs text-muted mt-1">Entrega pendente -- ainda sem publicacao confirmada.</p>
+          <p className="text-xs text-text-secondary mt-1">Entrega pendente -- ainda sem publicação confirmada.</p>
         )}
         {creator.last_successful_pull_at && (
-          <p className="font-mono text-xs text-muted mt-1">
+          <p className="font-mono text-xs text-text-secondary mt-1">
             Ultima coleta: {formatDateTime(creator.last_successful_pull_at)}
           </p>
         )}
@@ -112,7 +112,7 @@ export function CampaignDashboardPage() {
       <Alert variant="error">
         {isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel carregar o dashboard desta campanha.'}
+          : 'Não foi possível carregar o dashboard desta campanha.'}
       </Alert>
     );
   }
@@ -128,14 +128,14 @@ export function CampaignDashboardPage() {
 
       {pool_aggregate.any_stale && (
         <Alert variant="warning">
-          Algumas metricas podem estar desatualizadas. Os valores abaixo sao os ultimos conhecidos para cada
+          Algumas métricas podem estar desatualizadas. Os valores abaixo sao os ultimos conhecidos para cada
           criador, cada um marcado individualmente abaixo.
         </Alert>
       )}
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Pool</h3>
-        <div className="flex items-center gap-4 font-mono text-sm text-text-dark">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Pool</h3>
+        <div className="flex items-center gap-4 font-mono text-sm text-text-primary">
           <span className="flex items-center">
             <MetricDot color="var(--color-creator-pink)" />
             {dashboard.delivered_count} entregue(s)
@@ -144,35 +144,35 @@ export function CampaignDashboardPage() {
             <MetricDot color="var(--color-strategy-violet)" />
             {dashboard.pending_delivery_count} pendente(s)
           </span>
-          <span className="text-muted">de {dashboard.pool_size} no pool</span>
+          <span className="text-text-secondary">de {dashboard.pool_size} no pool</span>
         </div>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">
           Totais do pool (apenas criadores que entregaram)
         </h3>
         <div className="space-y-2">
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-signal-green)" />
             Alcance total: {formatNumber(pool_aggregate.total_delivered_reach)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-performance-orange)" />
             Engajamento total: {formatNumber(pool_aggregate.total_delivered_engagement)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-strategy-violet)" />
             Impressoes totais: {formatNumber(pool_aggregate.total_delivered_impressions)}
           </p>
         </div>
-        <p className="text-xs text-muted mt-3 font-mono">
+        <p className="text-xs text-text-secondary mt-3 font-mono">
           Calculado em {formatDateTime(pool_aggregate.last_computed_at)}
         </p>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Resultados por criador</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Resultados por criador</h3>
         {dashboard.creators.length > 0 ? (
           <div className="divide-y divide-border">
             {dashboard.creators.map((creator) => (
@@ -180,7 +180,7 @@ export function CampaignDashboardPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted py-6 text-center">Nenhum criador no pool ainda.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Nenhum criador no pool ainda.</p>
         )}
       </Card>
     </div>

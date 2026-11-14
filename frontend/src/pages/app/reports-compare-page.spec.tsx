@@ -146,7 +146,7 @@ describe('ReportsComparePage - US-46', () => {
     await userEvent.click(screen.getByRole('checkbox', { name: 'Loja Fora' }));
     await userEvent.click(screen.getByRole('button', { name: 'Comparar' }));
 
-    await screen.findByText(/Nao incluidos na comparacao/);
+    await screen.findByText(/Não incluidos na comparação/);
     expect(screen.getByText('acct-9')).toBeInTheDocument();
     expect(screen.getByText('Sem acesso')).toBeInTheDocument();
   });

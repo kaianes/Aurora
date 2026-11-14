@@ -58,7 +58,7 @@ export function InvoicePage() {
   });
 
   if (isLoadingCampaign || isLoadingInvoice) return <Spinner />;
-  if (invoiceError) return <Alert variant="error">Nao foi possivel carregar a fatura desta campanha.</Alert>;
+  if (invoiceError) return <Alert variant="error">Não foi possível carregar a fatura desta campanha.</Alert>;
 
   const generateErrorCode =
     isAxiosError(generateMutation.error) ? generateMutation.error.response?.data?.error?.code : undefined;
@@ -76,8 +76,8 @@ export function InvoicePage() {
 
       {!invoice ? (
         <Card>
-          <p className="text-sm text-text-dark mb-4">
-            Nenhuma fatura foi gerada ainda para esta campanha. Uma fatura unica cobre o preco fixo de toda a
+          <p className="text-sm text-text-primary mb-4">
+            Nenhuma fatura foi gerada ainda para esta campanha. Uma fatura única cobre o preco fixo de toda a
             campanha, incluindo qualquer reembolso aplicavel.
           </p>
 
@@ -92,7 +92,7 @@ export function InvoicePage() {
 
           {generateMutation.isError && generateErrorCode !== 'CAMPAIGN_NOT_BILLABLE' && generateErrorCode !== 'INVOICE_ALREADY_GENERATED' && (
             <Alert variant="error" className="mb-4">
-              {generateErrorMessage ?? 'Nao foi possivel gerar a fatura agora.'}
+              {generateErrorMessage ?? 'Não foi possível gerar a fatura agora.'}
             </Alert>
           )}
 
@@ -101,7 +101,7 @@ export function InvoicePage() {
               Gerar fatura
             </Button>
           ) : (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-text-secondary">
               Apenas quem gerencia esta conta pode gerar a fatura desta campanha.
             </p>
           )}
@@ -109,29 +109,29 @@ export function InvoicePage() {
       ) : (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-dark">Fatura #{invoice.id}</h3>
-            <p className="font-mono text-xs text-muted">
+            <h3 className="text-sm font-semibold text-text-primary">Fatura #{invoice.id}</h3>
+            <p className="font-mono text-xs text-text-secondary">
               Emitida em {new Date(invoice.issued_at).toLocaleDateString('pt-BR')}
             </p>
           </div>
 
-          <div className="space-y-2 border-t border-border pt-3">
+          <div className="space-y-2 border-t border-border-default pt-3">
             {invoice.line_items.map((item, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
                 <div>
-                  <p className="text-text-dark">{LINE_TYPE_LABEL[item.line_type] ?? item.line_type}</p>
-                  <p className="text-xs text-muted">{item.description}</p>
+                  <p className="text-text-primary">{LINE_TYPE_LABEL[item.line_type] ?? item.line_type}</p>
+                  <p className="text-xs text-text-secondary">{item.description}</p>
                 </div>
-                <p className={`font-mono ${Number(item.amount) < 0 ? 'text-error' : 'text-text-dark'}`}>
+                <p className={`font-mono ${Number(item.amount) < 0 ? 'text-error' : 'text-text-primary'}`}>
                   {formatCurrency(item.amount)}
                 </p>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between border-t border-border mt-4 pt-4">
-            <p className="text-sm font-semibold text-text-dark">Total</p>
-            <p className="font-mono text-xl text-text-dark">{formatCurrency(invoice.total_amount)}</p>
+          <div className="flex items-center justify-between border-t border-border-default mt-4 pt-4">
+            <p className="text-sm font-semibold text-text-primary">Total</p>
+            <p className="font-mono text-xl text-text-primary">{formatCurrency(invoice.total_amount)}</p>
           </div>
         </Card>
       )}

@@ -14,13 +14,13 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { Spinner } from '@/components/ui/spinner';
 
 const claimSchema = z.object({
-  email: z.string().email('Email invalido'),
+  email: z.string().email('Email inválido'),
   password: z
     .string()
     .min(10, 'Senha deve ter pelo menos 10 caracteres')
-    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiuscula')
-    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minuscula')
-    .regex(/[0-9]/, 'Deve conter pelo menos um numero')
+    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Deve conter pelo menos um número')
     .regex(/[^A-Za-z0-9]/, 'Deve conter pelo menos um caractere especial'),
   display_name: z.string().min(1, 'Informe seu nome de exibicao'),
   content_niche: z.string().optional(),
@@ -100,7 +100,7 @@ export function ClaimInvitationPage() {
     return (
       <div className="mx-auto max-w-md">
         <Card>
-          <Alert variant="error">Link de convite invalido.</Alert>
+          <Alert variant="error">Link de convite inválido.</Alert>
         </Card>
       </div>
     );
@@ -112,9 +112,9 @@ export function ClaimInvitationPage() {
     return (
       <div className="mx-auto max-w-md">
         <Card className="text-center">
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Convite recusado</h1>
-          <p className="text-sm text-muted">
-            Tudo bem. Removemos os dados que havíamos importado sobre voce e nao entraremos em
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Convite recusado</h1>
+          <p className="text-sm text-text-secondary">
+            Tudo bem. Removemos os dados que havíamos importado sobre voce e não entraremos em
             contato novamente sobre este convite.
           </p>
         </Card>
@@ -129,7 +129,7 @@ export function ClaimInvitationPage() {
         ? 'Este convite expirou ou ja foi respondido.'
         : isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel encontrar este convite.';
+          : 'Não foi possível encontrar este convite.';
     return (
       <div className="mx-auto max-w-md">
         <Card>
@@ -145,7 +145,7 @@ export function ClaimInvitationPage() {
     confirmError && isAxiosError(confirmError) && confirmError.response?.data?.error?.message
       ? confirmError.response.data.error.message
       : confirmError
-        ? 'Nao foi possivel confirmar seu cadastro agora.'
+        ? 'Não foi possível confirmar seu cadastro agora.'
         : null;
 
   const onSubmit = (data: ClaimForm) => confirmMutation.mutate(data);
@@ -159,38 +159,38 @@ export function ClaimInvitationPage() {
       <CardHeader>
         <CardTitle>Voce foi convidada para a Aurora</CardTitle>
         <CardDescription>
-          Reunimos estas informacoes publicas sobre voce. Revise, corrija o que estiver errado, e
+          Reunimos estas informações publicas sobre voce. Revise, corrija o que estiver errado, e
           confirme para ativar seu perfil -- ou recuse se preferir que nada disso vá adiante.
         </CardDescription>
       </CardHeader>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">O que encontramos publicamente</h3>
-        <dl className="space-y-1.5 font-mono text-sm text-text-dark">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">O que encontramos publicamente</h3>
+        <dl className="space-y-1.5 font-mono text-sm text-text-primary">
           <div className="flex justify-between">
-            <dt className="text-muted">Plataforma</dt>
+            <dt className="text-text-secondary">Plataforma</dt>
             <dd>{imported.platform ?? '-'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted">Usuario observado</dt>
+            <dt className="text-text-secondary">Usuario observado</dt>
             <dd>{imported.observed_handle ?? '-'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted">Seguidores observados</dt>
+            <dt className="text-text-secondary">Seguidores observados</dt>
             <dd>{imported.observed_follower_count?.toLocaleString('pt-BR') ?? '-'}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-muted">Nicho observado</dt>
+            <dt className="text-text-secondary">Nicho observado</dt>
             <dd>{imported.observed_niche ?? '-'}</dd>
           </div>
         </dl>
-        <p className="text-xs text-muted mt-3">
-          Campos nao observados ficam em branco -- nunca estimamos um valor que nao verificamos.
+        <p className="text-xs text-text-secondary mt-3">
+          Campos não observados ficam em branco -- nunca estimamos um valor que não verificamos.
         </p>
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Corrija o que precisar e crie sua senha</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Corrija o que precisar e crie sua senha</h3>
         {confirmErrorMessage && (
           <Alert variant="error" className="mb-4">
             {confirmErrorMessage}
@@ -203,7 +203,7 @@ export function ClaimInvitationPage() {
             error={errors.display_name?.message}
           />
           <Input
-            label="Nicho de conteudo"
+            label="Nicho de conteúdo"
             {...register('content_niche')}
             error={errors.content_niche?.message}
           />
@@ -219,11 +219,11 @@ export function ClaimInvitationPage() {
             type="password"
             {...register('password')}
             error={errors.password?.message}
-            hint="Minimo 10 caracteres, com maiuscula, minuscula, numero e caractere especial"
+            hint="Mínimo 10 caracteres, com maiúscula, minúscula, número e caractere especial"
             autoComplete="new-password"
           />
           <div>
-            <label className="flex items-start gap-2 text-sm text-text-dark">
+            <label className="flex items-start gap-2 text-sm text-text-primary">
               <input type="checkbox" className="mt-0.5" {...register('accepted_terms')} />
               <span>Li e aceito os termos de uso da Aurora.</span>
             </label>

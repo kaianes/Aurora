@@ -132,7 +132,7 @@ describe('CampaignDashboardPage - US-21b', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/Algumas metricas podem estar desatualizadas/)).toBeInTheDocument();
+    expect(await screen.findByText(/Algumas métricas podem estar desatualizadas/)).toBeInTheDocument();
     expect(screen.getByText(/Desatualizado \(limite da plataforma\)/)).toBeInTheDocument();
     // Still fully rendered -- totals and per-creator figures are present, not blocked.
     expect(screen.getByText('Duda Oliveira')).toBeInTheDocument();
@@ -161,11 +161,11 @@ describe('CampaignDashboardPage - US-21b', () => {
     (campaignApi.get as any).mockResolvedValue({ id: 'camp-1', name: 'Campanha X' });
     (campaignApi.getDashboard as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Campanha nao encontrada.' } } },
+      response: { data: { error: { message: 'Campanha não encontrada.' } } },
     });
 
     renderPage();
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Campanha nao encontrada.');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Campanha não encontrada.');
   });
 });

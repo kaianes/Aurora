@@ -64,7 +64,7 @@ describe('OnboardingReviewPage - onboarding step 3 (review/correct surfaced deta
     const user = userEvent.setup();
     renderPage();
 
-    await user.type(screen.getByLabelText(/Nicho de conteudo/i), 'skincare');
+    await user.type(screen.getByLabelText(/Nicho de conteúdo/i), 'skincare');
     await user.click(screen.getByRole('button', { name: 'Continuar' }));
 
     expect(await screen.findByText(/Voce pode tentar novamente ou pular esta etapa/i)).toBeInTheDocument();

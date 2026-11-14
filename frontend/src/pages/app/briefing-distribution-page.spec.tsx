@@ -68,7 +68,7 @@ describe('BriefingDistributionPage - US-18b', () => {
     renderPage();
 
     expect(await screen.findByText('O briefing alcancou todos os 2 criadores do pool.')).toBeInTheDocument();
-    expect(screen.queryByText('Criadores que o briefing nao alcancou')).not.toBeInTheDocument();
+    expect(screen.queryByText('Criadores que o briefing não alcancou')).not.toBeInTheDocument();
   });
 
   // Hard: while the asynchronous fan-out is still resolving some recipients, the page reflects

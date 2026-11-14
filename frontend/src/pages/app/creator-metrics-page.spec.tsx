@@ -70,7 +70,7 @@ describe('CreatorMetricsPage - US-12', () => {
     renderPage();
 
     expect(await screen.findByText('32')).toBeInTheDocument();
-    expect(screen.getByText(/possivel fraude de seguidores/)).toBeInTheDocument();
+    expect(screen.getByText(/possível fraude de seguidores/)).toBeInTheDocument();
     // decision stays with the human: no "removed" or rejection language rendered automatically
     expect(screen.queryByText(/removido/i)).not.toBeInTheDocument();
   });

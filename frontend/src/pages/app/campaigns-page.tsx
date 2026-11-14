@@ -66,11 +66,11 @@ export function CampaignsPage() {
       </CardHeader>
 
       {isLoading && <Spinner />}
-      {error && <Alert variant="error">Nao foi possivel carregar as campanhas.</Alert>}
+      {error && <Alert variant="error">Não foi possível carregar as campanhas.</Alert>}
 
       {data && data.data.length === 0 && (
         <Card>
-          <p className="text-sm text-muted text-center py-6">
+          <p className="text-sm text-text-secondary text-center py-6">
             Nenhuma campanha ainda. {canCreate && 'Crie a primeira para comecar.'}
           </p>
         </Card>
@@ -83,11 +83,11 @@ export function CampaignsPage() {
               <Link
                 key={c.id}
                 to={`/app/campaigns/${c.id}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-surface transition-colors"
+                className="flex items-center justify-between px-6 py-4 hover:bg-bg-hover transition-colors"
               >
                 <div>
-                  <p className="text-sm font-medium text-text-dark">{c.name}</p>
-                  <p className="font-mono text-xs text-muted">
+                  <p className="text-sm font-medium text-text-primary">{c.name}</p>
+                  <p className="font-mono text-xs text-text-secondary">
                     {new Date(c.created_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -95,7 +95,7 @@ export function CampaignsPage() {
                   {/* US-39 (E9): client attribution, shown for every workspace type (for a
                       brand workspace it is simply always the same account). */}
                   {c.account_name && <Badge variant="default">{c.account_name}</Badge>}
-                  <span className="font-mono text-sm text-text-dark">{formatCurrency(c.budget_amount)}</span>
+                  <span className="font-mono text-sm text-text-primary">{formatCurrency(c.budget_amount)}</span>
                   <Badge variant={STATE_BADGE[c.state]}>{STATE_LABELS[c.state]}</Badge>
                 </div>
               </Link>

@@ -57,7 +57,7 @@ export function VerifyEmailPage() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
-          <Alert variant="error">Token de verificacao ausente. Verifique o link do email.</Alert>
+          <Alert variant="error">Token de verificação ausente. Verifique o link do email.</Alert>
         </Card>
       </div>
     );
@@ -68,7 +68,7 @@ export function VerifyEmailPage() {
       <div className="flex min-h-[80vh] items-center justify-center">
         <div className="text-center">
           <Spinner />
-          <p className="mt-2 text-sm text-muted">Verificando seu email...</p>
+          <p className="mt-2 text-sm text-text-secondary">Verificando seu email...</p>
         </div>
       </div>
     );
@@ -78,14 +78,14 @@ export function VerifyEmailPage() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md">
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Link expirado</h1>
-          <p className="text-sm text-muted mb-4">
-            O link de verificacao expirou. Informe seu email para receber um novo link.
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Link expirado</h1>
+          <p className="text-sm text-text-secondary mb-4">
+            O link de verificação expirou. Informe seu email para receber um novo link.
           </p>
 
           {resendSuccess ? (
             <Alert variant="success">
-              Se este email estiver cadastrado, um novo link de verificacao sera enviado.
+              Se este email estiver cadastrado, um novo link de verificação sera enviado.
             </Alert>
           ) : (
             <div className="space-y-3">
@@ -102,7 +102,7 @@ export function VerifyEmailPage() {
                 disabled={!resendEmail}
                 className="w-full"
               >
-                Reenviar email de verificacao
+                Reenviar email de verificação
               </Button>
             </div>
           )}
@@ -115,7 +115,7 @@ export function VerifyEmailPage() {
     const errorMsg =
       isAxiosError(verifyMutation.error) && verifyMutation.error.response?.data?.error?.message
         ? verifyMutation.error.response.data.error.message
-        : 'Nao foi possivel verificar o email. O link pode ser invalido ou ja ter sido utilizado.';
+        : 'Não foi possível verificar o email. O link pode ser inválido ou já ter sido utilizado.';
 
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">

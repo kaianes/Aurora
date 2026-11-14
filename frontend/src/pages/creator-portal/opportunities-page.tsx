@@ -48,7 +48,7 @@ function ExpiryCountdown({ expiresAt }: { expiresAt: string }) {
   const hours = Math.floor(remainingMs / 3_600_000);
   const minutes = Math.floor((remainingMs % 3_600_000) / 60_000);
   return (
-    <span className="font-mono text-xs text-muted">
+    <span className="font-mono text-xs text-text-secondary">
       Expira em {hours}h {minutes}min
     </span>
   );
@@ -68,7 +68,7 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
       setActionError(
         isAxiosError(err) && err.response?.data?.error?.code === 'OPPORTUNITY_EXPIRED'
           ? 'Esta oportunidade expirou antes do seu aceite.'
-          : 'Nao foi possivel aceitar a oportunidade agora.',
+          : 'Não foi possível aceitar a oportunidade agora.',
       );
       queryClient.invalidateQueries({ queryKey: ['creator-opportunities'] });
     },
@@ -80,7 +80,7 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
       setActionError(null);
       queryClient.invalidateQueries({ queryKey: ['creator-opportunities'] });
     },
-    onError: () => setActionError('Nao foi possivel recusar a oportunidade agora.'),
+    onError: () => setActionError('Não foi possível recusar a oportunidade agora.'),
   });
 
   const isPending = opportunity.status === 'pending';
@@ -93,40 +93,40 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
     <Card>
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-text-dark">{opportunity.brand_name}</h3>
-          <p className="text-xs text-muted mt-0.5">
+          <h3 className="text-sm font-semibold text-text-primary">{opportunity.brand_name}</h3>
+          <p className="text-xs text-text-secondary mt-0.5">
             {opportunity.deliverable.format} &middot; {opportunity.deliverable.quantity}x
           </p>
         </div>
         <Badge variant={STATUS_BADGE[opportunity.status]}>{STATUS_LABEL[opportunity.status]}</Badge>
       </div>
 
-      <div className={`mt-4 space-y-1.5 border-t border-border pt-3 ${isClosed ? 'opacity-50' : ''}`}>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+      <div className={`mt-4 space-y-1.5 border-t border-border-default pt-3 ${isClosed ? 'opacity-50' : ''}`}>
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-signal-green)" />
           Pagamento bruto: {formatCurrency(opportunity.payout_gross)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-performance-orange)" />
           Comissao: {formatCurrency(opportunity.payout_commission)}
         </p>
-        <p className="flex items-center font-mono text-sm text-text-dark">
+        <p className="flex items-center font-mono text-sm text-text-primary">
           <MetricDot color="var(--color-creator-pink)" />
           Pagamento liquido: {formatCurrency(opportunity.payout_net)}
         </p>
       </div>
 
       {isClosed ? (
-        <p className="mt-2 text-xs text-muted">
-          Oportunidade encerrada. Estes valores nao estao mais disponiveis para aceite.
+        <p className="mt-2 text-xs text-text-secondary">
+          Oportunidade encerrada. Estes valores não estao mais disponiveis para aceite.
         </p>
       ) : (
         opportunity.expected_payment_date && (
           // Shown with plain, muted styling (no colored data-point dot) so it never carries the
           // same visual weight as the three locked figures above -- it is a projection, not a
           // locked figure, per docs/architecture/e6-payments-financial-transparency.md section 4.2.
-          <p className="mt-2 font-mono text-xs text-muted">
-            Previsao de pagamento: {formatDate(opportunity.expected_payment_date)}
+          <p className="mt-2 font-mono text-xs text-text-secondary">
+            Previsão de pagamento: {formatDate(opportunity.expected_payment_date)}
             {opportunity.expected_payment_date_is_estimate !== false && ' (estimativa)'}
           </p>
         )
@@ -134,19 +134,19 @@ function OpportunityCard({ opportunity }: { opportunity: CreatorOpportunity }) {
 
       {opportunity.status === 'accepted' && (
         <div className="mt-3 flex flex-col gap-1.5">
-          <Link to={`/creator-portal/briefing?campaign_id=${opportunity.campaign_id}`} className="text-sm text-primary hover:underline">
+          <Link to={`/creator-portal/briefing?campaign_id=${opportunity.campaign_id}`} className="text-sm text-violet-400 hover:underline">
             Ver briefing
           </Link>
-          <Link to={`/creator-portal/briefing/qa?campaign_id=${opportunity.campaign_id}`} className="text-sm text-primary hover:underline">
+          <Link to={`/creator-portal/briefing/qa?campaign_id=${opportunity.campaign_id}`} className="text-sm text-violet-400 hover:underline">
             Perguntas sobre o briefing
           </Link>
           <Link
             to={`/creator-portal/drafts/new?opportunity_id=${opportunity.id}&campaign_id=${opportunity.campaign_id}`}
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-violet-400 hover:underline"
           >
-            Enviar rascunho de conteudo
+            Enviar rascunho de conteúdo
           </Link>
-          <Link to={`/creator-portal/drafts?opportunity_id=${opportunity.id}`} className="text-sm text-primary hover:underline">
+          <Link to={`/creator-portal/drafts?opportunity_id=${opportunity.id}`} className="text-sm text-violet-400 hover:underline">
             Ver versoes enviadas
           </Link>
         </div>
@@ -199,7 +199,7 @@ export function OpportunitiesPage() {
   });
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar suas oportunidades.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar suas oportunidades.</Alert>;
 
   const opportunities = data?.data ?? [];
 
@@ -212,7 +212,7 @@ export function OpportunitiesPage() {
 
       {opportunities.length === 0 ? (
         <Card>
-          <p className="text-sm text-muted py-6 text-center">Nenhuma oportunidade no momento.</p>
+          <p className="text-sm text-text-secondary py-6 text-center">Nenhuma oportunidade no momento.</p>
         </Card>
       ) : (
         <div className="space-y-4">

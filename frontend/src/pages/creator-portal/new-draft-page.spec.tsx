@@ -76,7 +76,7 @@ describe('NewDraftPage - US-32a, US-32b', () => {
     await fillAndSubmit();
 
     expect(await screen.findByText('Versao: 1')).toBeInTheDocument();
-    expect(screen.getByText(/Prazo de revisao:/)).toBeInTheDocument();
+    expect(screen.getByText(/Prazo de revisão:/)).toBeInTheDocument();
   });
 
   // Failure: a resubmission attempted while the latest version is still pending review is
@@ -96,7 +96,7 @@ describe('NewDraftPage - US-32a, US-32b', () => {
 
     expect(
       await screen.findByText(
-        'A versao mais recente deste envio ainda esta aguardando revisao. Aguarde a decisao antes de enviar outra.',
+        'A versao mais recente deste envio ainda esta aguardando revisão. Aguarde a decisão antes de enviar outra.',
       ),
     ).toBeInTheDocument();
   });
@@ -109,7 +109,7 @@ describe('NewDraftPage - US-32a, US-32b', () => {
       isAxiosError: true,
       response: {
         status: 404,
-        data: { error: { code: 'OPPORTUNITY_NOT_FOUND', message: 'Oportunidade nao encontrada.' } },
+        data: { error: { code: 'OPPORTUNITY_NOT_FOUND', message: 'Oportunidade não encontrada.' } },
       },
     });
 

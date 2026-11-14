@@ -14,13 +14,13 @@ import { Card } from '@/components/ui/card';
 
 const registerSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100),
-  email: z.string().email('Email invalido'),
+  email: z.string().email('Email inválido'),
   password: z
     .string()
     .min(10, 'Senha deve ter pelo menos 10 caracteres')
-    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiuscula')
-    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minuscula')
-    .regex(/[0-9]/, 'Deve conter pelo menos um numero')
+    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Deve conter pelo menos um número')
     .regex(/[^A-Za-z0-9]/, 'Deve conter pelo menos um caractere especial'),
   accepted_terms: z.literal(true, {
     errorMap: () => ({ message: 'Voce precisa aceitar os termos para continuar' }),
@@ -69,12 +69,12 @@ export function RegisterPage() {
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <Card className="w-full max-w-md text-center">
           <div className="mb-4 text-4xl" aria-hidden="true">&#9993;</div>
-          <h1 className="text-xl font-semibold text-text-dark mb-2">Verifique seu email</h1>
-          <p className="text-sm text-muted">
-            Enviamos um link de verificacao para o seu email. Depois de confirmar, conecte suas
+          <h1 className="text-xl font-semibold text-text-primary mb-2">Verifique seu email</h1>
+          <p className="text-sm text-text-secondary">
+            Enviamos um link de verificação para o seu email. Depois de confirmar, conecte suas
             redes sociais para comecar a receber oportunidades.
           </p>
-          <Link to="/creator-portal/login" className="mt-4 inline-block text-sm text-primary hover:underline">
+          <Link to="/creator-portal/login" className="mt-4 inline-block text-sm text-violet-400 hover:underline">
             Ir para o login
           </Link>
         </Card>
@@ -85,8 +85,8 @@ export function RegisterPage() {
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md">
-        <h1 className="text-xl font-semibold text-text-dark mb-1">Criar conta de criadora</h1>
-        <p className="text-sm text-muted mb-6">
+        <h1 className="text-xl font-semibold text-text-primary mb-1">Criar conta de criadora</h1>
+        <p className="text-sm text-text-secondary mb-6">
           Cadastre-se para conectar suas redes e comecar a receber oportunidades de marcas.
         </p>
 
@@ -115,11 +115,11 @@ export function RegisterPage() {
             type="password"
             {...register('password')}
             error={errors.password?.message}
-            hint="Minimo 10 caracteres, com maiuscula, minuscula, numero e caractere especial"
+            hint="Mínimo 10 caracteres, com maiúscula, minúscula, número e caractere especial"
             autoComplete="new-password"
           />
           <div>
-            <label className="flex items-start gap-2 text-sm text-text-dark">
+            <label className="flex items-start gap-2 text-sm text-text-primary">
               <input type="checkbox" className="mt-0.5" {...register('accepted_terms')} />
               <span>Li e aceito os termos de uso da Aurora.</span>
             </label>
@@ -135,9 +135,9 @@ export function RegisterPage() {
           </Button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-muted">
-          Ja tem uma conta?{' '}
-          <Link to="/creator-portal/login" className="text-primary hover:underline">
+        <p className="mt-4 text-center text-sm text-text-secondary">
+          Já tem uma conta?{' '}
+          <Link to="/creator-portal/login" className="text-violet-400 hover:underline">
             Entrar
           </Link>
         </p>

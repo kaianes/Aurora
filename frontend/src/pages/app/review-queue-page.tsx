@@ -39,10 +39,10 @@ function TriggeredRulesList({ rules }: { rules: TriggeredRule[] }) {
   return (
     <ul className="mt-2 space-y-1">
       {rules.map((rule, i) => (
-        <li key={i} className="font-mono text-xs text-text-dark bg-surface rounded px-2 py-1">
+        <li key={i} className="font-mono text-xs text-text-primary bg-bg-surface rounded px-2 py-1">
           <span className="font-semibold">{CHANNEL_LABEL[rule.channel] ?? rule.channel}</span>
           {rule.rule_type && ` · ${rule.rule_type}`}
-          {rule.matched_excerpt && <span className="text-muted"> · "{rule.matched_excerpt}"</span>}
+          {rule.matched_excerpt && <span className="text-text-secondary"> · "{rule.matched_excerpt}"</span>}
         </li>
       ))}
     </ul>
@@ -73,7 +73,7 @@ function DecideControls({ itemId }: { itemId: string }) {
       setDecideError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel registrar a decisao.',
+          : 'Não foi possível registrar a decisão.',
       );
     },
   });
@@ -90,7 +90,7 @@ function DecideControls({ itemId }: { itemId: string }) {
             Rejeitar
           </Button>
           <Button size="sm" variant="outline" onClick={() => setMode('revision')}>
-            Solicitar revisao
+            Solicitar revisão
           </Button>
         </div>
       ) : (
@@ -156,8 +156,8 @@ export function ReviewQueuePage() {
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <CardTitle>Fila de revisao de seguranca</CardTitle>
-            <CardDescription>Conteudo sinalizado pela verificacao automatica, aguardando uma decisao humana.</CardDescription>
+            <CardTitle>Fila de revisão de segurança</CardTitle>
+            <CardDescription>Conteudo sinalizado pela verificação automatica, aguardando uma decisão humana.</CardDescription>
           </div>
           <Select
             aria-label="Filtrar por status"
@@ -176,13 +176,13 @@ export function ReviewQueuePage() {
       {error && (
         <Alert variant="error">
           <p>
-            Nao foi possivel carregar a fila de revisao agora.{' '}
+            Não foi possível carregar a fila de revisão agora.{' '}
             {isAxiosError(error) && error.response?.data?.error?.message
               ? error.response.data.error.message
               : 'Tente novamente em alguns instantes.'}
           </p>
           {items.length > 0 && (
-            <p className="mt-1">O conteudo sinalizado abaixo permanece bloqueado e nao publicado enquanto isso.</p>
+            <p className="mt-1">O conteúdo sinalizado abaixo permanece bloqueado e não publicado enquanto isso.</p>
           )}
           <Button size="sm" variant="outline" className="mt-2" onClick={() => refetch()}>
             Tentar novamente
@@ -194,7 +194,7 @@ export function ReviewQueuePage() {
 
       {!isLoading && !error && items.length === 0 && (
         <Card>
-          <p className="text-sm text-muted py-8 text-center">Nenhum item nesta fila.</p>
+          <p className="text-sm text-text-secondary py-8 text-center">Nenhum item nesta fila.</p>
         </Card>
       )}
 
@@ -204,15 +204,15 @@ export function ReviewQueuePage() {
             <Card key={item.id}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <Link to={`/app/safety/review-queue/${item.id}`} className="text-sm font-medium text-primary hover:underline">
+                  <Link to={`/app/safety/review-queue/${item.id}`} className="text-sm font-medium text-violet-400 hover:underline">
                     {item.campaign_name}
                   </Link>
-                  <p className="text-xs text-muted mt-0.5">Criador: {item.creator_display_name}</p>
-                  <p className="font-mono text-xs text-muted mt-0.5">{new Date(item.created_at).toLocaleString('pt-BR')}</p>
+                  <p className="text-xs text-text-secondary mt-0.5">Criador: {item.creator_display_name}</p>
+                  <p className="font-mono text-xs text-text-secondary mt-0.5">{new Date(item.created_at).toLocaleString('pt-BR')}</p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={item.reason_category === 'check_unavailable' ? 'default' : 'error'}>
-                    {item.reason_category === 'check_unavailable' ? 'Verificacao indisponivel' : 'Regra violada'}
+                    {item.reason_category === 'check_unavailable' ? 'Verificacao indisponível' : 'Regra violada'}
                   </Badge>
                   <Badge variant={STATUS_BADGE[item.status]}>{STATUS_LABEL[item.status]}</Badge>
                 </div>
@@ -223,7 +223,7 @@ export function ReviewQueuePage() {
               {item.status === 'pending' && canDecide && <DecideControls itemId={item.id} />}
 
               {item.status !== 'pending' && item.decision_reason && (
-                <p className="text-xs text-muted mt-2">Motivo registrado: {item.decision_reason}</p>
+                <p className="text-xs text-text-secondary mt-2">Motivo registrado: {item.decision_reason}</p>
               )}
             </Card>
           ))}

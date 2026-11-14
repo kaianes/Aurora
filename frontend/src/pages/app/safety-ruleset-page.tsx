@@ -160,7 +160,7 @@ export function SafetyRulesetPage() {
       const message =
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel salvar a regra. Verifique os dados informados.';
+          : 'Não foi possível salvar a regra. Verifique os dados informados.';
       setFormErrors((prev) => ({ ...prev, [vars.ruleType]: message }));
     },
   });
@@ -178,14 +178,14 @@ export function SafetyRulesetPage() {
   });
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o conjunto de regras da marca.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o conjunto de regras da marca.</Alert>;
 
   const rulesByType = (type: SafetyRuleType) => ruleset?.rules.filter((r) => r.rule_type === type) ?? [];
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <CardHeader>
-        <CardTitle>Regras de seguranca da marca</CardTitle>
+        <CardTitle>Regras de segurança da marca</CardTitle>
         <CardDescription>
           Essas regras sao aplicadas automaticamente a toda nova campanha, sem nenhuma etapa extra por campanha.
         </CardDescription>
@@ -195,7 +195,7 @@ export function SafetyRulesetPage() {
 
       {RULE_TYPES.map((type) => (
         <Card key={type}>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">{RULE_TYPE_LABEL[type]}</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">{RULE_TYPE_LABEL[type]}</h3>
 
           {formErrors[type] && (
             <Alert variant="error" className="mb-3">
@@ -207,7 +207,7 @@ export function SafetyRulesetPage() {
             <div className="divide-y divide-border mb-3">
               {rulesByType(type).map((rule) => (
                 <div key={rule.id} className="flex items-center justify-between py-2 gap-4">
-                  <p className="text-sm text-text-dark font-mono min-w-0 break-words">{ruleSummary(rule)}</p>
+                  <p className="text-sm text-text-primary font-mono min-w-0 break-words">{ruleSummary(rule)}</p>
                   {canManage && (
                     <Button
                       size="sm"
@@ -223,7 +223,7 @@ export function SafetyRulesetPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted py-3">Nenhuma regra cadastrada.</p>
+            <p className="text-sm text-text-secondary py-3">Nenhuma regra cadastrada.</p>
           )}
 
           {canManage &&

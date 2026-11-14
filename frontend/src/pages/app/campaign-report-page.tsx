@@ -66,7 +66,7 @@ export function CampaignReportPage() {
     isAxiosError(requestMutation.error) && requestMutation.error.response?.data?.error?.message
       ? requestMutation.error.response.data.error.message
       : requestMutation.isError
-        ? 'Nao foi possivel solicitar o relatorio agora.'
+        ? 'Não foi possível solicitar o relatório agora.'
         : null;
 
   return (
@@ -81,14 +81,14 @@ export function CampaignReportPage() {
         <Alert variant="error">
           {isAxiosError(reportError) && reportError.response?.data?.error?.message
             ? reportError.response.data.error.message
-            : 'Nao foi possivel carregar o relatorio solicitado.'}
+            : 'Não foi possível carregar o relatório solicitado.'}
         </Alert>
       )}
 
       {!report && (
         <Card>
-          <p className="text-sm text-text-dark mb-4">
-            Gere um relatorio desta campanha com investimento, alcance e engajamento entregues, e
+          <p className="text-sm text-text-primary mb-4">
+            Gere um relatório desta campanha com investimento, alcance e engajamento entregues, e
             eficiencia de custo, pronto para apresentar ao seu CMO ou CFO.
           </p>
           <Button onClick={() => requestMutation.mutate()} loading={requestMutation.isPending}>
@@ -99,7 +99,7 @@ export function CampaignReportPage() {
 
       {report?.status === 'pending' && (
         <Card>
-          <div className="flex items-center gap-3 text-sm text-muted">
+          <div className="flex items-center gap-3 text-sm text-text-secondary">
             <Spinner className="h-5 w-5" />
             Gerando relatorio. Isso pode levar alguns segundos.
           </div>
@@ -107,32 +107,32 @@ export function CampaignReportPage() {
       )}
 
       {report?.status === 'failed' && (
-        <Alert variant="error">Nao foi possivel gerar o relatorio agora. Tente novamente.</Alert>
+        <Alert variant="error">Não foi possível gerar o relatório agora. Tente novamente.</Alert>
       )}
 
       {report?.status === 'ready' && (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-dark">Relatorio #{report.id}</h3>
+            <h3 className="text-sm font-semibold text-text-primary">Relatorio #{report.id}</h3>
             <Badge variant={report.campaign_progress_label === 'final' ? 'success' : 'default'}>
               {report.campaign_progress_label === 'final' ? 'Campanha finalizada' : 'Campanha em andamento'}
             </Badge>
           </div>
 
           {report.campaign_progress_label === 'in_progress' && (
-            <p className="text-xs text-muted mb-3">
+            <p className="text-xs text-text-secondary mb-3">
               Esta campanha ainda esta em andamento. Os valores abaixo refletem o investimento ja
-              definido e as entregas confirmadas até agora, nao um resultado final.
+              definido e as entregas confirmadas até agora, não um resultado final.
             </p>
           )}
 
-          <div className="space-y-2 border-t border-border pt-3">
-            <p className="flex items-center font-mono text-sm text-text-dark">
+          <div className="space-y-2 border-t border-border-default pt-3">
+            <p className="flex items-center font-mono text-sm text-text-primary">
               <MetricDot color="var(--color-creator-pink)" />
               Investimento: {formatCurrency(report.spend_amount)}
             </p>
             {report.spend_source && (
-              <p className="text-xs text-muted">
+              <p className="text-xs text-text-secondary">
                 Fonte do valor: {SPEND_SOURCE_LABEL[report.spend_source] ?? report.spend_source}
               </p>
             )}
@@ -143,25 +143,25 @@ export function CampaignReportPage() {
               </Alert>
             ) : (
               <>
-                <p className="flex items-center font-mono text-sm text-text-dark">
+                <p className="flex items-center font-mono text-sm text-text-primary">
                   <MetricDot color="var(--color-signal-green)" />
                   Alcance entregue: {formatNumber(report.total_delivered_reach)}
                 </p>
-                <p className="flex items-center font-mono text-sm text-text-dark">
+                <p className="flex items-center font-mono text-sm text-text-primary">
                   <MetricDot color="var(--color-performance-orange)" />
                   Engajamento entregue: {formatNumber(report.total_delivered_engagement)}
                 </p>
-                <p className="font-mono text-sm text-text-dark">
+                <p className="font-mono text-sm text-text-primary">
                   Custo por engajamento: {formatCurrency(report.cost_per_engagement)}
                 </p>
-                <p className="font-mono text-sm text-text-dark">
+                <p className="font-mono text-sm text-text-primary">
                   CPM equivalente: {formatCurrency(report.cpm_equivalent)}
                 </p>
               </>
             )}
           </div>
 
-          <p className="font-mono text-xs text-muted mt-3">
+          <p className="font-mono text-xs text-text-secondary mt-3">
             Gerado em {formatDateTime(report.resolved_at)}
           </p>
 

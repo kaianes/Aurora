@@ -37,14 +37,14 @@ export function CreatorBriefingPage() {
   }
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o briefing agora.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o briefing agora.</Alert>;
 
   if (!briefing) {
     return (
       <div className="mx-auto max-w-2xl">
         <Alert variant="warning">
-          Nenhum briefing disponivel para voce nesta campanha. Isso pode significar que o briefing ainda nao foi
-          emitido ou que sua oportunidade nesta campanha nao esta mais ativa.
+          Nenhum briefing disponível para voce nesta campanha. Isso pode significar que o briefing ainda não foi
+          emitido ou que sua oportunidade nesta campanha não esta mais ativa.
         </Alert>
       </div>
     );
@@ -55,15 +55,15 @@ export function CreatorBriefingPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <h1 className="text-lg font-semibold text-text-dark">Briefing da campanha</h1>
+        <h1 className="text-lg font-semibold text-text-primary">Briefing da campanha</h1>
         <CardDescription>
-          Tudo que voce precisa para criar o conteudo certo, sem adivinhar o que a marca quer.
+          Tudo que voce precisa para criar o conteúdo certo, sem adivinhar o que a marca quer.
         </CardDescription>
       </CardHeader>
 
       <Card>
-        <h2 className="text-sm font-semibold text-text-dark mb-3">O que fazer</h2>
-        <ul className="list-disc pl-5 space-y-1 text-sm text-text-dark">
+        <h2 className="text-sm font-semibold text-text-primary mb-3">O que fazer</h2>
+        <ul className="list-disc pl-5 space-y-1 text-sm text-text-primary">
           {(briefing.dos ?? []).map((item, i) => (
             <li key={i}>{item}</li>
           ))}
@@ -71,8 +71,8 @@ export function CreatorBriefingPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-text-dark mb-3">O que evitar</h2>
-        <ul className="list-disc pl-5 space-y-1 text-sm text-text-dark">
+        <h2 className="text-sm font-semibold text-text-primary mb-3">O que evitar</h2>
+        <ul className="list-disc pl-5 space-y-1 text-sm text-text-primary">
           {(briefing.donts ?? []).map((item, i) => (
             <li key={i}>{item}</li>
           ))}
@@ -80,8 +80,8 @@ export function CreatorBriefingPage() {
       </Card>
 
       <Card>
-        <h2 className="text-sm font-semibold text-text-dark mb-3">Exemplos de referencia</h2>
-        <ul className="list-disc pl-5 space-y-1 text-sm text-text-dark break-words">
+        <h2 className="text-sm font-semibold text-text-primary mb-3">Exemplos de referencia</h2>
+        <ul className="list-disc pl-5 space-y-1 text-sm text-text-primary break-words">
           {(briefing.reference_examples ?? []).map((item, i) => (
             <li key={i}>{item}</li>
           ))}
@@ -90,33 +90,33 @@ export function CreatorBriefingPage() {
 
       {spec && (
         <Card>
-          <h2 className="text-sm font-semibold text-text-dark mb-3">Especificacao do entregavel</h2>
+          <h2 className="text-sm font-semibold text-text-primary mb-3">Especificacao do entregavel</h2>
           <dl className="space-y-2 text-sm">
             <div>
-              <dt className="font-semibold text-text-dark inline">Formato: </dt>
+              <dt className="font-semibold text-text-primary inline">Formato: </dt>
               <dd className="inline font-mono">{spec.format}</dd>
             </div>
             {spec.quantity != null && (
               <div>
-                <dt className="font-semibold text-text-dark inline">Quantidade: </dt>
+                <dt className="font-semibold text-text-primary inline">Quantidade: </dt>
                 <dd className="inline font-mono">{spec.quantity}</dd>
               </div>
             )}
             {spec.aspect_ratio && (
               <div>
-                <dt className="font-semibold text-text-dark inline">Proporcao: </dt>
+                <dt className="font-semibold text-text-primary inline">Proporcao: </dt>
                 <dd className="inline font-mono">{spec.aspect_ratio}</dd>
               </div>
             )}
             {spec.caption_length_limit != null && (
               <div>
-                <dt className="font-semibold text-text-dark inline">Limite de caracteres da legenda: </dt>
+                <dt className="font-semibold text-text-primary inline">Limite de caracteres da legenda: </dt>
                 <dd className="inline font-mono">{spec.caption_length_limit}</dd>
               </div>
             )}
             {spec.mandatory_hashtags && spec.mandatory_hashtags.length > 0 && (
               <div>
-                <dt className="font-semibold text-text-dark">Hashtags obrigatorias:</dt>
+                <dt className="font-semibold text-text-primary">Hashtags obrigatórias:</dt>
                 <dd>
                   <ul className="list-disc pl-5 font-mono">
                     {spec.mandatory_hashtags.map((tag, i) => (
@@ -128,7 +128,7 @@ export function CreatorBriefingPage() {
             )}
             {spec.notes && (
               <div>
-                <dt className="font-semibold text-text-dark inline">Observacoes: </dt>
+                <dt className="font-semibold text-text-primary inline">Observacoes: </dt>
                 <dd className="inline">{spec.notes}</dd>
               </div>
             )}
@@ -138,13 +138,13 @@ export function CreatorBriefingPage() {
 
       {briefing.deadline && (
         <Card>
-          <h2 className="text-sm font-semibold text-text-dark mb-2">Prazo</h2>
-          <p className="font-mono text-sm text-text-dark">{new Date(briefing.deadline).toLocaleString('pt-BR')}</p>
+          <h2 className="text-sm font-semibold text-text-primary mb-2">Prazo</h2>
+          <p className="font-mono text-sm text-text-primary">{new Date(briefing.deadline).toLocaleString('pt-BR')}</p>
         </Card>
       )}
 
       <div className="flex gap-4">
-        <Link to={`/creator-portal/briefing/qa?campaign_id=${campaignId}`} className="text-sm text-primary hover:underline">
+        <Link to={`/creator-portal/briefing/qa?campaign_id=${campaignId}`} className="text-sm text-violet-400 hover:underline">
           Fazer uma pergunta sobre o briefing
         </Link>
       </div>

@@ -66,7 +66,7 @@ describe('SafetyRulesetPage - US-15', () => {
       isAxiosError: true,
       response: {
         status: 422,
-        data: { error: { code: 'RULE_PATTERN_INVALID', message: 'Padrao de expressao regular invalido.' } },
+        data: { error: { code: 'RULE_PATTERN_INVALID', message: 'Padrao de expressao regular inválido.' } },
       },
     });
 
@@ -79,7 +79,7 @@ describe('SafetyRulesetPage - US-15', () => {
     await userEvent.type(screen.getByLabelText('Padrao'), '(((invalid');
     await userEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
 
-    expect(await screen.findByText('Padrao de expressao regular invalido.')).toBeInTheDocument();
+    expect(await screen.findByText('Padrao de expressao regular inválido.')).toBeInTheDocument();
     // The previously valid competitor-mention rule is untouched and still visible.
     expect(screen.getByText(/Marca Rival Ltda/)).toBeInTheDocument();
   });

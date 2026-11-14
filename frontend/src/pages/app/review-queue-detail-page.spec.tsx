@@ -86,14 +86,14 @@ describe('ReviewQueueDetailPage - US-17', () => {
       isAxiosError: true,
       response: {
         status: 503,
-        data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'Servico de revisao indisponivel.' } },
+        data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'Servico de revisão indisponível.' } },
       },
     });
 
     renderPage();
 
-    expect(await screen.findByText(/Nao foi possivel carregar este item da fila de revisao agora/)).toBeInTheDocument();
-    expect(screen.getByText(/permanece bloqueado e nao publicado/)).toBeInTheDocument();
+    expect(await screen.findByText(/Não foi possível carregar este item da fila de revisão agora/)).toBeInTheDocument();
+    expect(screen.getByText(/permanece bloqueado e não publicado/)).toBeInTheDocument();
     // No decision controls are rendered -- she cannot be misled into thinking a decision was made.
     expect(screen.queryByRole('button', { name: 'Aprovar' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Rejeitar' })).not.toBeInTheDocument();
@@ -105,7 +105,7 @@ describe('ReviewQueueDetailPage - US-17', () => {
   it('offers a retry action rather than any automatic resolution when the detail fails to load', async () => {
     (reviewQueueApi.get as any).mockRejectedValue({
       isAxiosError: true,
-      response: { status: 503, data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'indisponivel' } } },
+      response: { status: 503, data: { error: { code: 'REVIEW_QUEUE_UNAVAILABLE', message: 'indisponível' } } },
     });
 
     renderPage();

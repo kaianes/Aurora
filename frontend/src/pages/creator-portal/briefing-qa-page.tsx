@@ -44,14 +44,14 @@ export function CreatorBriefingQaPage() {
       setAskError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel enviar sua pergunta agora.',
+          : 'Não foi possível enviar sua pergunta agora.',
       );
     },
   });
 
   if (!campaignId) return <Alert variant="error">Nenhuma campanha informada.</Alert>;
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar suas perguntas sobre este briefing.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar suas perguntas sobre este briefing.</Alert>;
 
   const messages = thread?.messages ?? [];
 
@@ -69,14 +69,14 @@ export function CreatorBriefingQaPage() {
               <div
                 key={i}
                 className={`rounded-lg p-3 text-sm ${
-                  m.sender_type === 'creator' ? 'bg-surface text-text-dark' : 'bg-primary/10 text-text-dark'
+                  m.sender_type === 'creator' ? 'bg-bg-surface text-text-primary' : 'bg-primary-muted text-text-primary'
                 }`}
               >
-                <p className="text-xs font-semibold text-muted uppercase mb-1">
+                <p className="text-xs font-semibold text-text-secondary uppercase mb-1">
                   {m.sender_type === 'creator' ? 'Voce' : 'Marca'}
                 </p>
                 <p>{m.body}</p>
-                <p className="font-mono text-xs text-muted mt-1">{new Date(m.created_at).toLocaleString('pt-BR')}</p>
+                <p className="font-mono text-xs text-text-secondary mt-1">{new Date(m.created_at).toLocaleString('pt-BR')}</p>
               </div>
             ))}
           </div>
@@ -89,7 +89,7 @@ export function CreatorBriefingQaPage() {
       )}
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">
+        <h3 className="text-sm font-semibold text-text-primary mb-3">
           {messages.length > 0 ? 'Fazer outra pergunta' : 'Fazer uma pergunta'}
         </h3>
         {askError && <Alert variant="error" className="mb-3">{askError}</Alert>}

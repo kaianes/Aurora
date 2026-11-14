@@ -69,7 +69,7 @@ describe('CreatorAccessPage - US-24.1 real creator login (replaces the E3 pilot 
   it('shows an invalid-credentials message for a wrong password', async () => {
     (creatorPortalApi.login as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { code: 'INVALID_CREDENTIALS', message: 'Email ou senha invalidos.' } } },
+      response: { data: { error: { code: 'INVALID_CREDENTIALS', message: 'Email ou senha inválidos.' } } },
     });
     const user = userEvent.setup();
     renderPage();
@@ -78,7 +78,7 @@ describe('CreatorAccessPage - US-24.1 real creator login (replaces the E3 pilot 
     await user.type(screen.getByLabelText(/Senha/i), 'WrongPassword1!');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
-    expect(await screen.findByText('Email ou senha invalidos.')).toBeInTheDocument();
+    expect(await screen.findByText('Email ou senha inválidos.')).toBeInTheDocument();
     expect(setCreatorToken).not.toHaveBeenCalled();
     expect(navigateMock).not.toHaveBeenCalled();
   });
@@ -92,7 +92,7 @@ describe('CreatorAccessPage - US-24.1 real creator login (replaces the E3 pilot 
         data: {
           error: {
             code: 'EMAIL_NOT_VERIFIED',
-            message: 'Sua conta ainda nao foi verificada. Verifique seu email.',
+            message: 'Sua conta ainda não foi verificada. Verifique seu email.',
           },
         },
       },

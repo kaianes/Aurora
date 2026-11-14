@@ -11,9 +11,9 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const errorId = error ? `${inputId}-error` : undefined;
 
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {label && (
-          <label htmlFor={inputId} className="block text-sm font-medium text-text-dark">
+          <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary">
             {label}
           </label>
         )}
@@ -22,10 +22,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           id={inputId}
           aria-invalid={!!error}
           aria-describedby={errorId}
-          className={`block w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+          className={`block w-full rounded-lg border bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-muted transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-bg ${
             error
-              ? 'border-error text-error focus:ring-error/50'
-              : 'border-border text-text-dark focus:border-primary focus:ring-primary/50'
+              ? 'border-error/50 focus:ring-error/30 focus:border-error'
+              : 'border-border-default focus:border-violet-500 focus:ring-violet-500/30'
           } ${className}`}
           rows={4}
           {...props}

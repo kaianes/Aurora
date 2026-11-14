@@ -48,7 +48,7 @@ describe('ExclusionsPage - US-14', () => {
 
     expect(await screen.findByText('Criador creator-5555')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Adicionar exclusao' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Adicionar exclusão' }));
     await userEvent.type(screen.getByLabelText('ID do criador'), 'creator-7777');
     await userEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
 
@@ -83,12 +83,12 @@ describe('ExclusionsPage - US-14', () => {
     (exclusionApi.create as any).mockResolvedValue({ applies_to: 'future_shortlist_generations_only' });
 
     renderBrandPage();
-    await screen.findByText(/Nenhuma exclusao cadastrada/);
+    await screen.findByText(/Nenhuma exclusão cadastrada/);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Adicionar exclusao' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Adicionar exclusão' }));
     await userEvent.type(screen.getByLabelText('ID do criador'), 'creator-1');
     await userEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
 
-    expect(await screen.findByRole('alert')).toHaveTextContent(/aprovacoes ja feitas nao sao afetadas/);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/aprovacoes ja feitas não sao afetadas/);
   });
 });

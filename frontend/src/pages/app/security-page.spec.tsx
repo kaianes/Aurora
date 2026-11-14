@@ -64,7 +64,7 @@ describe('SecurityPage (MFA activation, POST /auth/mfa/setup + /auth/mfa/confirm
     expect(await screen.findByText('JBSWY3DPEHPK3PXP')).toBeInTheDocument();
     expect(screen.getByText('11111111')).toBeInTheDocument();
     expect(screen.getByText('22222222')).toBeInTheDocument();
-    expect(screen.getByLabelText('Codigo de verificacao')).toBeInTheDocument();
+    expect(screen.getByLabelText('Código de verificação')).toBeInTheDocument();
   });
 
   it('confirms the code, marks MFA as enabled, and shows a success message', async () => {
@@ -74,8 +74,8 @@ describe('SecurityPage (MFA activation, POST /auth/mfa/setup + /auth/mfa/confirm
     renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: 'Ativar MFA' }));
-    await screen.findByLabelText('Codigo de verificacao');
-    await userEvent.type(screen.getByLabelText('Codigo de verificacao'), '123456');
+    await screen.findByLabelText('Código de verificação');
+    await userEvent.type(screen.getByLabelText('Código de verificação'), '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
 
     expect(await screen.findByText('MFA ativado com sucesso.')).toBeInTheDocument();
@@ -87,32 +87,32 @@ describe('SecurityPage (MFA activation, POST /auth/mfa/setup + /auth/mfa/confirm
     (authApi.mfaSetup as any).mockResolvedValue(setupResponse);
     (authApi.mfaConfirm as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Codigo MFA invalido. Tente novamente.' } } },
+      response: { data: { error: { message: 'Código MFA inválido. Tente novamente.' } } },
     });
 
     renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: 'Ativar MFA' }));
-    await screen.findByLabelText('Codigo de verificacao');
-    await userEvent.type(screen.getByLabelText('Codigo de verificacao'), '000000');
+    await screen.findByLabelText('Código de verificação');
+    await userEvent.type(screen.getByLabelText('Código de verificação'), '000000');
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar' }));
 
-    expect(await screen.findByText('Codigo MFA invalido. Tente novamente.')).toBeInTheDocument();
+    expect(await screen.findByText('Código MFA inválido. Tente novamente.')).toBeInTheDocument();
     expect(mockUpdateUser).not.toHaveBeenCalled();
-    expect(screen.getByLabelText('Codigo de verificacao')).toBeInTheDocument();
+    expect(screen.getByLabelText('Código de verificação')).toBeInTheDocument();
   });
 
   it('shows an explicit error when starting setup fails', async () => {
     (authApi.mfaSetup as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Nao foi possivel iniciar a configuracao do MFA.' } } },
+      response: { data: { error: { message: 'Não foi possível iniciar a configuração do MFA.' } } },
     });
 
     renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: 'Ativar MFA' }));
 
-    expect(await screen.findByText('Nao foi possivel iniciar a configuracao do MFA.')).toBeInTheDocument();
+    expect(await screen.findByText('Não foi possível iniciar a configuração do MFA.')).toBeInTheDocument();
   });
 
   it('cancels setup and returns to the inactive state without confirming', async () => {
@@ -121,10 +121,10 @@ describe('SecurityPage (MFA activation, POST /auth/mfa/setup + /auth/mfa/confirm
     renderPage();
 
     await userEvent.click(screen.getByRole('button', { name: 'Ativar MFA' }));
-    await screen.findByLabelText('Codigo de verificacao');
+    await screen.findByLabelText('Código de verificação');
     await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
 
-    expect(screen.queryByLabelText('Codigo de verificacao')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Código de verificação')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ativar MFA' })).toBeInTheDocument();
   });
 });

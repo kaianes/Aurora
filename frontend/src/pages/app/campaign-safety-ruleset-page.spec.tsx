@@ -62,7 +62,7 @@ describe('CampaignSafetyRulesetPage - US-15 scenario 2', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/esta rodando com um override de seguranca/)).toBeInTheDocument();
+    expect(await screen.findByText(/esta rodando com um override de segurança/)).toBeInTheDocument();
     expect(screen.getByText('Padrao da marca')).toBeInTheDocument();
     expect(screen.getByText('Suspende a regra da marca')).toBeInTheDocument();
   });
@@ -79,6 +79,6 @@ describe('CampaignSafetyRulesetPage - US-15 scenario 2', () => {
 
     renderPage();
 
-    expect(await screen.findByText(/usa o padrao de seguranca herdado da marca, sem overrides/)).toBeInTheDocument();
+    expect(await screen.findByText(/usa o padrao de segurança herdado da marca, sem overrides/)).toBeInTheDocument();
   });
 });

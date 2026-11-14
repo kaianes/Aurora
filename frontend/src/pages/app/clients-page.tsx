@@ -60,7 +60,7 @@ export function ClientsPage() {
     createError && isAxiosError(createError) && createError.response?.data?.error?.message
       ? createError.response.data.error.message
       : createError
-        ? 'Nao foi possivel criar a conta do cliente.'
+        ? 'Não foi possível criar a conta do cliente.'
         : null;
 
   const isAtLimit = data ? data.limits.used >= data.limits.max : false;
@@ -74,7 +74,7 @@ export function ClientsPage() {
       <Alert variant="error">
         {isAxiosError(fetchError) && fetchError.response?.data?.error?.message
           ? fetchError.response.data.error.message
-          : 'Nao foi possivel carregar as contas de clientes.'}
+          : 'Não foi possível carregar as contas de clientes.'}
       </Alert>
     );
   }
@@ -85,7 +85,7 @@ export function ClientsPage() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Clientes</CardTitle>
-            <CardDescription>Gerencie as contas de clientes da agencia.</CardDescription>
+            <CardDescription>Gerencie as contas de clientes da agência.</CardDescription>
           </div>
           {data && (
             <Badge variant={isAtLimit ? 'error' : 'primary'} className="font-mono">
@@ -104,7 +104,7 @@ export function ClientsPage() {
         <Card>
           {!showForm ? (
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted">
+              <p className="text-sm text-text-secondary">
                 {isAtLimit
                   ? 'Limite de contas de clientes atingido. Entre em contato com o suporte para aumentar.'
                   : 'Adicione uma nova conta de cliente a agencia.'}
@@ -119,7 +119,7 @@ export function ClientsPage() {
             </div>
           ) : (
             <>
-              <h3 className="text-sm font-semibold text-text-dark mb-3">Novo cliente</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-3">Novo cliente</h3>
               {createErrorMessage && (
                 <Alert variant="error" className="mb-3">{createErrorMessage}</Alert>
               )}
@@ -140,13 +140,13 @@ export function ClientsPage() {
                 />
                 {data && data.data.length > 0 && (
                   <div className="space-y-1">
-                    <label htmlFor="copy-templates" className="block text-sm font-medium text-text-dark">
+                    <label htmlFor="copy-templates" className="block text-sm font-medium text-text-primary">
                       Copiar templates de (opcional)
                     </label>
                     <select
                       id="copy-templates"
                       {...register('copy_templates_from')}
-                      className="block w-full rounded-lg border border-border px-3 py-2 text-sm"
+                      className="block w-full rounded-lg border border-border-default px-3 py-2 text-sm"
                     >
                       <option value="">Nenhum</option>
                       {data.data.map((client) => (
@@ -184,11 +184,11 @@ export function ClientsPage() {
               <Link
                 key={client.id}
                 to={`/app/clients/${client.id}`}
-                className="flex items-center justify-between py-3 hover:bg-surface -mx-6 px-6 transition-colors"
+                className="flex items-center justify-between py-3 hover:bg-bg-hover -mx-6 px-6 transition-colors"
               >
                 <div>
-                  <p className="text-sm font-medium text-text-dark">{client.name}</p>
-                  <p className="text-xs text-muted font-mono">
+                  <p className="text-sm font-medium text-text-primary">{client.name}</p>
+                  <p className="text-xs text-text-secondary font-mono">
                     Criado em {new Date(client.created_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>
@@ -206,7 +206,7 @@ export function ClientsPage() {
             ))}
           </div>
         ) : (
-          <p className="text-sm text-muted py-8 text-center">
+          <p className="text-sm text-text-secondary py-8 text-center">
             Nenhuma conta de cliente. Crie a primeira para comecar.
           </p>
         )}

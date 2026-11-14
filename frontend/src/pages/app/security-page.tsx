@@ -39,7 +39,7 @@ export function SecurityPage() {
     setupError && isAxiosError(setupError) && setupError.response?.data?.error?.message
       ? setupError.response.data.error.message
       : setupError
-        ? 'Nao foi possivel iniciar a configuracao do MFA.'
+        ? 'Não foi possível iniciar a configuração do MFA.'
         : null;
 
   const confirmError = confirmMutation.error;
@@ -47,7 +47,7 @@ export function SecurityPage() {
     confirmError && isAxiosError(confirmError) && confirmError.response?.data?.error?.message
       ? confirmError.response.data.error.message
       : confirmError
-        ? 'Nao foi possivel confirmar o codigo.'
+        ? 'Não foi possível confirmar o código.'
         : null;
 
   const mfaEnabled = user?.mfa_enabled ?? false;
@@ -55,8 +55,8 @@ export function SecurityPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Seguranca</CardTitle>
-        <CardDescription>Gerencie a autenticacao de dois fatores (MFA) da sua conta.</CardDescription>
+        <CardTitle>Segurança</CardTitle>
+        <CardDescription>Gerencie a autenticação de dois fatores (MFA) da sua conta.</CardDescription>
       </CardHeader>
 
       {justEnabled && (
@@ -64,33 +64,33 @@ export function SecurityPage() {
       )}
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Autenticacao de dois fatores</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Autenticacao de dois fatores</h3>
 
         {mfaEnabled ? (
           <Alert variant="success">MFA esta ativado na sua conta.</Alert>
         ) : setupData ? (
           <div className="space-y-4">
-            <p className="text-sm text-muted">
+            <p className="text-sm text-text-secondary">
               Escaneie o QR code abaixo com um aplicativo autenticador (Google Authenticator, Authy, etc.)
-              e digite o codigo gerado para confirmar.
+              e digite o código gerado para confirmar.
             </p>
 
-            <div className="flex justify-center rounded-lg border border-border bg-white p-4">
-              <QRCodeSVG value={setupData.qr_code_url} size={192} />
+            <div className="flex justify-center rounded-lg border border-border-default bg-white p-4">
+              <QRCodeSVG value={setupData.qr_code_url} size={192} bgColor="#ffffff" fgColor="#0A0A1A" />
             </div>
 
             <div>
-              <p className="text-xs text-muted mb-1">Nao consegue escanear? Digite o codigo manualmente:</p>
-              <code className="block rounded bg-surface px-3 py-2 text-sm font-mono break-all">
+              <p className="text-xs text-text-secondary mb-1">Não consegue escanear? Digite o código manualmente:</p>
+              <code className="block rounded bg-bg-surface px-3 py-2 text-sm font-mono break-all">
                 {setupData.secret}
               </code>
             </div>
 
             <div>
-              <p className="text-xs text-muted mb-1">
-                Codigos de backup (guarde em um lugar seguro, cada um pode ser usado uma vez):
+              <p className="text-xs text-text-secondary mb-1">
+                Códigos de backup (guarde em um lugar seguro, cada um pode ser usado uma vez):
               </p>
-              <div className="grid grid-cols-2 gap-1 rounded bg-surface px-3 py-2 font-mono text-sm">
+              <div className="grid grid-cols-2 gap-1 rounded bg-bg-surface px-3 py-2 font-mono text-sm">
                 {setupData.backup_codes.map((bc) => (
                   <span key={bc}>{bc}</span>
                 ))}
@@ -109,7 +109,7 @@ export function SecurityPage() {
             >
               <div className="flex-1">
                 <Input
-                  label="Codigo de verificacao"
+                  label="Código de verificação"
                   placeholder="123456"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -130,8 +130,8 @@ export function SecurityPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            <p className="text-sm text-muted">
-              MFA nao esta ativado na sua conta. Ative para aumentar a seguranca do seu login.
+            <p className="text-sm text-text-secondary">
+              MFA não esta ativado na sua conta. Ative para aumentar a segurança do seu login.
             </p>
             {setupErrorMessage && <Alert variant="error">{setupErrorMessage}</Alert>}
             <Button onClick={() => setupMutation.mutate()} loading={setupMutation.isPending}>

@@ -88,7 +88,7 @@ describe('PublicClientReportPage - US-44', () => {
     renderPage();
 
     expect(
-      await screen.findByText('Este link nao esta mais disponivel. Ele pode ter expirado ou sido revogado.'),
+      await screen.findByText('Este link não esta mais disponível. Ele pode ter expirado ou sido revogado.'),
     ).toBeInTheDocument();
   });
 });

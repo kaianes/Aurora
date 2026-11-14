@@ -33,7 +33,7 @@ function renderPage() {
 
 async function fillAndSubmit(url = 'https://instagram.com/p/abc123') {
   await userEvent.type(screen.getByLabelText('Link do post publicado'), url);
-  await userEvent.click(screen.getByRole('button', { name: 'Confirmar publicacao' }));
+  await userEvent.click(screen.getByRole('button', { name: 'Confirmar publicação' }));
 }
 
 describe('ConfirmPublicationPage - US-34', () => {
@@ -61,7 +61,7 @@ describe('ConfirmPublicationPage - US-34', () => {
       isAxiosError: true,
       response: {
         status: 422,
-        data: { error: { code: 'PUBLICATION_CONTENT_MISMATCH', message: 'Conteudo nao corresponde.', details: { field: 'caption_text' } } },
+        data: { error: { code: 'PUBLICATION_CONTENT_MISMATCH', message: 'Conteudo não corresponde.', details: { field: 'caption_text' } } },
       },
     });
 
@@ -69,7 +69,7 @@ describe('ConfirmPublicationPage - US-34', () => {
     await fillAndSubmit();
 
     expect(
-      await screen.findByText('O conteudo publicado nesse link nao corresponde ao conteudo aprovado.'),
+      await screen.findByText('O conteúdo publicado nesse link não corresponde ao conteúdo aprovado.'),
     ).toBeInTheDocument();
   });
 
@@ -87,20 +87,20 @@ describe('ConfirmPublicationPage - US-34', () => {
     renderPage();
     await fillAndSubmit();
     expect(
-      await screen.findByText('O link informado nao pode ser acessado. Verifique se o post esta publico e o endereco esta correto.'),
+      await screen.findByText('O link informado não pode ser acessado. Verifique se o post esta publico e o endereco esta correto.'),
     ).toBeInTheDocument();
 
     (creatorPortalApi.confirmPublication as any).mockRejectedValueOnce({
       isAxiosError: true,
       response: {
         status: 409,
-        data: { error: { code: 'SAFETY_NOT_CLEARED', message: 'Nao liberado.', details: { blocking_reason: 'flagged' } } },
+        data: { error: { code: 'SAFETY_NOT_CLEARED', message: 'Não liberado.', details: { blocking_reason: 'flagged' } } },
       },
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Confirmar publicacao' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar publicação' }));
     expect(
-      await screen.findByText(/O conteudo ainda nao foi liberado pela verificacao de seguranca de marca \(flagged\)/),
+      await screen.findByText(/O conteúdo ainda não foi liberado pela verificação de segurança de marca \(flagged\)/),
     ).toBeInTheDocument();
   });
 });

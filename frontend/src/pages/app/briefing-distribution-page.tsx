@@ -33,7 +33,7 @@ export function BriefingDistributionPage() {
       <Alert variant="error">
         {isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel carregar o status de distribuicao deste briefing.'}
+          : 'Não foi possível carregar o status de distribuicao deste briefing.'}
       </Alert>
     );
   }
@@ -44,7 +44,7 @@ export function BriefingDistributionPage() {
       <CardHeader>
         <CardTitle>Status de distribuicao do briefing</CardTitle>
         <CardDescription>
-          <Link to={`/app/campaigns/${id}/briefing`} className="text-primary hover:underline">
+          <Link to={`/app/campaigns/${id}/briefing`} className="text-violet-400 hover:underline">
             Voltar para o briefing
           </Link>
         </CardDescription>
@@ -52,20 +52,20 @@ export function BriefingDistributionPage() {
 
       <Card>
         <div className="space-y-2">
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-strategy-violet)" />
             Total de destinatarios: {distribution.recipients_total}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-signal-green)" />
             Entregues: {distribution.delivered}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-performance-orange)" />
             Com falha: {distribution.failed.length}
           </p>
           {distribution.pending > 0 && (
-            <div className="flex items-center gap-3 text-sm text-muted">
+            <div className="flex items-center gap-3 text-sm text-text-secondary">
               <Spinner className="h-5 w-5" />
               {distribution.pending} ainda em processamento.
             </div>
@@ -75,11 +75,11 @@ export function BriefingDistributionPage() {
 
       {distribution.failed.length > 0 && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Criadores que o briefing nao alcancou</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Criadores que o briefing não alcancou</h3>
           <div className="divide-y divide-border">
             {distribution.failed.map((f) => (
               <div key={f.creator_id} className="flex items-center justify-between py-2 gap-4">
-                <span className="font-mono text-sm text-text-dark">{f.creator_id}</span>
+                <span className="font-mono text-sm text-text-primary">{f.creator_id}</span>
                 <Badge variant="error">{f.failure_reason}</Badge>
               </div>
             ))}

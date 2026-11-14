@@ -20,9 +20,9 @@ const CHANNEL_LABEL: Record<string, string> = {
 
 const ERROR_CODE_MESSAGE: Record<string, string> = {
   OPPORTUNITY_NOT_FOUND: 'Nenhuma oportunidade aceita foi encontrada para este envio.',
-  CAMPAIGN_NOT_ACTIVE: 'Esta campanha nao esta ativa no momento, portanto nao aceita novos envios.',
-  PENDING_REVIEW_IN_PROGRESS: 'A versao mais recente deste envio ainda esta aguardando revisao. Aguarde a decisao antes de enviar outra.',
-  ALREADY_APPROVED: 'Esta entrega ja foi aprovada e nao aceita novas versoes.',
+  CAMPAIGN_NOT_ACTIVE: 'Esta campanha não esta ativa no momento, portanto não aceita novos envios.',
+  PENDING_REVIEW_IN_PROGRESS: 'A versao mais recente deste envio ainda esta aguardando revisão. Aguarde a decisão antes de enviar outra.',
+  ALREADY_APPROVED: 'Esta entrega ja foi aprovada e não aceita novas versoes.',
 };
 
 /**
@@ -93,7 +93,7 @@ export function NewDraftPage() {
   const submitError = submitMutation.error
     ? (submitErrorCode && ERROR_CODE_MESSAGE[submitErrorCode]) ||
       (isAxiosError(submitMutation.error) && submitMutation.error.response?.data?.error?.message) ||
-      'Nao foi possivel enviar seu rascunho agora.'
+      'Não foi possível enviar seu rascunho agora.'
     : null;
 
   const resetForm = () => {
@@ -112,27 +112,27 @@ export function NewDraftPage() {
       <div className="mx-auto max-w-2xl space-y-6">
         <CardHeader>
           <CardTitle>Rascunho enviado</CardTitle>
-          <CardDescription>Seu rascunho foi registrado e esta sendo verificado antes de avancar para revisao.</CardDescription>
+          <CardDescription>Seu rascunho foi registrado e esta sendo verificado antes de avancar para revisão.</CardDescription>
         </CardHeader>
 
         <Card>
-          <div className="space-y-1 text-sm text-text-dark">
+          <div className="space-y-1 text-sm text-text-primary">
             {versionNumber != null && <p className="font-mono">Versao: {versionNumber}</p>}
             {reviewDeadlineAt && (
-              <p className="font-mono">Prazo de revisao: {new Date(reviewDeadlineAt).toLocaleString('pt-BR')}</p>
+              <p className="font-mono">Prazo de revisão: {new Date(reviewDeadlineAt).toLocaleString('pt-BR')}</p>
             )}
           </div>
         </Card>
 
         <Card>
           {!check || check.status === 'pending' ? (
-            <div className="flex items-center gap-3 text-sm text-muted">
+            <div className="flex items-center gap-3 text-sm text-text-secondary">
               <Spinner className="h-5 w-5" />
               Verificando sua submissao. Isso pode levar alguns minutos.
             </div>
           ) : check.status === 'passed' ? (
             <Alert variant="success">
-              Sua submissao passou na verificacao de seguranca de marca e pode avancar no fluxo de aprovacao.
+              Sua submissao passou na verificação de segurança de marca e pode avancar no fluxo de aprovacao.
               {check.tier_reached && (
                 <span className="block font-mono text-xs mt-1">Verificacao concluida em: {check.tier_reached}</span>
               )}
@@ -140,17 +140,17 @@ export function NewDraftPage() {
           ) : check.status === 'flagged' ? (
             <div className="space-y-3">
               <Alert variant="error">
-                Sua submissao nao passou na verificacao de seguranca de marca e nao pode ser publicada enquanto nao
+                Sua submissao não passou na verificação de segurança de marca e não pode ser publicada enquanto nao
                 for revisada.
               </Alert>
               <div>
-                <p className="text-xs font-semibold text-muted uppercase mb-1">Regras acionadas</p>
+                <p className="text-xs font-semibold text-text-secondary uppercase mb-1">Regras acionadas</p>
                 <ul className="space-y-1">
                   {(check.triggered_rules ?? []).map((rule, i) => (
-                    <li key={i} className="font-mono text-xs text-text-dark bg-surface rounded px-2 py-1">
+                    <li key={i} className="font-mono text-xs text-text-primary bg-bg-surface rounded px-2 py-1">
                       {CHANNEL_LABEL[rule.channel] ?? rule.channel}
                       {rule.rule_type && ` · ${rule.rule_type}`}
-                      {rule.matched_excerpt && <span className="text-muted"> · "{rule.matched_excerpt}"</span>}
+                      {rule.matched_excerpt && <span className="text-text-secondary"> · "{rule.matched_excerpt}"</span>}
                     </li>
                   ))}
                 </ul>
@@ -159,7 +159,7 @@ export function NewDraftPage() {
           ) : (
             <Alert variant="warning">
               {check.message ??
-                'A verificacao de seguranca de marca nao pode ser concluida a tempo. O conteudo permanece bloqueado para publicacao e foi enviado para revisao humana.'}
+                'A verificação de segurança de marca não pode ser concluida a tempo. O conteúdo permanece bloqueado para publicação e foi enviado para revisão humana.'}
             </Alert>
           )}
         </Card>
@@ -171,7 +171,7 @@ export function NewDraftPage() {
           {opportunityId && (
             <Link
               to={`/creator-portal/drafts?opportunity_id=${opportunityId}`}
-              className="text-sm text-primary hover:underline self-center"
+              className="text-sm text-violet-400 hover:underline self-center"
             >
               Ver historico de versoes
             </Link>
@@ -184,9 +184,9 @@ export function NewDraftPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Enviar rascunho de conteudo</CardTitle>
+        <CardTitle>Enviar rascunho de conteúdo</CardTitle>
         <CardDescription>
-          Seu rascunho sera verificado quanto a seguranca de marca e depois revisado pela marca antes da publicacao.
+          Seu rascunho sera verificado quanto a segurança de marca e depois revisado pela marca antes da publicação.
         </CardDescription>
       </CardHeader>
 
@@ -212,7 +212,7 @@ export function NewDraftPage() {
                 label: `${o.brand_name} · ${o.deliverable.format}`,
               }))}
             />
-            <p className="text-sm text-muted mt-1">Apenas oportunidades que voce ja aceitou podem receber rascunhos.</p>
+            <p className="text-sm text-text-secondary mt-1">Apenas oportunidades que voce ja aceitou podem receber rascunhos.</p>
           </div>
           <Textarea label="Legenda (obrigatorio)" value={captionText} onChange={(e) => setCaptionText(e.target.value)} />
           <Textarea label="Texto na tela (opcional)" value={onScreenText} onChange={(e) => setOnScreenText(e.target.value)} />
@@ -222,10 +222,10 @@ export function NewDraftPage() {
             onChange={(e) => setAudioTranscript(e.target.value)}
           />
           <Input
-            label="Link do arquivo de midia (opcional)"
+            label="Link do arquivo de mídia (opcional)"
             value={mediaAssetUrl}
             onChange={(e) => setMediaAssetUrl(e.target.value)}
-            hint="Referencia S3 do video ou imagem bruta, usada quando nao ha texto na tela ou audio informados diretamente."
+            hint="Referencia S3 do video ou imagem bruta, usada quando não ha texto na tela ou audio informados diretamente."
           />
           <Button type="submit" loading={submitMutation.isPending} disabled={!campaignId || !opportunityId || !captionText.trim()}>
             Enviar rascunho
@@ -234,7 +234,7 @@ export function NewDraftPage() {
       </Card>
 
       {opportunityId && (
-        <Link to={`/creator-portal/drafts?opportunity_id=${opportunityId}`} className="text-sm text-primary hover:underline">
+        <Link to={`/creator-portal/drafts?opportunity_id=${opportunityId}`} className="text-sm text-violet-400 hover:underline">
           Ver versoes ja enviadas para esta oportunidade
         </Link>
       )}

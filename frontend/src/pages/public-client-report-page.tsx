@@ -52,8 +52,8 @@ export function PublicClientReportPage() {
       <div className="min-h-screen flex items-center justify-center p-6">
         <Alert variant="error" className="max-w-md">
           {notFound
-            ? 'Este link nao esta mais disponivel. Ele pode ter expirado ou sido revogado.'
-            : 'Nao foi possivel carregar este relatorio agora.'}
+            ? 'Este link não esta mais disponível. Ele pode ter expirado ou sido revogado.'
+            : 'Não foi possível carregar este relatório agora.'}
         </Alert>
       </div>
     );
@@ -63,51 +63,51 @@ export function PublicClientReportPage() {
   const primaryColor = branding.applied && branding.primary_color_hex ? branding.primary_color_hex : null;
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-bg-surface">
       <header
-        className="border-b border-border bg-white py-6"
+        className="border-b border-border-default bg-bg-elevated py-6"
         style={primaryColor ? { borderBottomColor: primaryColor, borderBottomWidth: 3 } : undefined}
       >
         <div className="mx-auto max-w-2xl px-4 flex items-center gap-3">
           {branding.applied && branding.logo_url ? (
             <img src={branding.logo_url} alt={`Logo de ${agency_name}`} className="h-10 w-10 rounded object-cover" />
           ) : null}
-          <h1 className="text-lg font-semibold text-text-dark">
+          <h1 className="text-lg font-semibold text-text-primary">
             {branding.applied ? agency_name : 'Relatorio de desempenho'}
           </h1>
         </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="rounded-xl border border-border bg-white p-6 shadow-sm space-y-3">
-          <p className="flex items-center font-mono text-sm text-text-dark">
+        <div className="rounded-xl border border-border-default bg-bg-elevated p-6 shadow-sm space-y-3">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-strategy-violet)" />
             Campanhas: {report.campaign_count}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-creator-pink)" />
             Investimento total: {formatCurrency(report.total_spend)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-signal-green)" />
             Alcance entregue: {formatNumber(report.total_delivered_reach)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-performance-orange)" />
             Engajamento entregue: {formatNumber(report.total_delivered_engagement)}
           </p>
-          <p className="font-mono text-sm text-text-dark">
+          <p className="font-mono text-sm text-text-primary">
             Custo por engajamento: {formatCurrency(report.cost_per_engagement)}
           </p>
-          <p className="font-mono text-sm text-text-dark">CPM equivalente: {formatCurrency(report.cpm_equivalent)}</p>
+          <p className="font-mono text-sm text-text-primary">CPM equivalente: {formatCurrency(report.cpm_equivalent)}</p>
 
-          <div className="flex gap-2 pt-3 border-t border-border">
+          <div className="flex gap-2 pt-3 border-t border-border-default">
             {report.pdf_document_url && (
               <a
                 href={report.pdf_document_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-dark hover:bg-surface transition-colors"
+                className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-bg-hover transition-colors"
               >
                 Baixar PDF
               </a>
@@ -117,7 +117,7 @@ export function PublicClientReportPage() {
                 href={report.csv_document_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-dark hover:bg-surface transition-colors"
+                className="rounded-lg border border-border-default px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-bg-hover transition-colors"
               >
                 Baixar CSV
               </a>

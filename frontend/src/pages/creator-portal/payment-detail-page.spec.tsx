@@ -77,7 +77,7 @@ describe('PaymentDetailPage - US-35a/US-35b/US-35c', () => {
     expect(await screen.findByText('Falhou')).toBeInTheDocument();
     expect(screen.getByText('Instruido')).toBeInTheDocument();
     expect(screen.getByText('Automatico')).toBeInTheDocument();
-    expect(screen.getByText('Manual (operacao Aurora)')).toBeInTheDocument();
+    expect(screen.getByText('Manual (operação Aurora)')).toBeInTheDocument();
   });
 
   // Hard: repeated failed attempts never hide the obligation -- it stays listed as owed with

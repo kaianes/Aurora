@@ -9,10 +9,10 @@ import { Alert } from '@/components/ui/alert';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const ERROR_CODE_MESSAGE: Record<string, string> = {
-  SUBMISSION_NOT_FOUND: 'Nao foi possivel encontrar este rascunho.',
-  DRAFT_NOT_APPROVED: 'Esta versao ainda nao foi aprovada pela marca. A publicacao so pode ser confirmada apos a aprovacao.',
-  PUBLICATION_LINK_UNREACHABLE: 'O link informado nao pode ser acessado. Verifique se o post esta publico e o endereco esta correto.',
-  PUBLICATION_CONTENT_MISMATCH: 'O conteudo publicado nesse link nao corresponde ao conteudo aprovado.',
+  SUBMISSION_NOT_FOUND: 'Não foi possível encontrar este rascunho.',
+  DRAFT_NOT_APPROVED: 'Esta versao ainda não foi aprovada pela marca. A publicação so pode ser confirmada apos a aprovacao.',
+  PUBLICATION_LINK_UNREACHABLE: 'O link informado não pode ser acessado. Verifique se o post esta publico e o endereco esta correto.',
+  PUBLICATION_CONTENT_MISMATCH: 'O conteúdo publicado nesse link não corresponde ao conteúdo aprovado.',
 };
 
 /**
@@ -46,10 +46,10 @@ export function ConfirmPublicationPage() {
 
   const errorMessage = confirmMutation.error
     ? errorCode === 'SAFETY_NOT_CLEARED'
-      ? `O conteudo ainda nao foi liberado pela verificacao de seguranca de marca${blockingReason ? ` (${blockingReason})` : ''}. A publicacao nao pode ser confirmada enquanto isso.`
+      ? `O conteúdo ainda não foi liberado pela verificação de segurança de marca${blockingReason ? ` (${blockingReason})` : ''}. A publicação não pode ser confirmada enquanto isso.`
       : (errorCode && ERROR_CODE_MESSAGE[errorCode]) ||
         (isAxiosError(confirmMutation.error) && confirmMutation.error.response?.data?.error?.message) ||
-        'Nao foi possivel confirmar a publicacao agora.'
+        'Não foi possível confirmar a publicação agora.'
     : null;
 
   if (confirmMutation.isSuccess) {
@@ -59,7 +59,7 @@ export function ConfirmPublicationPage() {
           <CardTitle>Publicacao confirmada</CardTitle>
         </CardHeader>
         <Alert variant="success">
-          <p>Sua publicacao foi registrada em {new Date(confirmMutation.data.published_at).toLocaleString('pt-BR')}.</p>
+          <p>Sua publicação foi registrada em {new Date(confirmMutation.data.published_at).toLocaleString('pt-BR')}.</p>
           <p className="font-mono text-xs mt-1 break-all">{confirmMutation.data.published_url}</p>
         </Alert>
         {opportunityId && (
@@ -74,10 +74,10 @@ export function ConfirmPublicationPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <CardHeader>
-        <CardTitle>Confirmar publicacao</CardTitle>
+        <CardTitle>Confirmar publicação</CardTitle>
         <CardDescription>
-          Envie o link do post publicado para registrar sua entrega. O conteudo precisa ter sido aprovado pela
-          marca e liberado pela verificacao de seguranca.
+          Envie o link do post publicado para registrar sua entrega. O conteúdo precisa ter sido aprovado pela
+          marca e liberado pela verificação de segurança.
         </CardDescription>
       </CardHeader>
 
@@ -100,7 +100,7 @@ export function ConfirmPublicationPage() {
             placeholder="https://instagram.com/p/abc123"
           />
           <Button type="submit" loading={confirmMutation.isPending} disabled={!publishedUrl.trim()}>
-            Confirmar publicacao
+            Confirmar publicação
           </Button>
         </form>
       </Card>

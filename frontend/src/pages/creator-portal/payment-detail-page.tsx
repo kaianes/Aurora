@@ -42,7 +42,7 @@ const ATTEMPT_OUTCOME_LABEL: Record<PayoutExecutionAttempt['outcome'], string> =
 
 const ATTEMPT_TRIGGER_LABEL: Record<PayoutExecutionAttempt['trigger'], string> = {
   scheduled: 'Automatico',
-  manual: 'Manual (operacao Aurora)',
+  manual: 'Manual (operação Aurora)',
 };
 
 /**
@@ -79,7 +79,7 @@ export function PaymentDetailPage() {
       setDownloadError(null);
       window.open(data.document_url, '_blank', 'noopener,noreferrer');
     },
-    onError: () => setDownloadError('Nao foi possivel gerar o extrato agora.'),
+    onError: () => setDownloadError('Não foi possível gerar o extrato agora.'),
   });
 
   if (isLoading) return <Spinner />;
@@ -88,7 +88,7 @@ export function PaymentDetailPage() {
       <Alert variant="error">
         {isAxiosError(error) && error.response?.data?.error?.message
           ? error.response.data.error.message
-          : 'Nao foi possivel carregar este pagamento.'}
+          : 'Não foi possível carregar este pagamento.'}
       </Alert>
     );
   }
@@ -113,22 +113,22 @@ export function PaymentDetailPage() {
       </CardHeader>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Valores</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Valores</h3>
         <div className="space-y-1.5">
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-signal-green)" />
             Pagamento bruto: {formatCurrency(obligation.payout_gross)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-performance-orange)" />
             Comissao: {formatCurrency(obligation.payout_commission)}
           </p>
-          <p className="flex items-center font-mono text-sm text-text-dark">
+          <p className="flex items-center font-mono text-sm text-text-primary">
             <MetricDot color="var(--color-creator-pink)" />
             Pagamento liquido: {formatCurrency(obligation.payout_net)}
           </p>
         </div>
-        <p className="font-mono text-xs text-muted mt-3">
+        <p className="font-mono text-xs text-text-secondary mt-3">
           {obligation.status === 'settled' && obligation.settled_at
             ? `Pago em ${formatDateTime(obligation.settled_at)}`
             : `Prazo combinado: ${formatDateTime(obligation.committed_deadline_at)}`}
@@ -159,16 +159,16 @@ export function PaymentDetailPage() {
       </Card>
 
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Historico de tentativas</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Historico de tentativas</h3>
         {attempts.length === 0 ? (
-          <p className="text-sm text-muted">Nenhuma tentativa de transferencia registrada ainda.</p>
+          <p className="text-sm text-text-secondary">Nenhuma tentativa de transferencia registrada ainda.</p>
         ) : (
           <div className="space-y-2">
             {attempts.map((attempt) => (
-              <div key={attempt.id} className="flex items-start justify-between gap-3 text-sm border-t border-border pt-2 first:border-t-0 first:pt-0">
+              <div key={attempt.id} className="flex items-start justify-between gap-3 text-sm border-t border-border-default pt-2 first:border-t-0 first:pt-0">
                 <div className="min-w-0">
-                  <p className="font-mono text-xs text-muted">{formatDateTime(attempt.created_at)}</p>
-                  <p className="text-text-dark">{ATTEMPT_TRIGGER_LABEL[attempt.trigger]}</p>
+                  <p className="font-mono text-xs text-text-secondary">{formatDateTime(attempt.created_at)}</p>
+                  <p className="text-text-primary">{ATTEMPT_TRIGGER_LABEL[attempt.trigger]}</p>
                   {attempt.failure_reason && <p className="text-xs text-error mt-0.5">{attempt.failure_reason}</p>}
                 </div>
                 <Badge variant={attempt.outcome === 'instructed' ? 'success' : 'error'}>
@@ -182,14 +182,14 @@ export function PaymentDetailPage() {
 
       {obligation.status === 'settled' && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Documento fiscal</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Documento fiscal</h3>
           {isLoadingTaxDocument ? (
             <Spinner className="h-5 w-5" />
           ) : !taxDocument ? (
-            <p className="text-sm text-muted">Documento fiscal ainda nao disponivel.</p>
+            <p className="text-sm text-text-secondary">Documento fiscal ainda não disponível.</p>
           ) : taxDocument.status === 'generated' ? (
             <div className="space-y-2">
-              <p className="font-mono text-sm text-text-dark">Periodo: {taxDocument.tax_period}</p>
+              <p className="font-mono text-sm text-text-primary">Periodo: {taxDocument.tax_period}</p>
               {taxDocument.document_url && (
                 <Button
                   variant="outline"
@@ -203,7 +203,7 @@ export function PaymentDetailPage() {
           ) : (
             <Alert variant="warning">
               {taxDocument.message ??
-                'Para gerar seu documento fiscal, e necessario completar algumas informacoes do seu perfil.'}
+                'Para gerar seu documento fiscal, e necessario completar algumas informações do seu perfil.'}
             </Alert>
           )}
         </Card>

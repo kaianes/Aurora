@@ -126,7 +126,7 @@ describe('OnboardingLinkAccountsPage - US-24.1 onboarding step 2 (link social ac
     renderPage();
 
     const banner = await screen.findByRole('alert');
-    expect(banner).toHaveTextContent(/indisponivel no momento para/i);
+    expect(banner).toHaveTextContent(/indisponível no momento para/i);
     expect(banner).toHaveTextContent('YouTube');
     // No connection exists yet, so continuing is correctly disabled -- but a retry ("Conectar")
     // button for every platform, including the failed one, is still available.

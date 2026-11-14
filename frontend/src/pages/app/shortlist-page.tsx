@@ -51,7 +51,7 @@ export function ShortlistPage() {
       setActionError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel gerar o shortlist agora.',
+          : 'Não foi possível gerar o shortlist agora.',
       );
     },
   });
@@ -67,7 +67,7 @@ export function ShortlistPage() {
       setActionError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel registrar a decisao. Se a campanha ja estiver ativa, o shortlist esta bloqueado.',
+          : 'Não foi possível registrar a decisão. Se a campanha ja estiver ativa, o shortlist esta bloqueado.',
       );
     },
   });
@@ -86,7 +86,7 @@ export function ShortlistPage() {
       setActionError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel aplicar a decisao em lote.',
+          : 'Não foi possível aplicar a decisão em lote.',
       );
     },
   });
@@ -101,7 +101,7 @@ export function ShortlistPage() {
       setActionError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel solicitar mais candidatos.',
+          : 'Não foi possível solicitar mais candidatos.',
       );
     },
   });
@@ -116,7 +116,7 @@ export function ShortlistPage() {
   };
 
   if (isLoading) return <Spinner />;
-  if (error) return <Alert variant="error">Nao foi possivel carregar o shortlist.</Alert>;
+  if (error) return <Alert variant="error">Não foi possível carregar o shortlist.</Alert>;
 
   const locked = shortlist?.locked ?? false;
 
@@ -145,7 +145,7 @@ export function ShortlistPage() {
 
       {!shortlist && canDecide && (
         <Card>
-          <p className="text-sm text-muted mb-3">Nenhum shortlist gerado ainda para esta campanha.</p>
+          <p className="text-sm text-text-secondary mb-3">Nenhum shortlist gerado ainda para esta campanha.</p>
           <Button onClick={() => requestMutation.mutate()} loading={requestMutation.isPending}>
             Gerar shortlist
           </Button>
@@ -154,7 +154,7 @@ export function ShortlistPage() {
 
       {shortlist?.status === 'pending' && (
         <Card>
-          <div className="flex items-center gap-3 text-sm text-muted">
+          <div className="flex items-center gap-3 text-sm text-text-secondary">
             <Spinner className="h-5 w-5" />
             Gerando shortlist. Isso pode levar até 60 segundos.
           </div>
@@ -163,7 +163,7 @@ export function ShortlistPage() {
 
       {shortlist?.status === 'failed' && (
         <Alert variant="error">
-          {shortlist.failure_reason ?? 'Nao foi possivel gerar o shortlist agora. Tente novamente.'}
+          {shortlist.failure_reason ?? 'Não foi possível gerar o shortlist agora. Tente novamente.'}
         </Alert>
       )}
 
@@ -209,7 +209,7 @@ export function ShortlistPage() {
           {canDecide && !locked && selected.size > 0 && (
             <Card>
               <div className="flex items-center justify-between">
-                <p className="text-sm text-text-dark">{selected.size} criador(es) selecionado(s)</p>
+                <p className="text-sm text-text-primary">{selected.size} criador(es) selecionado(s)</p>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => bulkMutation.mutate('approved')} loading={bulkMutation.isPending}>
                     Aprovar selecionados
@@ -243,11 +243,11 @@ export function ShortlistPage() {
                     <div className="min-w-0">
                       <Link
                         to={`/app/campaigns/${id}/shortlist/creators/${entry.creator_id}`}
-                        className="text-sm font-medium text-primary hover:underline"
+                        className="text-sm font-medium text-violet-400 hover:underline"
                       >
                         Criador {entry.creator_id}
                       </Link>
-                      <p className="flex items-center font-mono text-xs text-muted mt-0.5">
+                      <p className="flex items-center font-mono text-xs text-text-secondary mt-0.5">
                         {entry.rank !== null && (
                           <>
                             <MetricDot color="var(--color-strategy-violet)" />
@@ -263,7 +263,7 @@ export function ShortlistPage() {
                         )}
                       </p>
                       {entry.matched_attributes.length > 0 && (
-                        <p className="text-xs text-muted mt-1">{entry.matched_attributes.join(', ')}</p>
+                        <p className="text-xs text-text-secondary mt-1">{entry.matched_attributes.join(', ')}</p>
                       )}
                     </div>
                   </div>
@@ -294,7 +294,7 @@ export function ShortlistPage() {
                 </div>
               ))}
               {shortlist.entries.length === 0 && (
-                <p className="text-sm text-muted py-8 text-center">Nenhum criador no shortlist.</p>
+                <p className="text-sm text-text-secondary py-8 text-center">Nenhum criador no shortlist.</p>
               )}
             </div>
           </Card>

@@ -140,7 +140,7 @@ describe('TemplatesPage - US-41 cross-client template copy', () => {
     });
     vi.mocked(templateApi.copy).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Voce nao tem acesso ao cliente de destino.' } } },
+      response: { data: { error: { message: 'Voce não tem acesso ao cliente de destino.' } } },
     });
 
     renderPage();
@@ -149,6 +149,6 @@ describe('TemplatesPage - US-41 cross-client template copy', () => {
     await userEvent.selectOptions(await screen.findByLabelText('Cliente de destino'), 'acct-client-2');
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar copia' }));
 
-    expect(await screen.findByText('Voce nao tem acesso ao cliente de destino.')).toBeInTheDocument();
+    expect(await screen.findByText('Voce não tem acesso ao cliente de destino.')).toBeInTheDocument();
   });
 });

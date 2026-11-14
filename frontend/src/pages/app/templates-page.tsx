@@ -53,7 +53,7 @@ function CopyTemplateAction({ templateId }: { templateId: string }) {
     copyMutation.error && isAxiosError(copyMutation.error) && copyMutation.error.response?.data?.error?.message
       ? copyMutation.error.response.data.error.message
       : copyMutation.error
-        ? 'Nao foi possivel copiar o modelo para esse cliente.'
+        ? 'Não foi possível copiar o modelo para esse cliente.'
         : null;
 
   return (
@@ -68,7 +68,7 @@ function CopyTemplateAction({ templateId }: { templateId: string }) {
           Copiar para outro cliente
         </Button>
       ) : (
-        <div className="space-y-2 rounded-lg border border-border p-3 bg-surface">
+        <div className="space-y-2 rounded-lg border border-border-default p-3 bg-bg-surface">
           {errorMessage && <Alert variant="error">{errorMessage}</Alert>}
           <Select
             label="Cliente de destino"
@@ -125,11 +125,11 @@ export function TemplatesPage() {
       </CardHeader>
 
       {isLoading && <Spinner />}
-      {error && <Alert variant="error">Nao foi possivel carregar os modelos.</Alert>}
+      {error && <Alert variant="error">Não foi possível carregar os modelos.</Alert>}
 
       {data && data.data.length === 0 && (
         <Card>
-          <p className="text-sm text-muted text-center py-6">
+          <p className="text-sm text-text-secondary text-center py-6">
             Nenhum modelo salvo ainda. Confirme uma campanha e salve-a como modelo para comecar.
           </p>
         </Card>
@@ -141,8 +141,8 @@ export function TemplatesPage() {
             {data.data.map((t) => (
               <div key={t.id} className="flex items-center justify-between px-6 py-4 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-text-dark">{t.name}</p>
-                  <p className="font-mono text-xs text-muted">
+                  <p className="text-sm font-medium text-text-primary">{t.name}</p>
+                  <p className="font-mono text-xs text-text-secondary">
                     Criado em {new Date(t.created_at).toLocaleDateString('pt-BR')}
                   </p>
                 </div>

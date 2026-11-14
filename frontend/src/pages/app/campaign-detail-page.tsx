@@ -172,7 +172,7 @@ export function CampaignDetailPage() {
       setBoundsError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel salvar os limites de realocacao.',
+          : 'Não foi possível salvar os limites de realocacao.',
       );
     },
   });
@@ -197,14 +197,14 @@ export function CampaignDetailPage() {
   );
 
   if (isLoading) return <Spinner />;
-  if (error || !campaign) return <Alert variant="error">Nao foi possivel carregar a campanha.</Alert>;
+  if (error || !campaign) return <Alert variant="error">Não foi possível carregar a campanha.</Alert>;
 
   const lifecycleError = pauseMutation.error ?? resumeMutation.error ?? cancelMutation.error;
   const lifecycleErrorMessage =
     lifecycleError && isAxiosError(lifecycleError) && lifecycleError.response?.data?.error?.message
       ? lifecycleError.response.data.error.message
       : lifecycleError
-        ? 'Nao foi possivel executar essa acao no estado atual.'
+        ? 'Não foi possível executar essa ação no estado atual.'
         : null;
 
   return (
@@ -238,10 +238,10 @@ export function CampaignDetailPage() {
       {/* Draft: quote-readiness and request */}
       {campaign.state === 'draft' && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Cotacao</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Cotacao</h3>
           {quoteRequiredMissing.length > 0 ? (
             <Alert variant="warning">
-              Complete os campos pendentes antes de solicitar uma cotacao: {quoteRequiredMissing.join(', ')}.
+              Complete os campos pendentes antes de solicitar uma cotação: {quoteRequiredMissing.join(', ')}.
             </Alert>
           ) : (
             <Button
@@ -249,14 +249,14 @@ export function CampaignDetailPage() {
               loading={requestQuoteMutation.isPending}
               disabled={!canWrite}
             >
-              Solicitar cotacao
+              Solicitar cotação
             </Button>
           )}
           {requestQuoteMutation.error && (
             <Alert variant="error" className="mt-3">
               {isAxiosError(requestQuoteMutation.error) && requestQuoteMutation.error.response?.data?.error?.message
                 ? requestQuoteMutation.error.response.data.error.message
-                : 'Nao foi possivel solicitar a cotacao.'}
+                : 'Não foi possível solicitar a cotação.'}
             </Alert>
           )}
         </Card>
@@ -265,26 +265,26 @@ export function CampaignDetailPage() {
       {/* Quote in progress / result */}
       {quote && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Cotacao da campanha</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Cotacao da campanha</h3>
 
           {quote.status === 'pending' && (
-            <div className="flex items-center gap-3 text-sm text-muted">
+            <div className="flex items-center gap-3 text-sm text-text-secondary">
               <Spinner className="h-5 w-5" />
               Calculando pool, alcance e preco. Isso pode levar alguns segundos.
             </div>
           )}
 
           {quote.status === 'ready' && (
-            <div className="space-y-2 border-t border-border pt-3">
-              <p className="flex items-center font-mono text-sm text-text-dark">
+            <div className="space-y-2 border-t border-border-default pt-3">
+              <p className="flex items-center font-mono text-sm text-text-primary">
                 <MetricDot color="var(--color-creator-pink)" />
                 Pool minimo garantido: {formatNumber(quote.guaranteed_min_pool_size)} criadores
               </p>
-              <p className="flex items-center font-mono text-sm text-text-dark">
+              <p className="flex items-center font-mono text-sm text-text-primary">
                 <MetricDot color="var(--color-signal-green)" />
                 Alcance projetado: {formatNumber(quote.projected_reach_low)} - {formatNumber(quote.projected_reach_high)}
               </p>
-              <p className="flex items-center font-mono text-sm text-text-dark">
+              <p className="flex items-center font-mono text-sm text-text-primary">
                 <MetricDot color="var(--color-strategy-violet)" />
                 Preco total: {formatCurrency(quote.total_price)}
               </p>
@@ -299,7 +299,7 @@ export function CampaignDetailPage() {
                 <Alert variant="error">
                   {isAxiosError(confirmMutation.error) && confirmMutation.error.response?.data?.error?.message
                     ? confirmMutation.error.response.data.error.message
-                    : 'Nao foi possivel confirmar a campanha.'}
+                    : 'Não foi possível confirmar a campanha.'}
                 </Alert>
               )}
             </div>
@@ -311,7 +311,7 @@ export function CampaignDetailPage() {
 
           {quote.status === 'failed' && (
             <div className="space-y-3">
-              <Alert variant="error">{quote.failure_reason ?? 'Nao foi possivel calcular a cotacao agora.'}</Alert>
+              <Alert variant="error">{quote.failure_reason ?? 'Não foi possível calcular a cotação agora.'}</Alert>
               {canWrite && (
                 <Button variant="outline" size="sm" onClick={() => requestQuoteMutation.mutate()} loading={requestQuoteMutation.isPending}>
                   Tentar novamente
@@ -325,7 +325,7 @@ export function CampaignDetailPage() {
       {/* Shortfall notice */}
       {shortfallData?.shortfall && !shortfallData.shortfall.resolved_at && (
         <Alert variant="warning">
-          O pool garantido nao pode ser totalmente preenchido antes do lancamento.{' '}
+          O pool garantido não pode ser totalmente preenchido antes do lancamento.{' '}
           <Link to={`/app/campaigns/${campaign.id}/shortfall`} className="underline font-medium">
             Resolver agora
           </Link>
@@ -335,10 +335,10 @@ export function CampaignDetailPage() {
       {/* Locked price once confirmed+ */}
       {['confirmed', 'active', 'paused', 'completed', 'cancelled'].includes(campaign.state) && campaign.latest_quote && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-2">Preco travado</h3>
-          <p className="font-mono text-2xl text-text-dark">{formatCurrency(campaign.latest_quote.total_price)}</p>
-          <p className="text-xs text-muted mt-1">
-            Esse valor nao muda, independente da variacao de custo por criador durante a execucao.
+          <h3 className="text-sm font-semibold text-text-primary mb-2">Preco travado</h3>
+          <p className="font-mono text-2xl text-text-primary">{formatCurrency(campaign.latest_quote.total_price)}</p>
+          <p className="text-xs text-text-secondary mt-1">
+            Esse valor não muda, independente da variacao de custo por criador durante a execucao.
           </p>
         </Card>
       )}
@@ -346,7 +346,7 @@ export function CampaignDetailPage() {
       {/* Shortlist, exclusions, agency override (E3) */}
       {['confirmed', 'active', 'paused', 'completed'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Shortlist de criadores</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Shortlist de criadores</h3>
           <div className="flex gap-2">
             <Link to={`/app/campaigns/${campaign.id}/shortlist`}>
               <Button variant="outline" size="sm">Ver shortlist</Button>
@@ -356,7 +356,7 @@ export function CampaignDetailPage() {
             </Link>
             {canOverride && (
               <Link to={`/app/campaigns/${campaign.id}/shortlist/override`}>
-                <Button variant="outline" size="sm">Curadoria da agencia</Button>
+                <Button variant="outline" size="sm">Curadoria da agência</Button>
               </Link>
             )}
           </div>
@@ -365,32 +365,32 @@ export function CampaignDetailPage() {
 
       {/* Brand safety ruleset (E4, US-15 scenario 2) */}
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Seguranca de marca</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Segurança de marca</h3>
         <Link to={`/app/campaigns/${campaign.id}/safety-ruleset`}>
-          <Button variant="outline" size="sm">Ver regras de seguranca da campanha</Button>
+          <Button variant="outline" size="sm">Ver regras de segurança da campanha</Button>
         </Link>
       </Card>
 
       {/* Invoice (E6, US-20/US-42) */}
       {['active', 'paused', 'completed'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Faturamento</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Faturamento</h3>
           <Link to={`/app/campaigns/${campaign.id}/invoice`}>
             <Button variant="outline" size="sm">Ver fatura</Button>
           </Link>
         </Card>
       )}
 
-      {/* Dashboard de desempenho e relatorio de ROI (E7, US-21b, US-22) */}
+      {/* Dashboard de desempenho e relatório de ROI (E7, US-21b, US-22) */}
       {['active', 'paused', 'completed'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Desempenho</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Desempenho</h3>
           <div className="flex flex-wrap gap-2">
             <Link to={`/app/campaigns/${campaign.id}/dashboard`}>
               <Button variant="outline" size="sm">Ver dashboard de desempenho</Button>
             </Link>
             <Link to={`/app/campaigns/${campaign.id}/reports`}>
-              <Button variant="outline" size="sm">Gerar relatorio de ROI</Button>
+              <Button variant="outline" size="sm">Gerar relatório de ROI</Button>
             </Link>
           </div>
         </Card>
@@ -398,7 +398,7 @@ export function CampaignDetailPage() {
 
       {/* Briefing, Q&A, and content review (E5, US-18a/US-18b/US-19/US-31) */}
       <Card>
-        <h3 className="text-sm font-semibold text-text-dark mb-3">Briefing e revisao de conteudo</h3>
+        <h3 className="text-sm font-semibold text-text-primary mb-3">Briefing e revisão de conteúdo</h3>
         <div className="flex flex-wrap gap-2">
           <Link to={`/app/campaigns/${campaign.id}/briefing`}>
             <Button variant="outline" size="sm">Briefing</Button>
@@ -410,7 +410,7 @@ export function CampaignDetailPage() {
             <Button variant="outline" size="sm">Perguntas dos criadores</Button>
           </Link>
           <Link to={`/app/campaigns/${campaign.id}/content-submissions`}>
-            <Button variant="outline" size="sm">Rascunhos de conteudo</Button>
+            <Button variant="outline" size="sm">Rascunhos de conteúdo</Button>
           </Link>
         </div>
       </Card>
@@ -418,7 +418,7 @@ export function CampaignDetailPage() {
       {/* Lifecycle controls */}
       {canWrite && ['active', 'paused', 'confirmed'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Controles da campanha</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Controles da campanha</h3>
           {lifecycleErrorMessage && <Alert variant="error" className="mb-3">{lifecycleErrorMessage}</Alert>}
           <Input
             label="Motivo (opcional)"
@@ -450,14 +450,14 @@ export function CampaignDetailPage() {
       {/* Reallocation bounds + history */}
       {['confirmed', 'active', 'paused'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Realocacao automatica de orcamento</h3>
-          <p className="text-xs text-muted mb-3">
-            Desativada por padrao. Ative para que o orcamento ainda nao comprometido migre para os criadores com
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Realocacao automatica de orçamento</h3>
+          <p className="text-xs text-text-secondary mb-3">
+            Desativada por padrao. Ative para que o orçamento ainda não comprometido migre para os criadores com
             melhor desempenho, dentro dos limites abaixo.
           </p>
           {boundsError && <Alert variant="error" className="mb-3">{boundsError}</Alert>}
           <form onSubmit={handleBoundsSubmit(onBoundsSubmit)} className="space-y-3" noValidate>
-            <label className="flex items-center gap-2 text-sm text-text-dark">
+            <label className="flex items-center gap-2 text-sm text-text-primary">
               <input type="checkbox" {...registerBounds('enabled')} disabled={!canWrite} />
               Ativar realocacao automatica
             </label>
@@ -489,12 +489,12 @@ export function CampaignDetailPage() {
           </form>
 
           {reallocationEvents && reallocationEvents.data.length > 0 && (
-            <div className="mt-5 border-t border-border pt-4">
-              <h4 className="text-xs font-semibold text-muted uppercase mb-2">Historico de realocacao</h4>
+            <div className="mt-5 border-t border-border-default pt-4">
+              <h4 className="text-xs font-semibold text-text-secondary uppercase mb-2">Historico de realocacao</h4>
               <div className="space-y-2">
                 {reallocationEvents.data.map((ev) => (
                   <div key={ev.id} className="flex items-center justify-between text-sm">
-                    <span className="flex items-center font-mono text-xs text-muted">
+                    <span className="flex items-center font-mono text-xs text-text-secondary">
                       <MetricDot
                         color={
                           ev.outcome === 'applied' ? 'var(--color-performance-orange)' : 'var(--color-strategy-violet)'
@@ -506,7 +506,7 @@ export function CampaignDetailPage() {
                       {ev.outcome === 'applied'
                         ? 'Aplicada'
                         : ev.outcome === 'skipped_stale_metrics'
-                          ? 'Pulada (metricas indisponiveis)'
+                          ? 'Pulada (métricas indisponiveis)'
                           : 'Pulada (sem dados)'}
                     </Badge>
                   </div>
@@ -520,7 +520,7 @@ export function CampaignDetailPage() {
       {/* Save as template */}
       {canWrite && ['confirmed', 'active', 'paused', 'completed', 'cancelled'].includes(campaign.state) && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Salvar como modelo</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Salvar como modelo</h3>
           <div className="flex gap-2">
             <Input
               label="Nome do modelo"

@@ -78,7 +78,7 @@ describe('BriefingComposerPage - US-18a', () => {
         data: {
           error: {
             code: 'BRIEFING_INCOMPLETE',
-            message: 'O briefing nao pode ser emitido: os seguintes campos estao vazios.',
+            message: 'O briefing não pode ser emitido: os seguintes campos estao vazios.',
             details: { missing_fields: ['reference_examples', 'deadline'] },
           },
         },
@@ -90,14 +90,14 @@ describe('BriefingComposerPage - US-18a', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Emitir briefing para o pool' }));
 
-    const summaryAlert = (await screen.findByText('O briefing nao pode ser emitido: os seguintes campos estao vazios.')).closest(
+    const summaryAlert = (await screen.findByText('O briefing não pode ser emitido: os seguintes campos estao vazios.')).closest(
       '[role="alert"]',
     ) as HTMLElement;
     expect(within(summaryAlert).getByText('Exemplos de referencia')).toBeInTheDocument();
     expect(within(summaryAlert).getByText('Prazo')).toBeInTheDocument();
     // Field-level error, programmatically associated via aria-describedby on the textarea/input.
     expect(
-      screen.getByText('Obrigatorio para emitir o briefing: adicione ao menos um exemplo (link, descricao ou qualquer texto nao vazio).'),
+      screen.getByText('Obrigatorio para emitir o briefing: adicione ao menos um exemplo (link, descricao ou qualquer texto não vazio).'),
     ).toBeInTheDocument();
   });
 
@@ -107,7 +107,7 @@ describe('BriefingComposerPage - US-18a', () => {
     const completeBriefing = {
       ...draftBriefing,
       dos: ['Mostrar o produto'],
-      donts: ['Nao mencionar concorrentes'],
+      donts: ['Não mencionar concorrentes'],
       reference_examples: ['https://instagram.com/p/exemplo123'],
       deliverable_spec: { format: 'instagram_reel' },
       deadline: '2026-11-05T23:59:59Z',

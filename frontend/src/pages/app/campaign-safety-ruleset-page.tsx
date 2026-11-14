@@ -116,7 +116,7 @@ export function CampaignSafetyRulesetPage() {
       setFormError(
         isAxiosError(err) && err.response?.data?.error?.message
           ? err.response.data.error.message
-          : 'Nao foi possivel salvar o override. Verifique os dados informados.',
+          : 'Não foi possível salvar o override. Verifique os dados informados.',
       );
     },
   });
@@ -128,13 +128,13 @@ export function CampaignSafetyRulesetPage() {
 
   if (isLoading) return <Spinner />;
   if (error || !effective) {
-    return <Alert variant="error">Nao foi possivel carregar as regras de seguranca da campanha.</Alert>;
+    return <Alert variant="error">Não foi possível carregar as regras de segurança da campanha.</Alert>;
   }
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <CardHeader>
-        <CardTitle>Regras de seguranca da campanha</CardTitle>
+        <CardTitle>Regras de segurança da campanha</CardTitle>
         <CardDescription>
           Regras efetivas aplicadas a esta campanha, combinando o padrao da marca com os overrides definidos aqui.
         </CardDescription>
@@ -142,10 +142,10 @@ export function CampaignSafetyRulesetPage() {
 
       {effective.has_override ? (
         <Alert variant="warning">
-          Esta campanha esta rodando com um override de seguranca -- ela nao usa apenas o padrao herdado da marca.
+          Esta campanha esta rodando com um override de segurança -- ela não usa apenas o padrao herdado da marca.
         </Alert>
       ) : (
-        <Alert variant="info">Esta campanha usa o padrao de seguranca herdado da marca, sem overrides.</Alert>
+        <Alert variant="info">Esta campanha usa o padrao de segurança herdado da marca, sem overrides.</Alert>
       )}
 
       <Card>
@@ -153,13 +153,13 @@ export function CampaignSafetyRulesetPage() {
           {effective.effective_rules.map((rule) => (
             <div key={rule.id} className="flex items-center justify-between py-3 gap-4">
               <div className="min-w-0">
-                <p className="flex items-center font-mono text-sm text-text-dark">
+                <p className="flex items-center font-mono text-sm text-text-primary">
                   <MetricDot
                     color={rule.source === 'brand' ? 'var(--color-strategy-violet)' : 'var(--color-performance-orange)'}
                   />
                   {RULE_TYPE_LABEL[rule.rule_type]}: {ruleDefinitionSummary(rule.rule_type, rule.definition)}
                 </p>
-                {rule.note && <p className="text-xs text-muted mt-1">{rule.note}</p>}
+                {rule.note && <p className="text-xs text-text-secondary mt-1">{rule.note}</p>}
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <Badge variant={rule.source === 'brand' ? 'default' : 'primary'}>
@@ -179,14 +179,14 @@ export function CampaignSafetyRulesetPage() {
             </div>
           ))}
           {effective.effective_rules.length === 0 && (
-            <p className="text-sm text-muted py-8 text-center">Nenhuma regra efetiva para esta campanha.</p>
+            <p className="text-sm text-text-secondary py-8 text-center">Nenhuma regra efetiva para esta campanha.</p>
           )}
         </div>
       </Card>
 
       {canManage && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Override desta campanha</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Override desta campanha</h3>
           {!showForm ? (
             <Button size="sm" variant="outline" onClick={() => setShowForm(true)}>
               Adicionar override

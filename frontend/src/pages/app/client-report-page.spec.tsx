@@ -70,7 +70,7 @@ describe('ClientReportPage - US-43', () => {
     expect(screen.getByText(/Investimento total/)).toBeInTheDocument();
     expect(screen.getByText(/Alcance entregue/)).toBeInTheDocument();
     expect(screen.getByText(/Engajamento entregue/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Configurar marca da agencia/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Configurar marca da agência/ })).toBeInTheDocument();
   });
 
   // ---- Scenario 1 (branded state): a report generated after the agency
@@ -86,8 +86,8 @@ describe('ClientReportPage - US-43', () => {
     await screen.findByText('Loja A');
     await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
 
-    expect(await screen.findByText('Com marca da agencia')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Configurar marca da agencia/ })).not.toBeInTheDocument();
+    expect(await screen.findByText('Com marca da agência')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Configurar marca da agência/ })).not.toBeInTheDocument();
   });
 
   // The request must act on the client account itself (section 2.5), not
@@ -126,7 +126,7 @@ describe('ClientReportPage - US-43', () => {
     (agencyApi.listClients as any).mockResolvedValue({ data: [{ id: 'acct-client-1', name: 'Loja A' }] });
     (agencyApi.requestClientReport as any).mockRejectedValue({
       isAxiosError: true,
-      response: { data: { error: { message: 'Conta de cliente nao encontrada.' } } },
+      response: { data: { error: { message: 'Conta de cliente não encontrada.' } } },
     });
 
     renderPage();
@@ -134,7 +134,7 @@ describe('ClientReportPage - US-43', () => {
     await screen.findByText('Loja A');
     await userEvent.click(screen.getByRole('button', { name: 'Gerar relatorio' }));
 
-    expect(await screen.findByText('Conta de cliente nao encontrada.')).toBeInTheDocument();
+    expect(await screen.findByText('Conta de cliente não encontrada.')).toBeInTheDocument();
   });
 
   // ---- US-44 (E9): minting a public, token-gated share link for a ready report, per
@@ -148,7 +148,7 @@ describe('ClientReportPage - US-43', () => {
       (agencyApi.mintShareLink as any).mockResolvedValue({
         token: 'pR3x-token',
         share_url: 'https://app.aurora.com.br/public/client-reports/pR3x-token',
-        display_url: 'https://relatorios.agenciacriativa.com.br/public/client-reports/pR3x-token',
+        display_url: 'https://relatórios.agenciacriativa.com.br/public/client-reports/pR3x-token',
         expires_at: '2026-11-20T10:00:00Z',
       });
 
@@ -162,7 +162,7 @@ describe('ClientReportPage - US-43', () => {
 
       expect(
         await screen.findByRole('link', {
-          name: 'https://relatorios.agenciacriativa.com.br/public/client-reports/pR3x-token',
+          name: 'https://relatórios.agenciacriativa.com.br/public/client-reports/pR3x-token',
         }),
       ).toHaveAttribute('href', 'https://app.aurora.com.br/public/client-reports/pR3x-token');
       expect(agencyApi.mintShareLink).toHaveBeenCalledWith('acct-client-1', 'rpt-001');
@@ -176,7 +176,7 @@ describe('ClientReportPage - US-43', () => {
       (agencyApi.getClientReport as any).mockResolvedValue(readyReportUnbranded);
       (agencyApi.mintShareLink as any).mockRejectedValue({
         isAxiosError: true,
-        response: { data: { error: { message: 'O relatorio ainda nao esta pronto para compartilhamento.' } } },
+        response: { data: { error: { message: 'O relatório ainda não esta pronto para compartilhamento.' } } },
       });
 
       renderPage();
@@ -187,7 +187,7 @@ describe('ClientReportPage - US-43', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Gerar link compartilhavel' }));
 
-      expect(await screen.findByText('O relatorio ainda nao esta pronto para compartilhamento.')).toBeInTheDocument();
+      expect(await screen.findByText('O relatório ainda não esta pronto para compartilhamento.')).toBeInTheDocument();
     });
   });
 });

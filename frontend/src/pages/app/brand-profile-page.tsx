@@ -101,14 +101,14 @@ export function BrandProfilePage() {
     saveError && isAxiosError(saveError) && saveError.response?.data?.error?.message
       ? saveError.response.data.error.message
       : saveError
-        ? 'Nao foi possivel salvar o perfil. Tente novamente.'
+        ? 'Não foi possível salvar o perfil. Tente novamente.'
         : null;
 
   const logoErrorMessage =
     logoMutation.error && isAxiosError(logoMutation.error) && logoMutation.error.response?.data?.error?.message
       ? logoMutation.error.response.data.error.message
       : logoMutation.error
-        ? 'Nao foi possivel enviar o logo. Verifique o formato e tamanho do arquivo (max 5MB, PNG/JPG/SVG/WEBP).'
+        ? 'Não foi possível enviar o logo. Verifique o formato e tamanho do arquivo (max 5MB, PNG/JPG/SVG/WEBP).'
         : null;
 
   const onSubmit = (data: ProfileForm) => {
@@ -143,7 +143,7 @@ export function BrandProfilePage() {
 
   if (fetchError && !isNew) {
     return (
-      <Alert variant="error">Nao foi possivel carregar o perfil da marca. Tente novamente mais tarde.</Alert>
+      <Alert variant="error">Não foi possível carregar o perfil da marca. Tente novamente mais tarde.</Alert>
     );
   }
 
@@ -156,7 +156,7 @@ export function BrandProfilePage() {
             <CardDescription>
               {isNew
                 ? 'Configure o perfil da sua marca para que campanhas herdem essas configuracoes.'
-                : 'Atualize as informacoes e diretrizes da sua marca.'}
+                : 'Atualize as informações e diretrizes da sua marca.'}
             </CardDescription>
           </div>
           {profile && (
@@ -169,7 +169,7 @@ export function BrandProfilePage() {
 
       {profile?.status === 'draft' && (
         <Alert variant="warning" className="mb-6">
-          O perfil esta incompleto. Campanhas podem ser criadas, mas nao herdarao todas as configuracoes padrao.
+          O perfil esta incompleto. Campanhas podem ser criadas, mas não herdarao todas as configuracoes padrao.
         </Alert>
       )}
 
@@ -184,16 +184,16 @@ export function BrandProfilePage() {
         {/* Logo section */}
         {profile && (
           <div className="mb-6">
-            <label className="block text-sm font-medium text-text-dark mb-2">Logo</label>
+            <label className="block text-sm font-medium text-text-primary mb-2">Logo</label>
             <div className="flex items-center gap-4">
               {profile.logo_url ? (
                 <img
                   src={profile.logo_url}
                   alt={`Logo de ${profile.name}`}
-                  className="h-16 w-16 rounded-lg object-cover border border-border"
+                  className="h-16 w-16 rounded-lg object-cover border border-border-default"
                 />
               ) : (
-                <div className="h-16 w-16 rounded-lg bg-surface border border-border flex items-center justify-center text-muted text-xs">
+                <div className="h-16 w-16 rounded-lg bg-bg-surface border border-border-default flex items-center justify-center text-text-secondary text-xs">
                   Sem logo
                 </div>
               )}
@@ -221,7 +221,7 @@ export function BrandProfilePage() {
             {logoErrorMessage && (
               <p className="mt-2 text-sm text-error" role="alert">{logoErrorMessage}</p>
             )}
-            <p className="mt-1 text-xs text-muted">PNG, JPG, SVG ou WEBP. Maximo 5MB, minimo 200x200px.</p>
+            <p className="mt-1 text-xs text-text-secondary">PNG, JPG, SVG ou WEBP. Maximo 5MB, minimo 200x200px.</p>
           </div>
         )}
 
@@ -240,10 +240,10 @@ export function BrandProfilePage() {
             disabled={!canEdit}
           />
           <Textarea
-            label="Diretrizes de conteudo"
+            label="Diretrizes de conteúdo"
             {...register('content_guidelines')}
             error={errors.content_guidelines?.message}
-            placeholder="Instrucoes para criacao de conteudo da marca..."
+            placeholder="Instrucoes para criacao de conteúdo da marca..."
             disabled={!canEdit}
           />
           <Textarea
@@ -260,7 +260,7 @@ export function BrandProfilePage() {
                 {isNew ? 'Criar perfil' : 'Salvar alteracoes'}
               </Button>
               {isDirty && (
-                <span className="text-xs text-muted">Alteracoes nao salvas</span>
+                <span className="text-xs text-text-secondary">Alteracoes não salvas</span>
               )}
             </div>
           )}

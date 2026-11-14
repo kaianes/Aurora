@@ -41,7 +41,7 @@ export function MediaKitPage() {
     isAxiosError(requestMutation.error) && requestMutation.error.response?.data?.error?.message
       ? requestMutation.error.response.data.error.message
       : requestMutation.isError
-        ? 'Nao foi possivel solicitar seu media kit agora.'
+        ? 'Não foi possível solicitar seu media kit agora.'
         : null;
 
   return (
@@ -59,14 +59,14 @@ export function MediaKitPage() {
         <Alert variant="error">
           {isAxiosError(mediaKitError) && mediaKitError.response?.data?.error?.message
             ? mediaKitError.response.data.error.message
-            : 'Nao foi possivel carregar o media kit solicitado.'}
+            : 'Não foi possível carregar o media kit solicitado.'}
         </Alert>
       )}
 
       {!mediaKit && (
         <Card>
-          <p className="text-sm text-text-dark mb-4">
-            Gere seu media kit automaticamente, sem precisar reunir prints ou numeros a mao.
+          <p className="text-sm text-text-primary mb-4">
+            Gere seu media kit automaticamente, sem precisar reunir prints ou números a mao.
           </p>
           <Button onClick={() => requestMutation.mutate()} loading={requestMutation.isPending}>
             Gerar media kit
@@ -76,7 +76,7 @@ export function MediaKitPage() {
 
       {mediaKit?.status === 'pending' && (
         <Card>
-          <div className="flex items-center gap-3 text-sm text-muted">
+          <div className="flex items-center gap-3 text-sm text-text-secondary">
             <Spinner className="h-5 w-5" />
             Gerando seu media kit. Isso pode levar alguns segundos.
           </div>
@@ -86,7 +86,7 @@ export function MediaKitPage() {
       {mediaKit?.status === 'failed' && (
         <Card>
           <Alert variant="error">
-            {mediaKit.message ?? 'Nao foi possivel gerar seu media kit. Tente novamente.'}
+            {mediaKit.message ?? 'Não foi possível gerar seu media kit. Tente novamente.'}
           </Alert>
           <Button className="mt-4" onClick={() => requestMutation.mutate()} loading={requestMutation.isPending}>
             Tentar novamente
@@ -96,7 +96,7 @@ export function MediaKitPage() {
 
       {mediaKit?.status === 'ready' && (
         <Card>
-          <h3 className="text-sm font-semibold text-text-dark mb-3">Media kit #{mediaKit.id}</h3>
+          <h3 className="text-sm font-semibold text-text-primary mb-3">Media kit #{mediaKit.id}</h3>
 
           {mediaKit.has_campaign_history === false && (
             <Alert variant="info" className="mb-3">
@@ -105,7 +105,7 @@ export function MediaKitPage() {
             </Alert>
           )}
 
-          <p className="text-sm text-text-dark mb-4">
+          <p className="text-sm text-text-primary mb-4">
             Seu media kit inclui sua audiencia, engajamento e nicho reais
             {mediaKit.has_campaign_history ? ', alem do seu historico de campanhas entregues.' : '.'}
           </p>

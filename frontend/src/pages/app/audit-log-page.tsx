@@ -58,7 +58,7 @@ export function AuditLogPage() {
     isAxiosError(error) && error.response?.data?.error?.message
       ? error.response.data.error.message
       : error
-        ? 'Nao foi possivel carregar o registro de auditoria agora.'
+        ? 'Não foi possível carregar o registro de auditoria agora.'
         : null;
 
   return (
@@ -77,7 +77,7 @@ export function AuditLogPage() {
 
       {!isLoading && !error && entries.length === 0 && (
         <Card>
-          <p className="text-sm text-muted py-8 text-center">Nenhum evento registrado nesta conta ainda.</p>
+          <p className="text-sm text-text-secondary py-8 text-center">Nenhum evento registrado nesta conta ainda.</p>
         </Card>
       )}
 
@@ -87,19 +87,19 @@ export function AuditLogPage() {
             {entries.map((entry) => (
               <div key={entry.id} className="px-6 py-4">
                 <div className="flex items-center justify-between gap-4">
-                  <p className="flex items-center text-sm font-medium text-text-dark">
+                  <p className="flex items-center text-sm font-medium text-text-primary">
                     <MetricDot color="var(--color-strategy-violet)" />
                     {entry.action}
                   </p>
-                  <span className="font-mono text-xs text-muted">
+                  <span className="font-mono text-xs text-text-secondary">
                     {new Date(entry.created_at).toLocaleString('pt-BR')}
                   </span>
                 </div>
-                <p className="text-xs text-muted mt-1">
+                <p className="text-xs text-text-secondary mt-1">
                   {entry.actor_name ? `${entry.actor_name} (${entry.actor_email})` : 'Sistema'}
                 </p>
                 {metadataSummary(entry.metadata) && (
-                  <p className="font-mono text-xs text-muted mt-1 break-all">{metadataSummary(entry.metadata)}</p>
+                  <p className="font-mono text-xs text-text-secondary mt-1 break-all">{metadataSummary(entry.metadata)}</p>
                 )}
               </div>
             ))}
