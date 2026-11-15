@@ -132,7 +132,7 @@ export function LandingPage() {
               to="/register"
               className="group relative inline-flex items-center gap-2 rounded-xl bg-violet-500 px-8 py-3.5 text-base font-bold text-white transition-all duration-300 hover:bg-violet-600 shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] hover:-translate-y-0.5"
             >
-              Criar conta grátis
+              Inscreva-se
               <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
@@ -150,8 +150,8 @@ export function LandingPage() {
               <div className="mt-1 text-sm text-text-muted">Brand safety pré-publicação</div>
             </div>
             <div>
-              <div className="text-3xl sm:text-4xl font-black font-mono text-gradient">Preço fechado</div>
-              <div className="mt-1 text-sm text-text-muted">Sem surpresas no investimento</div>
+              <div className="text-3xl sm:text-4xl font-black font-mono text-gradient">&lt; 5 min</div>
+              <div className="mt-1 text-sm text-text-muted">Do briefing à campanha ativa</div>
             </div>
             <div>
               <div className="text-3xl sm:text-4xl font-black font-mono text-gradient">Pool curado</div>
