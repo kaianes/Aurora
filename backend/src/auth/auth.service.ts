@@ -511,10 +511,7 @@ export class AuthService {
         throw new UnauthorizedException();
       }
 
-      const memberships = await this.membershipRepo.find({
-        where: { userId: user.id },
-        relations: { account: { workspace: true } },
-      });
+      const memberships = await this.findMembershipsForUser(user.id);
 
       return this.issueTokens(user, memberships);
     } catch {
