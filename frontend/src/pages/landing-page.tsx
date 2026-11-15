@@ -91,8 +91,9 @@ export function LandingPage() {
 
   return (
     <div ref={revealRef}>
+      <div className="flex min-h-[calc(100svh_-_4rem)] flex-col">
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
+      <section className="relative flex flex-1 flex-col justify-center overflow-hidden">
         <div className="absolute inset-0 aurora-glow-strong" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-violet-500/8 blur-[100px] animate-pulse-glow" />
         <div className="absolute top-20 left-1/4 w-[300px] h-[300px] rounded-full bg-cyan-500/5 blur-[80px] animate-pulse-glow" style={{ animationDelay: '2s' }} />
@@ -106,8 +107,8 @@ export function LandingPage() {
           </div>
         </div>
 
-        <div className="relative z-10 mx-auto max-w-4xl px-4 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
-          <div data-reveal className="inline-flex items-center gap-2 rounded-full border border-border-accent bg-primary-muted px-4 py-1.5 text-sm font-medium text-violet-400 mb-8">
+        <div className="relative z-10 mx-auto w-full max-w-4xl px-4 py-[clamp(0.5rem,2vh,2rem)] text-center">
+          <div data-reveal className="inline-flex items-center gap-2 rounded-full border border-border-accent bg-primary-muted px-4 py-1.5 text-sm font-medium text-violet-400 mb-4">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-400" />
@@ -115,13 +116,13 @@ export function LandingPage() {
             Influência com tecnologia e inteligência de dados
           </div>
 
-          <h1 data-reveal className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.1] mb-6 delay-100">
+          <h1 data-reveal className="text-4xl sm:text-5xl md:text-[clamp(3rem,8vh,3.75rem)] font-black tracking-tight leading-[1.1] mb-4 delay-100">
             Creator economy
             <br />
             <span className="text-gradient">com lógica de mídia.</span>
           </h1>
 
-          <p data-reveal className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-10 leading-relaxed delay-200">
+          <p data-reveal className="text-lg sm:text-xl text-text-secondary max-w-2xl mx-auto mb-6 leading-relaxed delay-200">
             A Aurora conecta marcas, agências e criadores em uma única plataforma.
             Campanhas com brand safety integrado e pagamento justo — do briefing ao resultado.
           </p>
@@ -141,8 +142,8 @@ export function LandingPage() {
       </section>
 
       {/* ── SOCIAL PROOF BAR ── */}
-      <section className="relative border-b border-border-default bg-aurora-950/50">
-        <div className="mx-auto max-w-5xl px-4 py-12">
+      <section className="relative shrink-0 border-b border-border-default bg-aurora-950/50">
+        <div className="mx-auto max-w-5xl px-4 py-4 sm:py-5">
           <div data-reveal className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-3xl sm:text-4xl font-black font-mono text-gradient">100%</div>
@@ -159,6 +160,7 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+      </div>
 
       {/* ── FEATURES ── */}
       <section className="relative py-20 sm:py-28">
