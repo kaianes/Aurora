@@ -97,7 +97,16 @@ export function LandingPage() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-violet-500/8 blur-[100px] animate-pulse-glow" />
         <div className="absolute top-20 left-1/4 w-[300px] h-[300px] rounded-full bg-cyan-500/5 blur-[80px] animate-pulse-glow" style={{ animationDelay: '2s' }} />
 
-        <div className="relative mx-auto max-w-4xl px-4 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 z-0 mx-auto hidden max-w-7xl -translate-y-1/2 justify-between px-4 lg:flex">
+          <div className="-ml-28 w-[44vw] max-w-[500px] animate-float motion-reduce:animate-none">
+            <img src="/images/creators/creator-1.png" alt="" aria-hidden="true" className="w-full object-contain" style={{ transform: 'scale(2.4)' }} />
+          </div>
+          <div className="-mr-28 w-[44vw] max-w-[500px] animate-float motion-reduce:animate-none" style={{ animationDelay: '1.5s' }}>
+            <img src="/images/creators/creator-2.png" alt="" aria-hidden="true" className="w-full object-contain" style={{ transform: 'scale(2)' }} />
+          </div>
+        </div>
+
+        <div className="relative z-10 mx-auto max-w-4xl px-4 pt-24 pb-20 sm:pt-32 sm:pb-28 text-center">
           <div data-reveal className="inline-flex items-center gap-2 rounded-full border border-border-accent bg-primary-muted px-4 py-1.5 text-sm font-medium text-violet-400 mb-8">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75" />
@@ -132,7 +141,7 @@ export function LandingPage() {
       </section>
 
       {/* ── SOCIAL PROOF BAR ── */}
-      <section className="relative border-y border-border-default bg-aurora-950/50">
+      <section className="relative border-b border-border-default bg-aurora-950/50">
         <div className="mx-auto max-w-5xl px-4 py-12">
           <div data-reveal className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
             <div>
