@@ -296,10 +296,11 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM briefing_qa_message WHERE id IN ('${D.qaMsg1}','${D.qaMsg2}','${D.qaMsg3}','${D.qaMsg4}','${D.qaMsg5}')`);
   await dataSource.query(`DELETE FROM briefing_qa_thread WHERE id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
 
-  // Safety — delete queue items and triggers before checks (FK order)
-  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE id IN ('${D.queueNaty}','${D.queueNovaPedro}')`);
-  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN ('${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}')`);
-  await dataSource.query(`DELETE FROM safety_check WHERE id IN ('${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}')`);
+  // Safety — delete dependents by safety_check_id to cover any system-created rows
+  const allCheckIds = `'${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}'`;
+  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE safety_check_id IN (${allCheckIds})`);
+  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN (${allCheckIds})`);
+  await dataSource.query(`DELETE FROM safety_check WHERE id IN (${allCheckIds})`);
 
   // Payouts
   await dataSource.query(`DELETE FROM payout_obligation WHERE id IN ('${D.payoutQ4Duda}','${D.payoutQ4Naty}','${D.payoutQ4Marina}','${D.payoutBFPedro}','${D.payoutBFBruno}','${D.payoutBFThiago}','${D.payoutActiveDuda}','${D.payoutActiveCarolina}')`);
