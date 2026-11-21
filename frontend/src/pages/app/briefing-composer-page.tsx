@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { briefingApi } from '@/lib/api-client';
@@ -55,6 +55,7 @@ function isoToDatetimeLocal(iso: string | null | undefined): string {
  * outcome (US-18b) and the Q&A thread (US-31).
  */
 export function BriefingComposerPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { currentRole } = useAuth();
@@ -180,6 +181,7 @@ export function BriefingComposerPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>

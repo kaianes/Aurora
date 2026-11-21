@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { campaignApi } from '@/lib/api-client';
@@ -41,6 +41,7 @@ const SPEND_SOURCE_LABEL: Record<string, string> = {
  * docs/architecture/e7-analytics-reporting.md section 5.3.
  */
 export function CampaignReportPage() {
+  const navigate = useNavigate();
   const { id: campaignId } = useParams<{ id: string }>();
   const [reportId, setReportId] = useState<string | null>(null);
 
@@ -71,6 +72,7 @@ export function CampaignReportPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${campaignId}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <CardTitle>Relatorio da campanha</CardTitle>
         <CardDescription>{campaign?.name ?? 'Campanha'}</CardDescription>

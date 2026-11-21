@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { contentSubmissionApi } from '@/lib/api-client';
@@ -166,6 +166,7 @@ function SubmissionRow({ item, canDecide }: { item: BrandContentSubmissionVersio
  * stated reason still visible, unambiguously attributed (US-33 scenario 2).
  */
 export function ContentSubmissionsPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { currentRole } = useAuth();
   const canDecide = currentRole ? canDecideContentSubmission(currentRole) : false;
@@ -220,6 +221,7 @@ export function ContentSubmissionsPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div>

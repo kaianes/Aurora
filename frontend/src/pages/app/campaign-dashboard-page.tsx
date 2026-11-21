@@ -1,7 +1,8 @@
-import { useParams } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { campaignApi } from '@/lib/api-client';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -92,6 +93,7 @@ function CreatorRow({ creator }: { creator: DashboardCreatorEntry }) {
  * (NFR-02). Per docs/architecture/e7-analytics-reporting.md section 5.2.
  */
 export function CampaignDashboardPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const { data: campaign } = useQuery({
@@ -121,6 +123,7 @@ export function CampaignDashboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <CardTitle>Dashboard de desempenho</CardTitle>
         <CardDescription>{campaign?.name ?? 'Campanha'}</CardDescription>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { isAxiosError } from 'axios';
@@ -28,6 +28,7 @@ interface ExclusionForm {
  * architecture (section 2.2), so no reconciliation UI is needed between them.
  */
 export function ExclusionsPage() {
+  const navigate = useNavigate();
   const { id: campaignId } = useParams<{ id?: string }>();
   const scope = campaignId ? 'campaign' : 'brand';
   const queryClient = useQueryClient();
@@ -86,6 +87,8 @@ export function ExclusionsPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex justify-end">{campaignId && <Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${campaignId}`)}>Voltar para a campanha</Button>}</div>
+
       <CardHeader>
         <CardTitle>{scope === 'brand' ? 'Lista de exclusão da marca' : 'Lista de exclusão da campanha'}</CardTitle>
         <CardDescription>

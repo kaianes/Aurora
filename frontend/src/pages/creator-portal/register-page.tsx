@@ -74,7 +74,7 @@ export function RegisterPage() {
             Enviamos um link de verificação para o seu email. Depois de confirmar, conecte suas
             redes sociais para comecar a receber oportunidades.
           </p>
-          <Link to="/creator-portal/login" className="mt-4 inline-block text-sm text-violet-400 hover:underline">
+          <Link to="/login" className="mt-4 inline-block text-sm text-violet-400 hover:underline">
             Ir para o login
           </Link>
         </Card>
@@ -137,7 +137,7 @@ export function RegisterPage() {
 
         <p className="mt-4 text-center text-sm text-text-secondary">
           Já tem uma conta?{' '}
-          <Link to="/creator-portal/login" className="text-violet-400 hover:underline">
+          <Link to="/login" className="text-violet-400 hover:underline">
             Entrar
           </Link>
         </p>
