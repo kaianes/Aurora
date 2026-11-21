@@ -106,56 +106,6 @@ const AGENCY_ACTIONS = [
   },
 ];
 
-const CREATOR_ACTIONS = [
-  {
-    color: '#3DDC97',
-    icon: '◈',
-    title: 'Ver oportunidades',
-    outcome: 'Campanhas que combinam com o seu perfil e público — aceite as que fazem sentido para você.',
-    cta: 'Ver oportunidades',
-    href: '/creator-portal/opportunities',
-  },
-  {
-    color: '#7F77DD',
-    icon: '✦',
-    title: 'Ler o briefing',
-    outcome: 'Entenda exatamente o que a marca espera — formato, tom, hashtags obrigatórias.',
-    cta: 'Ver briefing',
-    href: '/creator-portal/briefing',
-  },
-  {
-    color: '#F0507A',
-    icon: '◎',
-    title: 'Tirar dúvidas com AI',
-    outcome: 'Pergunte qualquer coisa sobre o brief — a AI responde na hora com base no que a marca escreveu.',
-    cta: 'Ir para Q&A',
-    href: '/creator-portal/briefing/qa',
-  },
-  {
-    color: '#E8823C',
-    icon: '▲',
-    title: 'Enviar conteúdo',
-    outcome: 'Submeta seu rascunho para aprovação — a Aurora checa brand safety antes de te responder.',
-    cta: 'Enviar rascunho',
-    href: '/creator-portal/drafts/new',
-  },
-  {
-    color: '#7F77DD',
-    icon: '⬡',
-    title: 'Meus pagamentos',
-    outcome: 'Veja quanto você vai receber, quando, e o breakdown de cada campanha — sem surpresas.',
-    cta: 'Ver pagamentos',
-    href: '/creator-portal/payments',
-  },
-  {
-    color: '#F0507A',
-    icon: '◈',
-    title: 'Meu media kit',
-    outcome: 'Perfil gerado automaticamente com suas métricas reais — pronto para compartilhar.',
-    cta: 'Ver media kit',
-    href: '/creator-portal/media-kit',
-  },
-];
 
 function getFirstName(fullName: string): string {
   return fullName.split(' ')[0];
@@ -197,7 +147,7 @@ function ActionCard({ color, icon, title, outcome, cta, href }: ActionCardProps)
 
 export function HomePage() {
   const { user, workspace } = useAuth();
-  const workspaceType = workspace?.workspace_type ?? 'brand';
+  const workspaceType = workspace?.workspace.type ?? 'brand';
 
   const { data: campaigns } = useQuery({
     queryKey: ['campaigns', 'recent'],
