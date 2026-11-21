@@ -88,6 +88,71 @@ export class BriefingQaService {
     };
   }
 
+  // ---- Creator-portal AI Q&A side (US-10.1) ----
+
+  // Resolves the briefing and thread for the AI streaming endpoint, validates
+  // access, persists the creator's question, and returns the data needed to
+  // build the AI prompt. Called by the SSE endpoint in the controller before
+  // the stream is opened.
+  async prepareAiQuestion(
+    briefingId: string,
+    threadId: string,
+    creatorId: string,
+    questionBody: string,
+  ): Promise<{ questionMessage: BriefingQaMessage; briefing: Briefing; campaignId: string }> {
+    // Resolve the briefing and check that the creator has an active opportunity.
+    const briefing = await this.briefingRepo.findOne({ where: { id: briefingId } });
+    if (!briefing || briefing.status !== BriefingStatus.ISSUED) {
+      throw new NotFoundException(BRIEFING_NOT_AVAILABLE_ERROR);
+    }
+
+    const opportunity = await this.opportunityRepo.findOne({
+      where: { campaignId: briefing.campaignId, creatorId, status: OpportunityStatus.ACCEPTED },
+    });
+    if (!opportunity) {
+      throw new NotFoundException(BRIEFING_NOT_AVAILABLE_ERROR);
+    }
+
+    const thread = await this.threadRepo.findOne({
+      where: { id: threadId, briefingId, creatorId },
+    });
+    if (!thread) {
+      throw new NotFoundException({
+        error: { code: 'THREAD_NOT_FOUND', message: 'Thread de perguntas nao encontrada.', details: {} },
+      });
+    }
+
+    const questionMessage = await this.messageRepo.save(
+      this.messageRepo.create({
+        threadId: thread.id,
+        campaignId: briefing.campaignId,
+        senderType: QaSenderType.CREATOR,
+        senderCreatorId: creatorId,
+        body: questionBody,
+      }),
+    );
+
+    return { questionMessage, briefing, campaignId: briefing.campaignId };
+  }
+
+  // Persists the AI answer message after the stream completes.
+  async persistAiAnswer(
+    threadId: string,
+    campaignId: string,
+    answerBody: string,
+  ): Promise<BriefingQaMessage> {
+    return this.messageRepo.save(
+      this.messageRepo.create({
+        threadId,
+        campaignId,
+        senderType: QaSenderType.SYSTEM,
+        senderUserId: null,
+        senderCreatorId: null,
+        body: answerBody,
+      }),
+    );
+  }
+
   async askQuestion(campaignId: string, creatorId: string, question: string, actor: ActorContext) {
     const briefing = await this.resolveBriefingForCreatorOrFail(campaignId, creatorId);
 
@@ -247,10 +312,13 @@ export class BriefingQaService {
   }
 
   // No "answered" flag is stored (ADR-0028): computed from whether the
-  // thread's last message has sender_type = creator.
+  // thread's last message has sender_type = creator. E10 adds 'system' as
+  // a third sender type; system messages count as answered (the creator's
+  // question received an AI response).
   private computeAnswered(messages: BriefingQaMessage[]): boolean {
     if (messages.length === 0) return false;
-    return messages[messages.length - 1].senderType === QaSenderType.BRAND;
+    const lastType = messages[messages.length - 1].senderType;
+    return lastType === QaSenderType.BRAND || lastType === QaSenderType.SYSTEM;
   }
 
   private formatMessage(message: BriefingQaMessage) {

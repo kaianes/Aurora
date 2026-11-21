@@ -1,9 +1,24 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { RealContentSafetyAdapter } from './content-safety.adapter';
 import { SafetyRuleType } from '../../database/entities';
 
+// Minimal mocks for InferenceService and ConfigService. The tier-1
+// deterministic tests below never reach tier-2 Claude calls; the one test
+// that escalates to tier-2 does so but the tier-2 path is fully covered by
+// the separate brand-safety processor spec. We pass mocks so that the
+// constructor can be called; tier-2 is triggered only on ambiguous signals.
+const mockInferenceService = {
+  completeText: vi.fn().mockResolvedValue(JSON.stringify({ outcome: 'pass' })),
+};
+const mockConfigService = {
+  get: vi.fn().mockReturnValue(undefined),
+};
+
 describe('RealContentSafetyAdapter - US-16', () => {
-  const adapter = new RealContentSafetyAdapter();
+  const adapter = new RealContentSafetyAdapter(
+    mockInferenceService as any,
+    mockConfigService as any,
+  );
 
   // US-16 scenario 1: a compliant submission passes.
   it('passes a submission with no rule violations in any channel', async () => {

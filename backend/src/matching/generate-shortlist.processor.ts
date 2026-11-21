@@ -69,6 +69,9 @@ export class GenerateShortlistProcessor {
           excludedCreatorIds,
           alreadyOnShortlistCreatorIds: [],
           maxCandidates: 150,
+          // E10: pass campaign context for fit reason prompt generation.
+          campaignName: campaign.name,
+          campaignBriefSummary: campaign.message,
         }),
         SHORTLIST_TIMEOUT_MS,
       );
@@ -96,6 +99,9 @@ export class GenerateShortlistProcessor {
           fitScore: e.fitScore.toString(),
           matchedAttributes: e.matchedAttributes,
           origin: ShortlistEntryOrigin.SYSTEM_RANKED,
+          // E10: fit reason fields (section 7.1 of the E10 architecture doc).
+          fitReason: e.fitReason,
+          fitReasonUnavailable: e.fitReasonUnavailable,
         }),
       );
       await this.entryRepo.save(entries);
@@ -164,6 +170,8 @@ export class GenerateShortlistProcessor {
           excludedCreatorIds,
           alreadyOnShortlistCreatorIds,
           maxCandidates: request.requestedCount,
+          campaignName: campaign.name,
+          campaignBriefSummary: campaign.message,
         }),
         SHORTLIST_TIMEOUT_MS,
       );
@@ -192,6 +200,8 @@ export class GenerateShortlistProcessor {
           fitScore: e.fitScore.toString(),
           matchedAttributes: e.matchedAttributes,
           origin: ShortlistEntryOrigin.SYSTEM_RANKED,
+          fitReason: e.fitReason,
+          fitReasonUnavailable: e.fitReasonUnavailable,
         }),
       );
       await this.entryRepo.save(newEntries);

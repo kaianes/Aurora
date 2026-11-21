@@ -49,6 +49,16 @@ export class CampaignShortlistEntry {
   @Column({ type: 'jsonb', nullable: true, name: 'matched_attributes' })
   matchedAttributes: string[] | null;
 
+  // E10 additive extension (section 3.2 of the E10 architecture doc).
+  // Null for agency-added entries and for entries where the Claude call failed.
+  @Column({ type: 'text', nullable: true, name: 'fit_reason' })
+  fitReason: string | null;
+
+  // True when a Claude call was attempted and failed; false when no call was
+  // attempted (agency-added) or when the call succeeded (section 3.2).
+  @Column({ type: 'boolean', default: false, name: 'fit_reason_unavailable' })
+  fitReasonUnavailable: boolean;
+
   @Column({ type: 'text', enum: ShortlistEntryOrigin, name: 'origin' })
   origin: ShortlistEntryOrigin;
 

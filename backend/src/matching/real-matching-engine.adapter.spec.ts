@@ -19,11 +19,21 @@ describe('RealMatchingEngineAdapter - US-11', () => {
   let adapter: RealMatchingEngineAdapter;
   let creatorRepo: any;
 
+  // Minimal mocks for the two additional constructor deps added in US-10.2.
+  // All test cases here exercise tier-1 scoring; fit-reason generation is
+  // isolated behind ANTHROPIC_FIT_REASON_ENABLED and not under test here.
+  const mockInferenceService = { completeText: vi.fn() };
+  const mockConfigService = { get: vi.fn().mockReturnValue(undefined) };
+
   beforeEach(() => {
     creatorRepo = {
       createQueryBuilder: vi.fn(),
     };
-    adapter = new RealMatchingEngineAdapter(creatorRepo);
+    adapter = new RealMatchingEngineAdapter(
+      creatorRepo,
+      mockInferenceService as any,
+      mockConfigService as any,
+    );
   });
 
   function mockCandidates(rows: any[]) {

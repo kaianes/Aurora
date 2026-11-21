@@ -23,6 +23,7 @@ import { ContentWorkflowModule } from './content-workflow/content-workflow.modul
 import { PaymentsModule } from './payments/payments.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { CreatorNetworkModule } from './creator-network/creator-network.module';
+import { InferenceModule } from './inference/inference.module';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
@@ -186,6 +187,7 @@ import {
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
+    InferenceModule,
     CommonModule,
     TenantContextModule,
     AuditModule,

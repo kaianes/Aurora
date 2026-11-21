@@ -120,6 +120,8 @@ export class ReviewQueueService {
         decision_reason: item.decisionReason,
         decided_by_user_id: item.decidedByUserId,
         decided_at: item.decidedAt?.toISOString() || null,
+        // E10: ai_safety_reason from tier-2 Claude evaluation (section 4.1).
+        ai_safety_reason: item.aiSafetyReason ?? null,
         created_at: item.createdAt.toISOString(),
         tier_reached: check?.tierReached || null,
         submission: submission

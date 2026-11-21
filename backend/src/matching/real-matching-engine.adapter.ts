@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -16,6 +17,7 @@ import {
 } from '../campaign/matching-engine.adapter';
 import { AudienceTargeting } from '../database/entities/campaign.entity';
 import { MATCHING_WEIGHTS } from './matching-config';
+import { InferenceService, InferenceUnavailableError } from '../inference/inference.service';
 
 const PRICE_PER_CREATOR_PER_FORMAT = 350; // BRL, same pilot rate as E2's stub
 
@@ -27,9 +29,13 @@ const PRICE_PER_CREATOR_PER_FORMAT = 350; // BRL, same pilot rate as E2's stub
 // moves from a heuristic to a real query against the creator table.
 @Injectable()
 export class RealMatchingEngineAdapter implements MatchingEngineAdapter {
+  private readonly logger = new Logger(RealMatchingEngineAdapter.name);
+
   constructor(
     @InjectRepository(Creator)
     private creatorRepo: Repository<Creator>,
+    private inferenceService: InferenceService,
+    private configService: ConfigService,
   ) {}
 
   async estimatePool(input: EstimatePoolInput): Promise<EstimatePoolResult> {
@@ -114,16 +120,170 @@ export class RealMatchingEngineAdapter implements MatchingEngineAdapter {
 
     scored.sort((a, b) => b.fitScore - a.fitScore);
 
-    const entries: GenerateShortlistEntry[] = scored
-      .slice(0, input.maxCandidates)
-      .map((s, index) => ({
-        creatorId: s.creator.id,
-        rank: index + 1,
-        fitScore: Math.round(s.fitScore * 10000) / 10000,
-        matchedAttributes: s.matchedAttributes,
-      }));
+    const topScored = scored.slice(0, input.maxCandidates);
+
+    // Build entries without fit reasons first so scoring is complete before
+    // any Claude call is attempted.
+    const baseEntries = topScored.map((s, index) => ({
+      creator: s.creator,
+      fitScore: Math.round(s.fitScore * 10000) / 10000,
+      matchedAttributes: s.matchedAttributes,
+      rank: index + 1,
+    }));
+
+    // Generate fit reasons in parallel batches (section 8 of the E10
+    // architecture doc). Agency-added entries skip this entirely; this adapter
+    // only produces system_ranked entries, so all entries are eligible.
+    const fitReasons = await this.generateFitReasons(baseEntries, input);
+
+    const entries: GenerateShortlistEntry[] = baseEntries.map((base, i) => ({
+      creatorId: base.creator.id,
+      rank: base.rank,
+      fitScore: base.fitScore,
+      matchedAttributes: base.matchedAttributes,
+      fitReason: fitReasons[i].fitReason,
+      fitReasonUnavailable: fitReasons[i].fitReasonUnavailable,
+    }));
 
     return { status: 'ready', entries };
+  }
+
+  // ---- Fit reason generation (E10, section 8) ----
+
+  private async generateFitReasons(
+    entries: Array<{
+      creator: Creator;
+      fitScore: number;
+      matchedAttributes: string[];
+      rank: number;
+    }>,
+    input: GenerateShortlistInput,
+  ): Promise<Array<{ fitReason: string | null; fitReasonUnavailable: boolean }>> {
+    const model = this.configService.get<string>('ANTHROPIC_MODEL_FIT_REASON', 'claude-sonnet-4-5');
+    const batchSize = parseInt(
+      this.configService.get<string>('AI_FIT_REASON_BATCH_SIZE', '10'),
+      10,
+    );
+    const timeoutMs = parseInt(
+      this.configService.get<string>('AI_FIT_REASON_TIMEOUT_MS', '10000'),
+      10,
+    );
+
+    // Build a flat results array aligned with the input entries array.
+    const results: Array<{ fitReason: string | null; fitReasonUnavailable: boolean }> =
+      new Array(entries.length).fill(null).map(() => ({
+        fitReason: null,
+        fitReasonUnavailable: false,
+      }));
+
+    // Process in sequential batches of batchSize; within each batch, all
+    // calls run concurrently via Promise.allSettled (NFR-01, section 8).
+    for (let batchStart = 0; batchStart < entries.length; batchStart += batchSize) {
+      const batch = entries.slice(batchStart, batchStart + batchSize);
+
+      const batchPromises = batch.map((entry, batchIdx) => {
+        const globalIdx = batchStart + batchIdx;
+        return this.generateOneFitReason(entry, input, model, timeoutMs)
+          .then((reason) => {
+            results[globalIdx] = { fitReason: reason, fitReasonUnavailable: false };
+          })
+          .catch((err) => {
+            const isExpected = err instanceof InferenceUnavailableError;
+            if (!isExpected) {
+              this.logger.warn(
+                `Unexpected error generating fit reason for creator ${entry.creator.id}: ${(err as Error).message}`,
+              );
+            }
+            results[globalIdx] = { fitReason: null, fitReasonUnavailable: true };
+          });
+      });
+
+      await Promise.allSettled(batchPromises);
+    }
+
+    return results;
+  }
+
+  private async generateOneFitReason(
+    entry: { creator: Creator; fitScore: number; matchedAttributes: string[] },
+    input: GenerateShortlistInput,
+    model: string,
+    timeoutMs: number,
+  ): Promise<string> {
+    const campaignName = input.campaignName || 'campanha';
+    const campaignBrief = input.campaignBriefSummary || '(nao informado)';
+    const audienceDesc = this.renderAudienceTargeting(input.audienceTargeting);
+    const deliverableList =
+      input.deliverableFormats && input.deliverableFormats.length > 0
+        ? input.deliverableFormats.join(', ')
+        : '(nao informado)';
+
+    const matchedList =
+      entry.matchedAttributes.length > 0
+        ? entry.matchedAttributes
+            .map((a) => {
+              const [dim, val] = a.split(':');
+              return `${dim} de ${val} (compativel com '${a}')`;
+            })
+            .join(', ')
+        : 'nenhum atributo especifico identificado';
+
+    const system = `Voce e um assistente da plataforma Aurora. Sua tarefa e gerar uma justificativa de compatibilidade entre um criador de conteudo e uma campanha especifica de marketing.
+
+Instrucoes:
+- Responda SEMPRE em Portugues Brasileiro.
+- Escreva exatamente 1 ou 2 frases.
+- Mencione pelo menos um sinal concreto e quantitativo (taxa de engajamento, tamanho do publico, nicho especifico, pontuacao de autenticidade).
+- Relacione diretamente o perfil do criador ao objetivo desta campanha em especifico.
+- Se a compatibilidade for parcial, seja honesto sobre isso sem ser negativo.
+- Nao repita apenas o nome do criador ou o titulo da campanha sem contextualizar a relacao entre eles.`;
+
+    const user = `Campanha: ${campaignName}
+Objetivo da campanha: ${campaignBrief}
+Publico-alvo: ${audienceDesc}
+Formatos de entrega solicitados: ${deliverableList}
+
+Criador: ${this.sanitizePromptField(entry.creator.displayName)}
+Nicho de conteudo: ${this.sanitizePromptField(entry.creator.contentNiche || '(nao informado)')}
+Tamanho do publico: ${entry.creator.audienceSize ?? 0} seguidores
+Taxa de engajamento: ${entry.creator.engagementRate ?? '0'}%
+Pontuacao de autenticidade: ${entry.creator.authenticityScore ?? '0'}/100
+Atributos da campanha satisfeitos por este criador: ${matchedList}
+
+Gere a justificativa de compatibilidade para este criador nesta campanha.`;
+
+    return this.inferenceService.completeText({
+      model,
+      maxTokens: 128,
+      system,
+      user,
+      correlationId: `fit-reason-${entry.creator.id}`,
+      timeoutMs,
+    });
+  }
+
+  // Renders AudienceTargeting to a human-readable Portuguese string for the
+  // prompt (never raw JSON -- section 5.2 of the E10 architecture doc).
+  private renderAudienceTargeting(targeting: AudienceTargeting | null): string {
+    if (!targeting) return '(nao informado)';
+    const parts: string[] = [];
+    if (targeting.gender) parts.push(targeting.gender);
+    if (targeting.age_range && targeting.age_range.length === 2) {
+      parts.push(`de ${targeting.age_range[0]} a ${targeting.age_range[1]} anos`);
+    }
+    if (targeting.interests && targeting.interests.length > 0) {
+      parts.push(`interessados em ${targeting.interests.join(', ')}`);
+    }
+    if (targeting.geography && targeting.geography.length > 0) {
+      parts.push(`localizados em ${targeting.geography.join(', ')}`);
+    }
+    return parts.length > 0 ? parts.join(', ') : '(nao informado)';
+  }
+
+  // Strips bare backticks and angle brackets from creator-submitted fields
+  // before including them in prompts (section 5 of the E10 architecture doc).
+  private sanitizePromptField(value: string): string {
+    return value.replace(/[`<>]/g, '');
   }
 
   // ---- Eligibility and scoring helpers ----
