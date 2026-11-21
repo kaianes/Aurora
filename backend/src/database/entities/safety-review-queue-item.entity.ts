@@ -52,6 +52,12 @@ export class SafetyReviewQueueItem {
   @Column({ type: 'text', nullable: true, name: 'decision_reason' })
   decisionReason: string | null;
 
+  // E10 additive extension (section 3.3 of the E10 architecture doc).
+  // Populated only for tier-2 flagged items (reason_category = 'rule_violation').
+  // Null for check_unavailable items and for tier-1 flagged items.
+  @Column({ type: 'text', nullable: true, name: 'ai_safety_reason' })
+  aiSafetyReason: string | null;
+
   @Column({ type: 'uuid', nullable: true, name: 'decided_by_user_id' })
   decidedByUserId: string | null;
 

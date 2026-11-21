@@ -654,6 +654,9 @@ export class ShortlistService {
       rank: entry.rank,
       fit_score: entry.fitScore !== null ? Number(entry.fitScore) : null,
       matched_attributes: entry.matchedAttributes || [],
+      // E10: fit reason fields (section 4.1 of the E10 architecture doc).
+      fit_reason: entry.fitReason ?? null,
+      fit_reason_unavailable: entry.fitReasonUnavailable ?? false,
       origin: entry.origin,
       decision: entry.decision,
       included: entry.included,

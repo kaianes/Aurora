@@ -105,6 +105,39 @@ export class RunSafetyCheckProcessor {
         return;
       }
 
+      // E10: check_unavailable means tier-2 (Claude) was unavailable.
+      // Transition the check to check_unavailable and queue for manual review
+      // (section 6.3 of the E10 architecture doc).
+      if (result.outcome === 'check_unavailable') {
+        check.status = SafetyCheckStatus.CHECK_UNAVAILABLE;
+        check.tierReached = SafetyCheckTier.TIER2;
+        check.resolvedAt = new Date();
+        await this.checkRepo.save(check);
+
+        await this.reviewRepo.save(
+          this.reviewRepo.create({
+            safetyCheckId: check.id,
+            campaignId: submission.campaignId,
+            contentSubmissionId,
+            reasonCategory: ReviewReasonCategory.CHECK_UNAVAILABLE,
+            status: ReviewItemStatus.PENDING,
+            aiSafetyReason: null,
+          }),
+        );
+
+        await this.auditService.log({
+          actorUserId: null,
+          targetAccountId: campaign.accountId,
+          action: 'safety_check.check_unavailable',
+          metadata: {
+            content_submission_id: contentSubmissionId,
+            safety_check_id: check.id,
+            tier_reached: 'tier2',
+          },
+        });
+        return;
+      }
+
       // flagged: status is a single aggregate over all triggers for this
       // check -- a pass in some channels never produces an overall pass if
       // any other channel triggered (US-16 scenario 2).
@@ -124,6 +157,13 @@ export class RunSafetyCheckProcessor {
       );
       await this.triggerRepo.save(triggerRows);
 
+      // E10: for tier-2 flagged items, include the AI safety reason from Claude
+      // (section 7.2 of the E10 architecture doc).
+      const aiSafetyReason =
+        result.tierReached === 'tier2' && 'aiSafetyReason' in result
+          ? result.aiSafetyReason
+          : null;
+
       await this.reviewRepo.save(
         this.reviewRepo.create({
           safetyCheckId: check.id,
@@ -131,6 +171,7 @@ export class RunSafetyCheckProcessor {
           contentSubmissionId,
           reasonCategory: ReviewReasonCategory.RULE_VIOLATION,
           status: ReviewItemStatus.PENDING,
+          aiSafetyReason,
         }),
       );
 

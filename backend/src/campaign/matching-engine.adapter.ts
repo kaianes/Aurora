@@ -33,6 +33,10 @@ export interface GenerateShortlistInput {
   alreadyOnShortlistCreatorIds: string[];
   // 150 ceiling per NFR-06.
   maxCandidates: number;
+  // E10 additive extension (section 7.3 of the E10 architecture doc):
+  // campaign context for fit reason prompt generation.
+  campaignName?: string;
+  campaignBriefSummary?: string | null;
 }
 
 export interface GenerateShortlistEntry {
@@ -40,6 +44,11 @@ export interface GenerateShortlistEntry {
   rank: number;
   fitScore: number;
   matchedAttributes: string[];
+  // E10 additive extension (section 7.1 of the E10 architecture doc).
+  // Null for agency-added entries and for entries where the Claude call failed.
+  fitReason: string | null;
+  // True when a Claude call was attempted and failed (section 7.1).
+  fitReasonUnavailable: boolean;
 }
 
 export interface GenerateShortlistReady {
@@ -113,7 +122,7 @@ export class StubMatchingEngineAdapter implements MatchingEngineAdapter {
   // RealMatchingEngineAdapter (matching module) once E3 ships. Never called
   // in that configuration, kept deterministic and honest (no_viable_pool)
   // rather than fabricating a fake shortlist.
-  async generateShortlist(): Promise<GenerateShortlistResult> {
+  async generateShortlist(_input?: GenerateShortlistInput): Promise<GenerateShortlistResult> {
     return { status: 'no_viable_pool' };
   }
 

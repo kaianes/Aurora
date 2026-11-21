@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { shortlistApi } from '@/lib/api-client';
@@ -30,6 +30,7 @@ const DECISION_LABEL: Record<ShortlistEntryDecision, string> = {
 };
 
 export function ShortlistPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { currentRole } = useAuth();
@@ -122,6 +123,7 @@ export function ShortlistPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -264,6 +266,26 @@ export function ShortlistPage() {
                       </p>
                       {entry.matched_attributes.length > 0 && (
                         <p className="text-xs text-text-secondary mt-1">{entry.matched_attributes.join(', ')}</p>
+                      )}
+                      {/* E10 US-10.2: fit reason from Claude. Null for agency-added entries
+                          (origin=agency_added has fit_reason=null, fit_reason_unavailable=false
+                          by design -- no Claude call is made for those). */}
+                      {entry.fit_reason && (
+                        <p className="text-xs text-text-secondary mt-1.5 italic max-w-sm leading-snug">
+                          <span
+                            className="not-italic mr-1 font-semibold"
+                            style={{ color: 'var(--color-strategy-violet)' }}
+                            aria-hidden="true"
+                          >
+                            ✦
+                          </span>
+                          {entry.fit_reason}
+                        </p>
+                      )}
+                      {!entry.fit_reason && entry.fit_reason_unavailable && (
+                        <p className="text-xs text-text-muted mt-1.5 italic">
+                          Justificativa nao disponivel.
+                        </p>
                       )}
                     </div>
                   </div>

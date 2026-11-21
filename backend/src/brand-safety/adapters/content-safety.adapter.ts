@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   SafetyRuleType,
   SafetyRuleDefinition,
@@ -10,6 +11,7 @@ import {
   TIER1_PROHIBITED_TOPIC_FULL_OVERLAP,
   TIER2_PROHIBITED_TOPIC_PARTIAL_OVERLAP,
 } from '../brand-safety.config';
+import { InferenceService, InferenceUnavailableError } from '../../inference/inference.service';
 
 // Resolved per ADR-0019 (already merged brand + campaign-override rules),
 // the shape the run-safety-check job hands to the adapter.
@@ -39,7 +41,12 @@ export interface EvaluateTrigger {
 
 export type EvaluateResult =
   | { outcome: 'pass'; tierReached: 'tier1' | 'tier2' }
-  | { outcome: 'flagged'; tierReached: 'tier1' | 'tier2'; triggers: EvaluateTrigger[] };
+  | { outcome: 'flagged'; tierReached: 'tier1'; triggers: EvaluateTrigger[] }
+  | { outcome: 'flagged'; tierReached: 'tier2'; triggers: EvaluateTrigger[]; aiSafetyReason: string | null }
+  // E10: check_unavailable is returned when Claude fails during tier-2 (section
+  // 7.2 and 6.3 of the E10 architecture doc). The calling job maps this to
+  // safety_check.status = 'check_unavailable'.
+  | { outcome: 'check_unavailable'; tierReached: 'tier2' };
 
 // ADR-0021: the only interface the run-safety-check job depends on for
 // judgment. Never writes to any database table itself -- it returns a
@@ -67,6 +74,13 @@ interface RuleMatch {
 // a real model later is a change inside this class and its DI binding only.
 @Injectable()
 export class RealContentSafetyAdapter implements ContentSafetyAdapter {
+  private readonly logger = new Logger(RealContentSafetyAdapter.name);
+
+  constructor(
+    private inferenceService: InferenceService,
+    private configService: ConfigService,
+  ) {}
+
   async evaluate(input: EvaluateInput): Promise<EvaluateResult> {
     const channels: Array<{ name: EvaluateChannel; text: string | null }> = [
       { name: 'caption', text: input.channels.caption },
@@ -106,23 +120,154 @@ export class RealContentSafetyAdapter implements ContentSafetyAdapter {
       return { outcome: 'pass', tierReached: 'tier1' };
     }
 
-    // Tier-1 ambiguous: escalate to tier 2 (stub -- swappable for a real
-    // reasoning model later without touching this method's signature or any
-    // caller, per ADR-0021). The stub resolves ambiguity with a lower
-    // confidence bar than tier 1's exact-match requirement.
-    return this.resolveTier2(ambiguousTriggers);
+    // Tier-1 ambiguous: escalate to tier 2. E10 activates the real Claude
+    // implementation (US-10.3, section 5.3 of the E10 architecture doc).
+    return this.resolveTier2(ambiguousTriggers, input);
   }
 
-  private resolveTier2(ambiguousTriggers: EvaluateTrigger[]): EvaluateResult {
-    // Placeholder tier-2 judgment: every tier-1-ambiguous signal that
-    // reached here already cleared TIER2_PROHIBITED_TOPIC_PARTIAL_OVERLAP at
-    // matching time (see matchProhibitedTopic), so tier 2 confirms them as
-    // triggers. A real tier-2 model would re-reason over the full channel
-    // text instead of trusting the tier-1 signal verbatim.
-    if (ambiguousTriggers.length === 0) {
+  // Real Claude tier-2 implementation (E10, US-10.3). Replaces the stub.
+  // The calling evaluate() method already has the full input; we pass input
+  // and ambiguousTriggers so Claude can reason over the actual channel text
+  // against the actual ruleset (section 5.3 of the E10 architecture doc).
+  private async resolveTier2(
+    ambiguousTriggers: EvaluateTrigger[],
+    input: EvaluateInput,
+  ): Promise<EvaluateResult> {
+    // US-10.3 scenario 5: no ruleset means no tier-2 call needed.
+    if (input.effectiveRuleset.length === 0) {
       return { outcome: 'pass', tierReached: 'tier2' };
     }
-    return { outcome: 'flagged', tierReached: 'tier2', triggers: ambiguousTriggers };
+
+    const model = this.configService.get<string>('ANTHROPIC_MODEL_SAFETY', 'claude-sonnet-4-5');
+    const timeoutMs = parseInt(
+      this.configService.get<string>('AI_SAFETY_TIMEOUT_MS', '60000'),
+      10,
+    );
+
+    const rulesBlock = input.effectiveRuleset
+      .map((r) => {
+        const summary = this.renderRuleDefinition(r.ruleType, r.definition);
+        return `- Regra ${r.ruleId}: Tipo "${r.ruleType}", Definicao: ${summary}`;
+      })
+      .join('\n');
+
+    const channelsBlock = [
+      input.channels.caption
+        ? `Canal "legenda": "${this.sanitizeField(input.channels.caption)}"`
+        : null,
+      input.channels.onScreenText
+        ? `Canal "texto_na_tela": "${this.sanitizeField(input.channels.onScreenText)}"`
+        : null,
+      input.channels.audioTranscript
+        ? `Canal "transcript_de_audio": "${this.sanitizeField(input.channels.audioTranscript)}"`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const system = `Voce e um avaliador de seguranca de marca da plataforma Aurora. Sua tarefa e analisar semanticamente o conteudo submetido por um criador e determinar se ele viola as regras de seguranca de marca da campanha.
+
+Instrucoes:
+- Responda SEMPRE em Portugues Brasileiro.
+- Analise o conteudo semanticamente. Uma violacao pode estar presente mesmo que nenhuma palavra exata da regra apareca no texto.
+- Se houver violacao, identifique qual regra foi violada (cite o tipo e a definicao da regra) e em qual canal foi detectada (legenda, texto_na_tela ou transcript_de_audio).
+- Se nao houver violacao semantica, retorne verdict "pass".
+- Responda com um objeto JSON valido. Nada antes e nada depois do JSON.`;
+
+    const user = `Regras de seguranca de marca desta campanha:
+${rulesBlock}
+
+Conteudo submetido para avaliacao:
+${channelsBlock}
+
+Avalie se o conteudo viola alguma das regras acima semanticamente.
+Responda com JSON no seguinte formato exato, sem nenhum texto fora do JSON:
+{
+  "verdict": "pass",
+  "reason": null
+}
+ou
+{
+  "verdict": "flagged",
+  "reason": "Explicacao em Portugues Brasileiro de qual regra foi violada, em qual canal, e por que o conteudo semanticamente implica a violacao. Maximo 3 frases."
+}`;
+
+    let rawResponse: string;
+    try {
+      rawResponse = await this.inferenceService.completeText({
+        model,
+        maxTokens: 512,
+        system,
+        user,
+        correlationId: `safety-tier2-${input.campaignId}`,
+        timeoutMs,
+      });
+    } catch (error) {
+      if (error instanceof InferenceUnavailableError) {
+        return { outcome: 'check_unavailable', tierReached: 'tier2' };
+      }
+      return { outcome: 'check_unavailable', tierReached: 'tier2' };
+    }
+
+    // Parse Claude's JSON response. Invalid JSON is treated as check_unavailable
+    // (section 6.3 of the E10 architecture doc).
+    let parsed: { verdict: string; reason: string | null };
+    try {
+      // Strip any markdown code fences Claude might wrap around the JSON
+      const cleaned = rawResponse.trim().replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+      parsed = JSON.parse(cleaned);
+    } catch {
+      this.logger.warn(
+        `Tier-2 safety check for campaign ${input.campaignId}: Claude returned non-JSON response`,
+      );
+      return { outcome: 'check_unavailable', tierReached: 'tier2' };
+    }
+
+    if (parsed.verdict === 'pass') {
+      return { outcome: 'pass', tierReached: 'tier2' };
+    }
+
+    if (parsed.verdict === 'flagged') {
+      return {
+        outcome: 'flagged',
+        tierReached: 'tier2',
+        triggers: ambiguousTriggers,
+        aiSafetyReason: typeof parsed.reason === 'string' ? parsed.reason : null,
+      };
+    }
+
+    // Unexpected verdict value: treat as check_unavailable
+    this.logger.warn(
+      `Tier-2 safety check for campaign ${input.campaignId}: unexpected verdict "${parsed.verdict}"`,
+    );
+    return { outcome: 'check_unavailable', tierReached: 'tier2' };
+  }
+
+  // Renders a rule definition to a one-line human-readable string for the
+  // prompt (section 5.3 of the E10 architecture doc).
+  private renderRuleDefinition(ruleType: SafetyRuleType, definition: SafetyRuleDefinition): string {
+    switch (ruleType) {
+      case SafetyRuleType.PROHIBITED_TOPIC: {
+        const d = definition as ProhibitedTopicDefinition;
+        return d.topic;
+      }
+      case SafetyRuleType.RESTRICTED_LANGUAGE: {
+        const d = definition as RestrictedLanguageDefinition;
+        return `padrao: ${d.pattern}`;
+      }
+      case SafetyRuleType.COMPETITOR_MENTION: {
+        const d = definition as CompetitorMentionDefinition;
+        return `concorrente: ${d.competitor_name}`;
+      }
+      default:
+        return JSON.stringify(definition);
+    }
+  }
+
+  // Strips bare backticks and angle brackets from creator-submitted content
+  // before including in prompts (section 5 of the E10 architecture doc).
+  private sanitizeField(value: string): string {
+    return value.replace(/[`<>]/g, '');
   }
 
   private matchRule(rule: EffectiveRule, text: string): RuleMatch | null {

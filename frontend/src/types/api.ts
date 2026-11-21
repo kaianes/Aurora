@@ -484,6 +484,11 @@ export interface ShortlistEntry {
   rank: number | null;
   fit_score: number | null;
   matched_attributes: string[];
+  // E10 US-10.2: fit reason text from Claude. Null for agency-added entries or failed calls.
+  // fit_reason_unavailable = true means a Claude call was attempted and failed.
+  // See docs/architecture/e10-ai-creator-demo.md section 3.2 and 4.1.
+  fit_reason?: string | null;
+  fit_reason_unavailable?: boolean;
   origin: ShortlistEntryOrigin;
   decision: ShortlistEntryDecision;
   included: boolean;
@@ -849,9 +854,11 @@ export interface BriefingDistribution {
   pending: number;
 }
 
-// Briefing Q&A (US-31)
+// Briefing Q&A (US-31, extended by E10 US-10.1)
 
-export type QaSenderType = 'creator' | 'brand';
+// 'system' added by E10: AI-authored messages from Claude via the SSE streaming endpoint.
+// See docs/architecture/e10-ai-creator-demo.md section 3.4.
+export type QaSenderType = 'creator' | 'brand' | 'system';
 
 export interface QaMessage {
   sender_type: QaSenderType;

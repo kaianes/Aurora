@@ -12,6 +12,10 @@ import { Campaign } from './campaign.entity';
 export enum QaSenderType {
   CREATOR = 'creator',
   BRAND = 'brand',
+  // E10 additive extension (section 3.4 of the E10 architecture doc):
+  // AI-generated answers stored with sender_type = 'system'. senderUserId
+  // and senderCreatorId are both null for system messages.
+  SYSTEM = 'system',
 }
 
 // A message within a private briefing Q&A thread (ADR-0028). No "answered"

@@ -10,6 +10,9 @@ vi.mock('@/lib/api-client', () => ({
   creatorPortalApi: {
     getBriefingQa: vi.fn(),
     askBriefingQuestion: vi.fn(),
+    // E10 US-10.1: briefing fetch added to get briefingId for the SSE endpoint path.
+    // Tests that use thread_id=null will fall back to askBriefingQuestion automatically.
+    getBriefing: vi.fn().mockResolvedValue(null),
   },
   getCreatorToken: vi.fn(() => 'fake-creator-token'),
 }));
