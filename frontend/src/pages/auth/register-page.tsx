@@ -163,6 +163,12 @@ export function RegisterPage() {
             Entrar
           </Link>
         </p>
+        <p className="mt-2 text-center text-sm text-text-muted">
+          É creator?{' '}
+          <Link to="/creator-portal/register" className="text-violet-400 hover:underline">
+            Criar conta de creator
+          </Link>
+        </p>
       </Card>
     </div>
   );

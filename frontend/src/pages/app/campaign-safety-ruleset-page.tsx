@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {useParams, useNavigate} from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { safetyRulesetApi } from '@/lib/api-client';
@@ -49,6 +49,7 @@ function ruleDefinitionSummary(ruleType: SafetyRuleType, definition: SafetyRuleD
  * rather than the inherited default" is never left to the frontend to infer.
  */
 export function CampaignSafetyRulesetPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { currentRole } = useAuth();
@@ -133,6 +134,7 @@ export function CampaignSafetyRulesetPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <CardTitle>Regras de segurança da campanha</CardTitle>
         <CardDescription>

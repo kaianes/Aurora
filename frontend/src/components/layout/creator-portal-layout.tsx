@@ -7,7 +7,7 @@ export function CreatorPortalLayout() {
 
   const handleLogout = () => {
     clearCreatorToken();
-    navigate('/creator-portal/login');
+    navigate('/login');
   };
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -20,12 +20,13 @@ export function CreatorPortalLayout() {
       <header className="border-b border-border-default bg-aurora-950">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
-            <Link to="/creator-portal/opportunities" className="text-lg font-bold text-gradient-warm">
+            <Link to="/creator-portal/home" className="text-lg font-bold text-gradient-warm">
               Aurora
             </Link>
             <div className="flex items-center gap-5">
               {hasToken && (
                 <>
+                  <NavLink to="/creator-portal/home" className={linkClass}>Início</NavLink>
                   <NavLink to="/creator-portal/opportunities" className={linkClass}>Oportunidades</NavLink>
                   <NavLink to="/creator-portal/payments" className={linkClass}>Pagamentos</NavLink>
                   <NavLink to="/creator-portal/performance" className={linkClass}>Desempenho</NavLink>

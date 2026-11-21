@@ -69,6 +69,7 @@ export function InvoicePage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <CardTitle>Fatura</CardTitle>
         <CardDescription>{campaign?.name ?? 'Campanha'}</CardDescription>
@@ -136,9 +137,6 @@ export function InvoicePage() {
         </Card>
       )}
 
-      <Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>
-        Voltar para a campanha
-      </Button>
     </div>
   );
 }
