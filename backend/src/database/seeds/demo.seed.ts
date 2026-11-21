@@ -296,9 +296,9 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM briefing_qa_message WHERE id IN ('${D.qaMsg1}','${D.qaMsg2}','${D.qaMsg3}','${D.qaMsg4}','${D.qaMsg5}')`);
   await dataSource.query(`DELETE FROM briefing_qa_thread WHERE id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
 
-  // Safety – nova pedro
+  // Safety — delete queue items and triggers before checks (FK order)
   await dataSource.query(`DELETE FROM safety_review_queue_item WHERE id IN ('${D.queueNaty}','${D.queueNovaPedro}')`);
-  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE id = '${D.triggerNaty}'`);
+  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN ('${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}')`);
   await dataSource.query(`DELETE FROM safety_check WHERE id IN ('${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}')`);
 
   // Payouts
