@@ -358,7 +358,10 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
   await dataSource.query(`DELETE FROM account WHERE id IN ('${D.acctBella}','${D.acctNovatech}','${D.acctAgency}')`);
   await dataSource.query(`DELETE FROM workspace WHERE id IN ('${D.wsBella}','${D.wsNovatech}','${D.wsAgency}')`);
-  await dataSource.query(`DELETE FROM "user" WHERE id IN ('${D.userBella}','${D.userNovatech}','${D.userAgency}','${D.userDuda}','${D.userCarolina}')`);
+  // Unlink creator.user_id before deleting users (handles manually-created users with different UUIDs)
+  await dataSource.query(`UPDATE creator SET user_id = NULL WHERE user_id IN (SELECT id FROM "user" WHERE email IN ('demo-duda@aurora.internal','demo-carolina@aurora.internal'))`);
+  // Delete by email to cover any UUID mismatch from manually-created accounts
+  await dataSource.query(`DELETE FROM "user" WHERE email IN ('demo-bella@aurora.internal','demo-novatech@aurora.internal','demo-agencia@aurora.internal','demo-duda@aurora.internal','demo-carolina@aurora.internal')`);
 
   console.log('[seed:demo] Teardown concluido.');
 }
@@ -386,7 +389,7 @@ async function seed(): Promise<void> {
     ('${D.userAgency}',   'demo-agencia@aurora.internal',  '${DEMO_HASH}', 'Thais Drummond Demo',         true, now(), now()),
     ('${D.userDuda}',     'demo-duda@aurora.internal',     '${DEMO_HASH}', 'Duda Martins Demo',           true, now(), now()),
     ('${D.userCarolina}', 'demo-carolina@aurora.internal', '${DEMO_HASH}', 'Carolina Fit Demo',           true, now(), now())
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT DO NOTHING
   `);
 
   // ── 2. Workspaces ─────────────────────────────────────────────────────────
