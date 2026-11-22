@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { creatorPortalApi, getCreatorToken } from '@/lib/api-client';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -125,6 +126,7 @@ export function CreatorPerformancePage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
+      <Button variant="ghost" size="sm" onClick={() => navigate('/creator-portal/opportunities')}>← Voltar</Button>
       <CardHeader>
         <CardTitle>Seu desempenho</CardTitle>
         <CardDescription>Alcance e engajamento de cada conteúdo que voce publicou.</CardDescription>

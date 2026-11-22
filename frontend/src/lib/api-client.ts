@@ -674,6 +674,17 @@ export function clearCreatorToken() {
   localStorage.removeItem(CREATOR_TOKEN_KEY);
 }
 
+export function parseCreatorToken(): { name?: string; display_name?: string; creator_id?: string } {
+  const token = getCreatorToken();
+  if (!token) return {};
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return { name: payload.name, display_name: payload.display_name, creator_id: payload.creator_id };
+  } catch {
+    return {};
+  }
+}
+
 const creatorPortalClient = axios.create({
   baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },

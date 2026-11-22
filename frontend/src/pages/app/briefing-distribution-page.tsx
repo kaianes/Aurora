@@ -1,7 +1,8 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { briefingApi } from '@/lib/api-client';
+import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -18,6 +19,7 @@ function MetricDot({ color }: { color: string }) {
  * partial failure into a misleading "sent" summary.
  */
 export function BriefingDistributionPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const { data: distribution, error, isLoading } = useQuery({
@@ -41,6 +43,7 @@ export function BriefingDistributionPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
       <CardHeader>
         <CardTitle>Status de distribuicao do briefing</CardTitle>
         <CardDescription>

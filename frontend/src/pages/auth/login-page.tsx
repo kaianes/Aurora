@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { authApi } from '@/lib/api-client';
+import { authApi, creatorPortalApi, setCreatorToken } from '@/lib/api-client';
 import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,10 +35,32 @@ export function LoginPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (data) => {
-      login(data.access_token, data.refresh_token, data.user, data.memberships);
-      navigate('/app/brand-profile');
+    mutationFn: async (data: LoginForm & { mfa_code?: string }) => {
+      try {
+        const brandData = await authApi.login(data);
+        // User exists in shared user table but has no workspace — they're a creator
+        if (brandData.memberships.length === 0) {
+          const creatorData = await creatorPortalApi.login(data);
+          return { kind: 'creator' as const, data: creatorData };
+        }
+        return { kind: 'brand' as const, data: brandData };
+      } catch (err) {
+        if (isAxiosError(err) && err.response?.data?.error?.code === 'MFA_REQUIRED') throw err;
+        if (isAxiosError(err) && err.response?.status === 401) {
+          const creatorData = await creatorPortalApi.login(data);
+          return { kind: 'creator' as const, data: creatorData };
+        }
+        throw err;
+      }
+    },
+    onSuccess: (result) => {
+      if (result.kind === 'creator') {
+        setCreatorToken(result.data.access_token);
+        navigate('/creator-portal/home');
+      } else {
+        login(result.data.access_token, result.data.refresh_token, result.data.user, result.data.memberships);
+        navigate('/app/home');
+      }
     },
     onError: (error) => {
       if (isAxiosError(error) && error.response?.data?.error?.code === 'MFA_REQUIRED') {

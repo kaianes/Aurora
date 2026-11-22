@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
 import { briefingApi } from '@/lib/api-client';
@@ -18,6 +18,7 @@ import { Spinner } from '@/components/ui/spinner';
  * `answered` is read straight from the backend, computed at read time there, never cached here.
  */
 export function BriefingQaPage() {
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { currentRole } = useAuth();
@@ -61,7 +62,9 @@ export function BriefingQaPage() {
   const threads = list?.data ?? [];
 
   return (
-    <div className="mx-auto max-w-4xl grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
+    <div className="mx-auto max-w-4xl space-y-4">
+      <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
       <div className="space-y-4">
         <CardHeader>
           <CardTitle>Perguntas sobre o briefing</CardTitle>
@@ -149,6 +152,7 @@ export function BriefingQaPage() {
             )}
           </Card>
         ) : null}
+      </div>
       </div>
     </div>
   );

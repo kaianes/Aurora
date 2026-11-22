@@ -119,7 +119,7 @@ export class CreatorRegistrationService {
     const creator = await this.creatorRepo.findOne({ where: { userId: user.id } });
 
     const accessToken = this.jwtService.sign(
-      { sub: user.id, creator_id: creator?.id },
+      { sub: user.id, creator_id: creator?.id, name: user.name, display_name: creator?.displayName },
       { expiresIn: '15m' },
     );
 

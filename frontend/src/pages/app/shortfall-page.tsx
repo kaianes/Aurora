@@ -46,7 +46,8 @@ export function ShortfallPage() {
 
   if (!shortfall) {
     return (
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-2xl space-y-4">
+        <div className="flex justify-end"><Button variant="ghost" size="sm" onClick={() => navigate(`/app/campaigns/${id}`)}>Voltar para a campanha</Button></div>
         <Alert variant="success">O pool minimo garantido foi atendido. Nenhuma acao necessaria.</Alert>
       </div>
     );

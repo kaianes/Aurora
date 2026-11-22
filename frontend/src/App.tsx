@@ -15,6 +15,7 @@ import { TeamPage } from '@/pages/app/team-page';
 import { SecurityPage } from '@/pages/app/security-page';
 import { ClientsPage } from '@/pages/app/clients-page';
 import { ClientDetailPage } from '@/pages/app/client-detail-page';
+import { HomePage } from '@/pages/app/home-page';
 import { CampaignsPage } from '@/pages/app/campaigns-page';
 import { CampaignFormPage } from '@/pages/app/campaign-form-page';
 import { CampaignDetailPage } from '@/pages/app/campaign-detail-page';
@@ -25,7 +26,7 @@ import { ShortlistPage } from '@/pages/app/shortlist-page';
 import { CreatorMetricsPage } from '@/pages/app/creator-metrics-page';
 import { ExclusionsPage } from '@/pages/app/exclusions-page';
 import { ShortlistOverridePage } from '@/pages/app/shortlist-override-page';
-import { CreatorAccessPage } from '@/pages/creator-portal/creator-access-page';
+import { CreatorHomePage } from '@/pages/creator-portal/creator-home-page';
 import { OpportunitiesPage } from '@/pages/creator-portal/opportunities-page';
 // E8 -- Creator Recruitment and Growth (US-23.1, US-23.2, US-24.1-24.4, US-25, US-26, US-27)
 import { RegisterPage as CreatorRegisterPage } from '@/pages/creator-portal/register-page';
@@ -99,6 +100,7 @@ export default function App() {
                 </ProtectedRoute>
               }
             >
+              <Route path="home" element={<HomePage />} />
               <Route path="pricing" element={<PricingPage />} />
               <Route path="brand-profile" element={<BrandProfilePage />} />
               <Route path="team" element={<TeamPage />} />
@@ -196,8 +198,9 @@ export default function App() {
 
             {/* Creator portal (US-28): separate from /app, creators are not account members */}
             <Route path="/creator-portal" element={<CreatorPortalLayout />}>
-              <Route path="access" element={<CreatorAccessPage />} />
-              <Route path="login" element={<CreatorAccessPage />} />
+              <Route path="home" element={<CreatorHomePage />} />
+              <Route path="access" element={<Navigate to="/login" replace />} />
+              <Route path="login" element={<Navigate to="/login" replace />} />
               <Route path="opportunities" element={<OpportunitiesPage />} />
               {/* E8 -- Creator Recruitment and Growth, per
                   docs/architecture/e8-creator-recruitment-growth.md section 10 */}
