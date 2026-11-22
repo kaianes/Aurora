@@ -162,7 +162,7 @@ export class ShortlistService {
     });
 
     const campaign = await this.campaignRepo.findOne({ where: { id: campaignId } });
-    const response: Record<string, any> = this.formatShortlist(shortlist, entries);
+    const response: Record<string, any> = await this.formatShortlist(shortlist, entries);
 
     if (shortlist.belowGuaranteedMinimum && campaign?.guaranteedMinPoolSize) {
       response.guaranteed_min_pool_size = campaign.guaranteedMinPoolSize;
@@ -483,7 +483,7 @@ export class ShortlistService {
       userAgent: actor.userAgent,
     });
 
-    return this.formatShortlist(savedShortlist, finalEntries);
+    return await this.formatShortlist(savedShortlist, finalEntries);
   }
 
   // ---- ADR-0012: one-time hand-off to campaign_pool_member ----
@@ -631,7 +631,13 @@ export class ShortlistService {
     return isBelow ? 'pool_below_guaranteed_minimum' : null;
   }
 
-  formatShortlist(shortlist: CampaignShortlist, entries: CampaignShortlistEntry[]) {
+  async formatShortlist(shortlist: CampaignShortlist, entries: CampaignShortlistEntry[]) {
+    const creatorIds = [...new Set(entries.map((e) => e.creatorId))];
+    const creators = creatorIds.length
+      ? await this.creatorRepo.findByIds(creatorIds)
+      : [];
+    const creatorMap = new Map(creators.map((c) => [c.id, c.displayName]));
+
     return {
       id: shortlist.id,
       campaign_id: shortlist.campaignId,
@@ -641,16 +647,17 @@ export class ShortlistService {
       locked: shortlist.locked,
       locked_reason: shortlist.lockedReason,
       locked_at: shortlist.lockedAt?.toISOString() || null,
-      entries: entries.map((e) => this.formatEntry(e)),
+      entries: entries.map((e) => this.formatEntry(e, creatorMap)),
       requested_at: shortlist.requestedAt.toISOString(),
       resolved_at: shortlist.resolvedAt?.toISOString() || null,
     };
   }
 
-  private formatEntry(entry: CampaignShortlistEntry) {
+  private formatEntry(entry: CampaignShortlistEntry, creatorMap?: Map<string, string>) {
     return {
       id: entry.id,
       creator_id: entry.creatorId,
+      creator_display_name: creatorMap?.get(entry.creatorId) ?? null,
       rank: entry.rank,
       fit_score: entry.fitScore !== null ? Number(entry.fitScore) : null,
       matched_attributes: entry.matchedAttributes || [],

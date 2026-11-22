@@ -247,7 +247,7 @@ export function ShortlistPage() {
                         to={`/app/campaigns/${id}/shortlist/creators/${entry.creator_id}`}
                         className="text-sm font-medium text-violet-400 hover:underline"
                       >
-                        Criador {entry.creator_id}
+                        {entry.creator_display_name ?? entry.creator_id}
                       </Link>
                       <p className="flex items-center font-mono text-xs text-text-secondary mt-0.5">
                         {entry.rank !== null && (
