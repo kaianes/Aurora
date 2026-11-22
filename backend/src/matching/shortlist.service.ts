@@ -634,9 +634,11 @@ export class ShortlistService {
   async formatShortlist(shortlist: CampaignShortlist, entries: CampaignShortlistEntry[]) {
     const creatorIds = [...new Set(entries.map((e) => e.creatorId))];
     const creators = creatorIds.length
-      ? await this.creatorRepo.findByIds(creatorIds)
+      ? await this.creatorRepo.findBy(creatorIds.map((id) => ({ id })))
       : [];
-    const creatorMap = new Map<string, string>(creators.map((c) => [c.id, c.displayName as string]));
+    const creatorMap = new Map<string, string>(
+      (creators as Creator[]).map((c) => [c.id, c.displayName]),
+    );
 
     return {
       id: shortlist.id,
