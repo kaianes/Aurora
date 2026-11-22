@@ -636,7 +636,7 @@ export class ShortlistService {
     const creators = creatorIds.length
       ? await this.creatorRepo.findByIds(creatorIds)
       : [];
-    const creatorMap = new Map(creators.map((c) => [c.id, c.displayName]));
+    const creatorMap = new Map<string, string>(creators.map((c) => [c.id, c.displayName as string]));
 
     return {
       id: shortlist.id,
