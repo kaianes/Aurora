@@ -29,7 +29,7 @@ Guardrails that hold across every stage:
 
 ## 3. Branches and merge order
 
-Each epic was built on a feature branch stacked on the previous one, since E3's `matching` module depends directly on E2's `campaign` module (it replaces E2's stub matching engine with a real one and writes into E2's `campaign_pool_member` table). Both `feature/e2-campaign-planning-pool-buying` ([PR #1](https://github.com/kaianes/Aurora/pull/1)) and `feature/e3-creator-matching-curation` ([PR #2](https://github.com/kaianes/Aurora/pull/2)) have since merged to `main`, so **`main` now contains E1, E2, and E3**; there's no need to check out a feature branch to run everything built so far.
+Each epic was built on a feature branch stacked on the previous one, since E3's `matching` module depends directly on E2's `campaign` module (it replaces E2's stub matching engine with a real one and writes into E2's `campaign_pool_member` table). All ten epic branches have since merged to `main`. **`main` contains the complete implementation: E1 through E10**. All feature branches are deleted; the only active branch besides `main` is `docs/pitch-deck` (documentation only, also merged).
 
 ## 4. Epic 1 — Access and Onboarding
 
@@ -134,7 +134,7 @@ cd backend && npx vitest run
 cd frontend && npx vitest run
 ```
 
-As of the last pipeline run, on `main` (E1+E2+E3 combined): **backend 107/107 passing**, **frontend 31/31 passing**. Build and lint are clean on both packages. Exact per-story pass/fail counts and any deviations are reported in each epic's summary, linked in sections 4-6 above, since those are qa's and the reviewer's verified output rather than a claim made ahead of time.
+As of the last pipeline run, on `main` (all 10 epics): **backend 523/523 passing** (87 test files), **frontend 218/218 passing** (49 test files). Both GitHub Actions and GitLab CI also run real-Postgres integration tests (`npm run test:e2e`) against `postgres:16-alpine`. Build and lint are clean on both packages. Exact per-story pass/fail counts and any deviations are reported in each epic's summary, linked in sections 4-12, since those are qa's and the reviewer's verified output rather than a claim made ahead of time.
 
 **Manual walkthrough**, once both servers are running:
 
@@ -160,7 +160,9 @@ The full route map, roles table, and endpoint list for E1 are in section 4 above
 - Automatic budget reallocation (E2, US-10) is fully implemented and tested but inert in this build, since it depends on a social-platform metrics feed (FR-52) that is out of scope until a later epic.
 - Commission rate (15%) and opportunity expiry window (72h) in E3 are explicit placeholders pending Epic 6 (Payments and Financial Transparency).
 - The creator-portal login (`POST /creator-portal/login`) is a passwordless pilot stub pending Epic 8 (Creator Recruitment and Growth)'s real creator authentication.
-- Tenant-context middleware (RLS enforcement) remains unregistered, carried over from E1.
+- Tenant isolation is now enforced and production-verified (BYPASSRLS root cause confirmed and fixed in Sprint 7; cross-tenant 404 responses verified on the live Railway deployment on 2026-11-04).
+- A creator cannot decline a campaign opportunity (locked shortlist entry — known design limitation).
+- No `CONFIRMED → ACTIVE` campaign state transition (known design limitation).
 
 ## 10. Bugs found and fixed via live deployment testing
 
@@ -172,7 +174,30 @@ The automated pipeline (QA + reviewer) caught real bugs during each epic's own b
 - **Shortlist page showed a dead-end error for a brand-new campaign:** the frontend treated the backend's 404 ("no shortlist requested yet") the same as a real failure, which hid the "Gerar shortlist" button entirely behind a generic error message.
 - Smaller fixes along the way: the backend's global exception filter never logged the underlying error for a 500 (it just returned a generic message), which is how the above took longer than necessary to diagnose; a Node version mismatch and a missing Redis password broke the first Railway deploy; and a TypeScript unused-import error only surfaced in Vercel's production build, not in local test runs.
 
-## 11. Field research conducted alongside Epic 1
+## 11. Epic 10 — AI Creator Demo
+
+Wires live Claude API calls into four interaction points across the existing platform, adding an `InferenceModule` as the shared integration layer. **Status: implemented, tested, and merged to `main` (Sprint 7).**
+
+- Stories: [docs/epics/e10-ai-creator-demo/stories.md](epics/e10-ai-creator-demo/stories.md)
+- Architecture: [docs/architecture/e10-ai-creator-demo.md](architecture/e10-ai-creator-demo.md)
+- ADRs: [0065-inference-module-pattern](adr/0065-inference-module-pattern.md), [0066-model-choice-and-token-budgets](adr/0066-model-choice-and-token-budgets.md), [0067-sse-streaming-for-briefing-qa](adr/0067-sse-streaming-for-briefing-qa.md), [0068-fit-reason-generation-at-shortlist-time](adr/0068-fit-reason-generation-at-shortlist-time.md)
+- Migration: `1746000000000-AiCreatorDemoSchema.ts` (adds `fit_reason` and `ai_safety_reason` columns; adds `SYSTEM` to `QaSenderType` enum)
+- Epic summary (reviewer's output): [docs/epics/e10-ai-creator-demo/summary.md](epics/e10-ai-creator-demo/summary.md)
+
+**What was integrated:**
+
+| Touch point | Where | Model | Description |
+|---|---|---|---|
+| Fit reason | `RealMatchingEngineAdapter` | `claude-sonnet-4-5` | Per-creator plain-language justification generated at shortlist time, stored in `fit_reason`, shown in the shortlist UI |
+| Brand safety tier-2 | `RealContentSafetyAdapter` | `claude-sonnet-4-5` | Semantic check as a second gate after deterministic rule matching; result stored in `ai_safety_reason` on flagged items |
+| Briefing Q&A | `CreatorPortalBriefingController` | `claude-sonnet-4-5` | Streaming SSE assistant answering creator questions about a campaign briefing |
+| Animated onboarding | `OnboardingPage` (frontend) | — | Frontend-only animation showing `analyzing` state during creator onboarding; no new API call |
+
+**New endpoint:** `POST /creator-portal/briefings/:id/qa/stream` — streams tokens as `text/event-stream`. Uses `@Res()` injection (not `@Sse()`) to allow manual header control.
+
+**Known gap:** the SSE endpoint sets `Content-Type`, `Cache-Control`, and `Connection` headers but is missing `X-Accel-Buffering: no`, recommended for nginx reverse proxies. Non-blocking for Railway's direct deployment.
+
+## 12. Field research conducted alongside Epic 1
 
 In parallel with building Epic 1, three market validation interviews were conducted with practitioners in the Brazilian creator economy, to check Aurora's market hypotheses (pricing predictability, client segmentation, automation maturity, and the role of agencies) against how established players actually operate. All interviews were conducted and analyzed by Kaiane Souza, using a shared interview guide (available in [English](field-research/Creator_Economy_Interview_Guide_EN.pdf) and [Portuguese](field-research/Creator_Economy_Interview_Guide_PT.pdf)), cross-referencing the question script, personal notes, an automated meeting summary, and the full transcript for each conversation. Per-interview notes, named by interviewee, are kept internally rather than published in this repository, pending confirmation that each interviewee consents to being identified publicly.
 
@@ -184,11 +209,11 @@ In parallel with building Epic 1, three market validation interviews were conduc
 
 This research grounds the assumptions behind the epics being built, including the pricing model exposed publicly in US-02 and the agency-client relationship modeled in US-47, in direct input from people operating in this market today rather than in desk research alone.
 
-## 12. Reading order for grading
+## 14. Reading order for grading
 
 1. This document, for the process and what each epic delivered.
-2. Each epic's summary (linked in sections 4-6), for what was actually built and verified, and any deviations from the design.
-3. The architecture documents and ADRs linked in sections 4-6, for the design rationale.
+2. Each epic's summary (sections 4–11, linked above), for what was actually built and verified, and any deviations from the design.
+3. The architecture documents and ADRs linked in each section, for the design rationale.
 4. The running application — the live demo linked in the README, or locally using the steps in sections 7 and 8.
 5. Section 10, for what manual testing against the live deployment found and fixed beyond what the automated pipeline caught.
-6. The field research interviews in section 11, for the market evidence behind the product decisions.
+6. The field research interviews in section 13, for the market evidence behind the product decisions.

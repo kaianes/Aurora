@@ -2,7 +2,7 @@
 
 This is a step-by-step guide to put a working, link-shareable demo of Aurora online: backend + Postgres + Redis on [Railway](https://railway.app), frontend as a static site on [Vercel](https://vercel.com). Both have free tiers; Railway's free usage is trial credit, not permanent (see note at the end).
 
-**Live right now:** frontend at [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app), backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs), both deployed from `main` (E1+E2+E3). The steps below are what it took to get there, kept for redeploying or recreating the demo later.
+**Live right now:** frontend at [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app), backend API docs at [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs), both deployed from `main` (all 10 epics). The steps below are what it took to get there, kept for redeploying or recreating the demo later.
 
 **Provenance note:** both Railway and Vercel deploy directly from the GitHub repository (`github.com/kaianes/Aurora`), per the `Deploy from GitHub repo` step below. Neither of the institution's GitLab mirrors (`interno`, `publico`) feeds this live environment — anyone evaluating only one of those GitLab projects should treat the live demo as evidence of what GitHub's `main` contains, not of what that specific GitLab project contains.
 
