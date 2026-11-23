@@ -481,6 +481,7 @@ export type ShortlistEntryDecision = 'pending' | 'approved' | 'rejected';
 export interface ShortlistEntry {
   id: string;
   creator_id: string;
+  creator_display_name?: string | null;
   rank: number | null;
   fit_score: number | null;
   matched_attributes: string[];

@@ -296,10 +296,11 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM briefing_qa_message WHERE id IN ('${D.qaMsg1}','${D.qaMsg2}','${D.qaMsg3}','${D.qaMsg4}','${D.qaMsg5}')`);
   await dataSource.query(`DELETE FROM briefing_qa_thread WHERE id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
 
-  // Safety – nova pedro
-  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE id IN ('${D.queueNaty}','${D.queueNovaPedro}')`);
-  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE id = '${D.triggerNaty}'`);
-  await dataSource.query(`DELETE FROM safety_check WHERE id IN ('${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}')`);
+  // Safety — delete dependents by safety_check_id to cover any system-created rows
+  const allCheckIds = `'${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}'`;
+  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE safety_check_id IN (${allCheckIds})`);
+  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN (${allCheckIds})`);
+  await dataSource.query(`DELETE FROM safety_check WHERE id IN (${allCheckIds})`);
 
   // Payouts
   await dataSource.query(`DELETE FROM payout_obligation WHERE id IN ('${D.payoutQ4Duda}','${D.payoutQ4Naty}','${D.payoutQ4Marina}','${D.payoutBFPedro}','${D.payoutBFBruno}','${D.payoutBFThiago}','${D.payoutActiveDuda}','${D.payoutActiveCarolina}')`);
@@ -357,7 +358,10 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
   await dataSource.query(`DELETE FROM account WHERE id IN ('${D.acctBella}','${D.acctNovatech}','${D.acctAgency}')`);
   await dataSource.query(`DELETE FROM workspace WHERE id IN ('${D.wsBella}','${D.wsNovatech}','${D.wsAgency}')`);
-  await dataSource.query(`DELETE FROM "user" WHERE id IN ('${D.userBella}','${D.userNovatech}','${D.userAgency}','${D.userDuda}','${D.userCarolina}')`);
+  // Unlink creator.user_id before deleting users (handles manually-created users with different UUIDs)
+  await dataSource.query(`UPDATE creator SET user_id = NULL WHERE user_id IN (SELECT id FROM "user" WHERE email IN ('demo-duda@aurora.internal','demo-carolina@aurora.internal'))`);
+  // Delete by email to cover any UUID mismatch from manually-created accounts
+  await dataSource.query(`DELETE FROM "user" WHERE email IN ('demo-bella@aurora.internal','demo-novatech@aurora.internal','demo-agencia@aurora.internal','demo-duda@aurora.internal','demo-carolina@aurora.internal')`);
 
   console.log('[seed:demo] Teardown concluido.');
 }
@@ -385,7 +389,7 @@ async function seed(): Promise<void> {
     ('${D.userAgency}',   'demo-agencia@aurora.internal',  '${DEMO_HASH}', 'Thais Drummond Demo',         true, now(), now()),
     ('${D.userDuda}',     'demo-duda@aurora.internal',     '${DEMO_HASH}', 'Duda Martins Demo',           true, now(), now()),
     ('${D.userCarolina}', 'demo-carolina@aurora.internal', '${DEMO_HASH}', 'Carolina Fit Demo',           true, now(), now())
-    ON CONFLICT (id) DO NOTHING
+    ON CONFLICT DO NOTHING
   `);
 
   // ── 2. Workspaces ─────────────────────────────────────────────────────────

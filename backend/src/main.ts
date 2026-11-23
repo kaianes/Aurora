@@ -37,8 +37,17 @@ async function bootstrap() {
   app.useGlobalInterceptors(new CorrelationIdInterceptor());
 
   // CORS
+  const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map((o) => o.trim());
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin) return cb(null, true);
+      const ok =
+        allowedOrigins.some((o) => origin === o || origin.startsWith(o.replace(/\/$/, ''))) ||
+        /^https:\/\/aurora(-[a-z0-9]+)*\.vercel\.app$/.test(origin);
+      cb(ok ? null : new Error('CORS'), ok);
+    },
     credentials: true,
   });
 
