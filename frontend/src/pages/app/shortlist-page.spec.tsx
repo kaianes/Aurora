@@ -36,6 +36,7 @@ function renderPage() {
 const baseEntry = {
   id: 'entry-1',
   creator_id: 'creator-9001',
+  creator_display_name: 'Criador creator-9001',
   rank: 1,
   fit_score: 0.91,
   matched_attributes: ['interests:skincare'],
