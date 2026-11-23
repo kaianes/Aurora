@@ -38,7 +38,7 @@ O repositório público (espelho no GitHub) não inclui o código-fonte nem a pe
 | Frontend | [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) |
 | API (Swagger) | [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs) |
 
-Credenciais de demo e instruções de seed estão em [`docs/implementation.md`](docs/implementation.md).
+Credenciais de demo e instruções de seed estão em [`docs/agent-orchestration.md`](docs/agent-orchestration.md).
 
 ---
 
@@ -65,7 +65,7 @@ Cada summary cobre: o que foi construído, contagem de testes, desvios do design
 
 | Documento | Conteúdo |
 |---|---|
-| [Pipeline de implementação](docs/implementation.md) | Como o pipeline de agentes funciona, como rodar localmente, como testar |
+| [Orquestração de agentes](docs/agent-orchestration.md) | Como o pipeline de agentes funciona, o que cada agente faz, como rodar e testar |
 | [Análise de negócios](docs/business-analysis.md) | Creator economy, Porter, SWOT, Gap Analysis, Personas, modelo de receita |
 | [Requisitos de produto](docs/product-requirements.md) | 47 user stories, 60 RFs, 36 RNFs |
 | [Arquitetura](docs/architecture.md) | Decisões arquiteturais, ATAM, segurança, DevOps |
