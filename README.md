@@ -1,85 +1,124 @@
 <div align="center">
 
-# Aurora ✦
+# Aurora
 
-**Technology that turns pools of nano and micro creators into a buyable media asset**
+**Projeto de Engenharia de Software — Inteli, Instituto de Tecnologia e Liderança**
 
-A brand sets a budget, an audience, and a message once. Aurora handles matching, briefings, brand safety, and paying every creator in the pool.
-
-[![Live demo](https://img.shields.io/badge/demo-aurora--kaiane.vercel.app-00C4B4?style=flat-square)](https://aurora-kaiane.vercel.app)
-[![API docs](https://img.shields.io/badge/API-Railway-9B72E6?style=flat-square)](https://aurora-production-b051.up.railway.app/api/docs)
-[![License](https://img.shields.io/badge/license-MIT-D45FA0?style=flat-square)](LICENSE)
+Módulo 2A · 2026 · Autora: Kaiane Souza Cordeiro
 
 </div>
 
 ---
 
-## Why Aurora exists
+## O que é Aurora
 
-Influencer marketing in Brazil is a R$1.6 billion market growing at 23% a year — but it is entirely concentrated in enterprise. The minimum ticket on existing platforms reaches R$50k, locking out the 10.9 million small and mid-sized businesses that could benefit from creator marketing.
+Aurora é uma plataforma de infraestrutura para campanhas de creator marketing no mid-market brasileiro. Uma marca define orçamento, público e mensagem uma única vez; Aurora cuida do matching, briefing, brand safety e pagamento de cada criador do pool — tratando o conjunto como uma unidade de mídia que se compra inteira.
 
-The barrier is not access: it is **operational**. Each creator requires an individual briefing, deadline tracking, content review, and a separate payment. Multiply that by hundreds of nano and micro creators and no team can manage it without a system.
-
-Aurora solves this by treating a curated pool of creators as a **media unit that a brand plans and buys as a whole**.
+A motivação completa, a análise de mercado e as decisões de produto estão em [`docs/business-analysis.md`](docs/business-analysis.md) e [`docs/product-requirements.md`](docs/product-requirements.md).
 
 ---
 
-## The solution
+## O que está neste repositório
 
-<p align="center">
-  <img src="./docs/images/aurora-what-it-is.png" alt="What Aurora is" width="680" />
-</p>
+Este é o repositório **interno** do projeto. Ele contém tudo:
+
+- Código-fonte completo (`backend/` e `frontend/`)
+- Documentação de produto, arquitetura e épicos (`docs/`)
+- Pesquisa de campo com empresas do setor (`docs/field-research/`) — mantida apenas aqui por solicitação dos entrevistados
+- Pitch deck interativo e relatório do módulo
+
+O repositório público (espelho no GitHub) não inclui o código-fonte nem a pesquisa de campo.
+
+---
+
+## Demo ao vivo
 
 | | |
 |---|---|
-| **Curated pool as a product** | The brand buys a validated set of creators instead of negotiating one by one. One budget, one invoice, one result. |
-| **AI as support — humans always decide** | A four-dimension fit score ranks the right creators. Claude checks brand safety before any publication. The team approves or vetoes. |
-| **Creators as partners** | Structured briefing, payment confirmed before publishing, their own portal. A good creator experience retains the ecosystem. |
-| **White-label for agencies** | The agency delivers the full operation under its own brand. More clients without hiring more people. |
+| Frontend | [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) |
+| API (Swagger) | [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs) |
+
+Credenciais de demo e instruções de seed estão em [`docs/deployment.md`](docs/deployment.md).
 
 ---
 
-## What was built
+## Épicos entregues
 
-Ten epics delivered end to end, covering the full campaign lifecycle:
+| Épico | Nome | Resumo do revisor |
+|---|---|---|
+| E1 | Acesso e Onboarding | [summary.md](docs/epics/e1-access-onboarding/summary.md) |
+| E2 | Planejamento de Campanha e Pool Buying | [summary.md](docs/epics/e2-campaign-planning-pool-buying/summary.md) |
+| E3 | Matching e Curadoria de Criadores | [summary.md](docs/epics/e3-creator-matching-curation/summary.md) |
+| E4 | Brand Safety | [summary.md](docs/epics/e4-brand-safety/summary.md) |
+| E5 | Briefing e Workflow de Conteúdo | [summary.md](docs/epics/e5-briefing-content-workflow/summary.md) |
+| E6 | Pagamentos e Transparência Financeira | [summary.md](docs/epics/e6-payments-financial-transparency/summary.md) |
+| E7 | Analytics e Relatórios | [summary.md](docs/epics/e7-analytics-reporting/summary.md) |
+| E8 | Recrutamento e Crescimento de Criadores | [summary.md](docs/epics/e8-creator-recruitment-growth/summary.md) |
+| E9 | Operações Multi-Cliente para Agências | [summary.md](docs/epics/e9-agency-multi-client-operations/summary.md) |
+| E10 | AI Creator Demo | [summary.md](docs/epics/e10-ai-creator-demo/summary.md) |
 
-- **Epic 1** — Access and Onboarding (auth, tenant isolation, RBAC, workspace, invitations, agency client management)
-- **Epic 2** — Campaign Planning and Pool Buying (budget, async quoting, confirmed pool price, templates)
-- **Epic 3** — Creator Matching and Curation (four-dimension fit score, shortlist, exclusions, agency override)
-- **Epic 4** — Brand Safety (per-campaign rules, AI-assisted content check, human review in the loop)
-- **Epic 5** — Briefing and Content Workflow (structured briefing, approval cycle with stated revision reasons)
-- **Epic 6** — Payments and Financial Transparency (consolidated invoice, itemized per-creator breakdown)
-- **Epic 7** — Analytics and Reporting (dashboard by creator and by pool, exportable reports)
-- **Epic 8** — Creator Recruitment and Growth (self-registration, media kit, social linking, reputation history)
-- **Epic 9** — Agency Multi-Client Operations (white-label branding, client context selector, shareable report links)
-- **Epic 10** — AI Creator Demo (live Claude API integration across fit score explanations, brand safety semantic check, and creator briefing assistant)
+Cada summary cobre: o que foi construído, contagem de testes, desvios do design e gaps de cobertura.
+
+---
+
+## Documentação principal
+
+| Documento | Conteúdo |
+|---|---|
+| [Relatório do módulo](docs/module-2a-2026-report.md) | Relatório completo do projeto: contexto, pipeline, épicos, issues conhecidos, implantação |
+| [Pipeline de implementação](docs/implementation.md) | Como o pipeline de agentes funciona, como rodar localmente, como testar |
+| [Análise de negócios](docs/business-analysis.md) | Creator economy, Porter, SWOT, Gap Analysis, Personas, modelo de receita |
+| [Requisitos de produto](docs/product-requirements.md) | 47 user stories, 60 RFs, 36 RNFs |
+| [Arquitetura](docs/architecture.md) | Decisões arquiteturais, ATAM, segurança, DevOps |
+| [ADRs](docs/adr/) | 68 Architecture Decision Records (ADR-0001 a ADR-0068) |
+| [Pitch deck](docs/pitch/pitch-deck.html) | Deck interativo — mercado, solução, demo, próximos passos |
+| [Pesquisa de campo](docs/field-research/) | Análises das entrevistas com Creator Ads e PlayNest |
+| [Implantação](docs/deployment.md) | Passo a passo Railway + Vercel, variáveis, seed |
+| [Isolamento de tenant](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md) | Revisão da remediação cross-cutting de RLS/BYPASSRLS |
 
 ---
 
 ## Stack
 
-| Layer | Technology |
+| Camada | Tecnologia |
 |---|---|
 | Backend | NestJS · TypeScript · PostgreSQL 16 · Redis |
 | Frontend | React · Vite · TypeScript |
-| AI | Claude (Anthropic) — brand safety and fit score |
-| Infrastructure | Railway (API) · Vercel (frontend) · GitHub Actions CI |
+| IA | Claude (Anthropic) — brand safety e fit score |
+| Infraestrutura | Railway · Vercel · GitHub Actions CI · GitLab CI |
 
 ---
 
-## Business documentation
+## Como rodar localmente
 
-| Document | Contents |
-|---|---|
-| [Market analysis](docs/business-analysis.md) | Creator economy, Porter's Five Forces, SWOT, Gap Analysis, Personas, Revenue model |
-| [Product requirements](docs/product-requirements.md) | User journeys, 47 user stories, 60 FRs, 36 NFRs |
-| [Architecture](docs/architecture.md) | Design decisions, ATAM, security, DevOps |
-| [Business pitch](docs/pitch/pitch-deck.html) | Interactive deck — market, solution, demo, next steps |
+```bash
+# 1. Postgres e Redis
+docker compose up -d
+
+# 2. Backend
+cd backend && cp .env.example .env && npm install
+npx tsx src/database/run-migrations.ts
+npm run seed:demo        # seed completo para a apresentação
+npm run start:dev        # http://localhost:3001
+
+# 3. Frontend (outro terminal)
+cd frontend && npm install
+npm run dev              # http://localhost:5173
+```
+
+Instruções detalhadas, incluindo variáveis de ambiente e seed de criadores, em [`docs/implementation.md`](docs/implementation.md).
 
 ---
 
-## About
+## Suíte de testes
 
-Software Engineering project developed at [Inteli — Institute of Technology and Leadership](https://www.inteli.edu.br/).
+```bash
+cd backend  && npm test          # 523 testes unitários
+cd backend  && npm run test:e2e  # integração real com Postgres
+cd frontend && npm test          # 218 testes
+```
 
-**Author:** Kaiane Souza Cordeiro · kaiane.cordeiro@sou.inteli.edu.br
+---
+
+**Autora:** Kaiane Souza Cordeiro · kaiane.cordeiro@sou.inteli.edu.br  
+**Instituição:** [Inteli — Instituto de Tecnologia e Liderança](https://www.inteli.edu.br/)
