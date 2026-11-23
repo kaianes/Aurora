@@ -1,28 +1,13 @@
 # Aurora
 
-**Creator media infrastructure for the mid-market:** Aurora treats a curated pool of nano and micro creators as one media unit that a brand can plan and buy, with an advantage built on the supply side by treating creators as customers instead of anonymous supply.
+Aurora treats a curated pool of nano and micro creators as one media unit that a brand can plan and buy, with an advantage built on the supply side by treating creators as customers instead of anonymous supply.
 
-> This is the **internal repository**. It includes the full source code (`backend/`, `frontend/`), field-research interview analyses (`docs/field-research/` — internal only by request of the interviewees), and all documentation. The public GitHub mirror contains documentation only.
 
 <p align="center">
   <img src="./docs/images/aurora-what-it-is.png" alt="What Aurora is" width="680" />
 </p>
 
 ---
-
-## Project Status
-
-Ten epics, all merged to `main`. Cumulative automated suite: **523 backend tests · 218 frontend tests · all passing**.
-
-- ✅ **Sprint 1** — Market research and business analysis (industry context, the problem, the solution, competitive landscape)
-- ✅ **Sprint 2** — Business analysis complete (Competitive Matrix, Porter's Five Forces, Gap Analysis, SWOT, Risk Matrix, Personas, Value Proposition Canvas, Revenue and Cost Structure)
-- ✅ **Sprint 3** — Product requirements complete (user journeys, 47 user stories, 60 FRs, 36 NFRs, full traceability)
-- ✅ **Sprint 4** — System design finalized, agent pipeline defined, Epic 1 (Access and Onboarding) built end to end: auth, tenant isolation, RBAC, brand profile, team invitations, agency client management
-- ✅ **Sprint 5** — Epic 2 (Campaign Planning and Pool Buying) and Epic 3 (Creator Matching and Curation) built end to end: async quoting, budget allocation, real matching engine, shortlist, exclusions, agency override, creator opportunity portal
-- ✅ **Sprint 6** — Epics 4–9 built end to end: Brand Safety, Briefing and Content Workflow, Payments and Financial Transparency, Analytics and Reporting, Creator Recruitment and Growth, Agency Multi-Client Operations. 508 backend + 208 frontend tests passing
-- ✅ **Sprint 7** — Advisor remediation closed (Tiers 0–3): BYPASSRLS root cause confirmed and fixed (Railway role switched to `aurora_app`, `NOBYPASSRLS`), cross-tenant isolation proven in production; CI pipelines added (GitHub Actions + GitLab CI); real-Postgres integration harness added; creator seed scripts added; MFA activation UI delivered. 523 backend + 218 frontend tests passing
-- ✅ **Sprint 8** — Epic 10 (AI Creator Demo): live Claude API integration across fit score explanations, brand safety semantic check, and creator briefing assistant (SSE streaming). Pitch deck (interactive HTML). Final documentation cleanup
-- ⏳ **Sprint 9** — Final adjustments, banca presentation (2026-11-27)
 
 ## Project Roadmap
 
@@ -56,13 +41,13 @@ gantt
 
 | Document | Contents |
 |---|---|
-| [Orquestração de agentes](docs/agent-orchestration.md) | How the agent pipeline works, what each agent does, how to run and test |
-| [Análise de negócios](docs/business-analysis.md) | Creator economy, Porter's Five Forces, SWOT, Gap Analysis, Personas, Revenue model |
-| [Requisitos de produto](docs/product-requirements.md) | User journeys, 47 user stories, 60 FRs, 36 NFRs |
-| [Arquitetura](docs/architecture.md) | Design decisions, ATAM, security, DevOps |
+| [Agent Orchestration](docs/agent-orchestration.md) | How the agent pipeline works, what each agent does, how to run and test |
+| [Business Analysis](docs/business-analysis.md) | Creator economy, Porter's Five Forces, SWOT, Gap Analysis, Personas, Revenue model |
+| [Product Requirements](docs/product-requirements.md) | User journeys, 47 user stories, 60 FRs, 36 NFRs |
+| [Architecture](docs/architecture.md) | Design decisions, ATAM, security, DevOps |
 | [ADRs](docs/adr/) | 68 Architecture Decision Records (ADR-0001 to ADR-0068) |
-| [Pitch deck](docs/pitch/pitch-deck.html) | Interactive deck — market, solution, demo, next steps |
-| [Pesquisa de campo](docs/field-research/) | Interview analyses — Creator Ads and PlayNest (internal only) |
+| [Pitch Deck](docs/pitch/pitch-deck.html) | Interactive deck — market, solution, demo, next steps |
+| [Field Research](docs/field-research/) | Interview analyses — Creator Ads and PlayNest (internal only) |
 
 ---
 
@@ -105,6 +90,18 @@ Full pipeline documentation and how to run the project: [`docs/agent-orchestrati
 |---|---|
 | Frontend | [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) |
 | API (Swagger) | [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs) |
+
+---
+
+## Demo Credentials
+
+| Role | Email | Password |
+|---|---|---|
+| Brand (Bella Natural Cosméticos) | demo-bella@aurora.internal | Demo@2026 |
+| Brand (NovaTech Eletrônicos) | demo-novatech@aurora.internal | Demo@2026 |
+| Agency | demo-agencia@aurora.internal | Demo@2026 |
+| Creator (Duda) | demo-duda@aurora.internal | Demo@2026 |
+| Creator (Carolina) | demo-carolina@aurora.internal | Demo@2026 |
 
 ---
 
