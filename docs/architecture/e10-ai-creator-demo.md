@@ -2,7 +2,7 @@
 
 **Date:** 2026-11-16
 **Epic:** E10 -- AI Creator Demo
-**Status:** Proposed -- awaiting approval before backend-dev or frontend-dev begin
+**Status:** Accepted -- implemented, tested, and merged to main (Sprint 7)
 
 ---
 
