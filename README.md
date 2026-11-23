@@ -1,6 +1,6 @@
 # Aurora
 
-**Creator media infrastructure for the mid-market:** Aurora treats a curated pool of nano and micro creators as one media unit that a brand can plan and buy, with an advantage built on the supply side by treating creators as customers instead of anonymous supply.
+Aurora treats a curated pool of nano and micro creators as one media unit that a brand can plan and buy, with an advantage built on the supply side by treating creators as customers instead of anonymous supply.
 
 
 <p align="center">
