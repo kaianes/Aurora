@@ -1,0 +1,1658 @@
+<title>Aurora · Pitch do Negócio</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:   #07111E;
+  --navy2:  #0E1F33;
+  --teal:   #00C4B4;
+  --teal2:  #00E6D3;
+  --purple: #9B72E6;
+  --pink:   #D45FA0;
+  --text:   #E6F2F8;
+  --text2:  #7AAEC0;
+  --text3:  #3E6880;
+  --border: rgba(255,255,255,.08);
+  --ok:     #3DC882;
+  --warn:   #F07A52;
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: var(--navy); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 16px; -webkit-font-smoothing: antialiased;
+}
+
+#progress-bar {
+  position: fixed; top: 0; left: 0; height: 3px;
+  background: linear-gradient(90deg, var(--teal), var(--purple));
+  transition: width .4s ease; z-index: 100;
+}
+#nav-dots {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 100;
+}
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--text3); cursor: pointer;
+  transition: background .2s, transform .2s;
+}
+.dot.active { background: var(--teal); transform: scale(1.4); }
+#counter {
+  position: fixed; top: 20px; right: 24px;
+  font-size: 11px; font-weight: 600; letter-spacing: .1em;
+  color: var(--text3); z-index: 100; font-variant-numeric: tabular-nums;
+}
+
+.slide-time {
+  position: absolute; bottom: 44px; right: 72px;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  color: var(--text3); z-index: 10;
+  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  padding: 4px 10px; border-radius: 20px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+.arrow {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,.06); border: 1px solid var(--border);
+  cursor: pointer; z-index: 100; color: var(--text2); font-size: 18px;
+  transition: background .2s, color .2s; user-select: none;
+}
+.arrow:hover { background: rgba(255,255,255,.12); color: var(--text); }
+#arrow-prev { left: 20px; }
+#arrow-next { right: 20px; }
+
+#deck { width: 100%; height: 100%; position: relative; }
+
+.slide {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 48px 80px; opacity: 0; pointer-events: none;
+  transition: opacity .45s ease, transform .45s ease;
+  transform: translateX(40px); overflow: hidden;
+}
+.slide.active  { opacity: 1; pointer-events: all; transform: translateX(0); }
+.slide.exit    { opacity: 0; transform: translateX(-40px); transition: opacity .3s ease, transform .3s ease; }
+.slide-content { width: 100%; max-width: 920px; position: relative; z-index: 2; }
+
+.eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 16px;
+}
+.eyebrow.purple { color: var(--purple); }
+.eyebrow.pink   { color: var(--pink); }
+.eyebrow.ok     { color: var(--ok); }
+.eyebrow.warn   { color: var(--warn); }
+
+h2 {
+  font-size: clamp(22px, 3.5vw, 38px);
+  font-weight: 800; line-height: 1.15; text-wrap: balance;
+}
+.sub {
+  font-size: clamp(14px, 1.6vw, 18px);
+  color: var(--text2); line-height: 1.6; margin-top: 12px; text-wrap: balance;
+}
+.source { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.blob { position: absolute; border-radius: 50%; filter: blur(100px); opacity: .18; pointer-events: none; z-index: 0; }
+
+.capa-tag {
+  font-size: 20px; font-weight: 900; letter-spacing: -.01em;
+  background: linear-gradient(135deg, var(--teal2), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 24px;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.capa-sparkle {
+  width: 20px; height: 20px; flex-shrink: 0;
+}
+.capa-statement {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  text-align: center; line-height: 1.3;
+  padding-bottom: 48px;
+}
+
+.capa-pergunta {
+  font-size: clamp(28px, 5vw, 60px);
+  font-weight: 900; line-height: 1.15; letter-spacing: -.02em;
+  color: var(--text); text-wrap: balance; max-width: 700px;
+  margin-bottom: 28px;
+}
+
+/* ── S1 Capa ── */
+#s1 { background: var(--navy); }
+#s1 .bg1 { width:600px;height:600px;background:var(--teal);top:-200px;right:-100px; }
+#s1 .bg2 { width:500px;height:500px;background:var(--purple);bottom:-150px;left:-100px; }
+#s1 .logo {
+  font-size: clamp(64px,10vw,100px); font-weight: 900; letter-spacing: -.03em;
+  background: linear-gradient(135deg, var(--teal2) 0%, var(--purple) 55%, var(--pink) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1; margin-bottom: 20px;
+}
+#s1 .tagline { font-size:clamp(16px,2.2vw,22px); color:var(--text2); max-width:540px; line-height:1.5; }
+#s1 .badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:32px; }
+#s1 .badge {
+  font-size:12px; font-weight:600; padding:6px 14px; border-radius:20px;
+  border:1px solid var(--border); color:var(--text2); background:rgba(255,255,255,.04);
+}
+#s1 .badge.accent { border-color:var(--teal); color:var(--teal); background:rgba(0,196,180,.08); }
+
+/* ── S2 Timeline ── */
+#s2 { background:var(--navy); }
+#s2 .bg1 { width:400px;height:400px;background:var(--teal);top:-100px;right:0; }
+.timeline-h { display:flex; align-items:center; margin-top:36px; position:relative; }
+.timeline-h::before {
+  content:""; position:absolute; top:18px; left:32px; right:32px;
+  height:2px; background:linear-gradient(90deg, var(--text3), var(--teal));
+}
+.tstep { display:flex; flex-direction:column; align-items:center; flex:1; gap:12px; position:relative; }
+.tstep-dot {
+  width:36px; height:36px; border-radius:50%; border:2px solid var(--text3);
+  background:var(--navy); display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:var(--text3); z-index:2;
+}
+.tstep.current .tstep-dot {
+  border-color:var(--teal); background:var(--teal); color:var(--navy);
+  width:44px; height:44px; font-size:13px; font-weight:700;
+  box-shadow:0 0 28px rgba(0,196,180,.5);
+}
+.tstep-label { font-size:clamp(10px,1.2vw,13px); color:var(--text3); text-align:center; font-weight:600; }
+.tstep.current .tstep-label { color:var(--teal); font-size:clamp(12px,1.4vw,15px); }
+
+@keyframes dot-pop {
+  0%   { opacity:0; transform:scale(0.3); }
+  60%  { transform:scale(1.15); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes line-grow {
+  from { transform:scaleX(0); transform-origin:left; }
+  to   { transform:scaleX(1); transform-origin:left; }
+}
+#s2.active .tstep-dot {
+  opacity:0;
+  animation: dot-pop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+#s2.active .tstep:nth-child(1) .tstep-dot { animation-delay: .1s; }
+#s2.active .tstep:nth-child(2) .tstep-dot { animation-delay: .4s; }
+#s2.active .tstep:nth-child(3) .tstep-dot { animation-delay: .7s; }
+#s2.active .tstep:nth-child(4) .tstep-dot { animation-delay: 1.0s; }
+#s2.active .tstep:nth-child(5) .tstep-dot { animation-delay: 1.3s; }
+#s2.active .tstep:nth-child(6) .tstep-dot { animation-delay: 1.6s; }
+#s2.active .tstep-label {
+  opacity:0;
+  animation: dot-pop .3s ease forwards;
+}
+#s2.active .tstep:nth-child(1) .tstep-label { animation-delay: .3s; }
+#s2.active .tstep:nth-child(2) .tstep-label { animation-delay: .6s; }
+#s2.active .tstep:nth-child(3) .tstep-label { animation-delay: .9s; }
+#s2.active .tstep:nth-child(4) .tstep-label { animation-delay: 1.2s; }
+#s2.active .tstep:nth-child(5) .tstep-label { animation-delay: 1.5s; }
+#s2.active .tstep:nth-child(6) .tstep-label { animation-delay: 1.8s; }
+#s2.active .timeline-h::before {
+  animation: line-grow 2s ease forwards;
+  animation-delay: .05s;
+}
+@media (prefers-reduced-motion: reduce) {
+  #s2.active .tstep-dot,
+  #s2.active .tstep-label { animation: none; opacity:1; }
+  #s2.active .timeline-h::before { animation: none; }
+}
+
+/* ── S3 Creators ── */
+#s3 { background:var(--navy); }
+#s3 .bg1 { width:500px;height:500px;background:var(--pink);bottom:-200px;right:-100px;opacity:.12; }
+.creator-split { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:28px; }
+.creator-col { display:flex; flex-direction:column; gap:12px; }
+.creator-col h3 { font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text3); padding-bottom:10px; border-bottom:1px solid var(--border); }
+.creator-stat { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:16px 18px; }
+.creator-stat .num { font-size:clamp(22px,3vw,34px); font-weight:900; letter-spacing:-.02em; color:var(--teal); line-height:1; }
+.creator-stat .num.pink   { color:var(--pink); }
+.creator-stat .num.purple { color:var(--purple); }
+.creator-stat .label { font-size:12px; color:var(--text2); margin-top:5px; line-height:1.4; }
+.creator-value-list { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.creator-value-list li {
+  display:flex; gap:12px; align-items:flex-start;
+  background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px;
+  padding:14px 16px; font-size:13px; color:var(--text2); line-height:1.4;
+}
+.creator-value-list li .vi { font-size:20px; flex-shrink:0; }
+.creator-value-list li strong { color:var(--text); display:block; font-size:14px; margin-bottom:2px; }
+
+/* ── S3 Bubble compare ── */
+.bubble-compare {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 16px; align-items: center; margin-top: 24px;
+}
+.bubble-side { display: flex; flex-direction: column; align-items: center; gap: 10px; justify-content: space-between; }
+.bubble-label-top {
+  font-size: 11px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text3);
+}
+.bubble-divider {
+  font-size: 28px; color: var(--text3); align-self: center;
+}
+.bubble-stage {
+  width: 100%; display: flex; align-items: center; justify-content: center;
+  gap: 12px; height: 165px;
+}
+.bubble {
+  border-radius: 50%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 2px; flex-shrink: 0;
+}
+.macro-stage { align-items: center; }
+.macro-bubble {
+  background: rgba(255,255,255,.06); border: 2px solid rgba(255,255,255,.12);
+  opacity: 0;
+}
+#s3.active .macro-bubble {
+  animation: bubble-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+#s3.active .macro-bubble.b1 { animation-delay:.1s; }
+#s3.active .macro-bubble.b2 { animation-delay:.3s; }
+.macro-bubble.b1 { width: 110px; height: 110px; }
+.macro-bubble.b2 { width: 86px;  height: 86px; }
+.bubble-seg { font-size: 11px; font-weight: 700; color: var(--text3); }
+.bubble-eng { font-size: 10px; color: var(--text3); }
+.nano-stage {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; align-items: center; justify-items: center;
+}
+.nano-bubble {
+  background: rgba(0,196,180,.15); border: 2px solid rgba(0,196,180,.3);
+  transition: transform .2s;
+  opacity: 0;
+}
+#s3.active .nano-bubble {
+  animation: bubble-pop .5s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes bubble-pop {
+  0%   { opacity:0; transform:scale(0.2); }
+  70%  { transform:scale(1.12); }
+  100% { opacity:1; transform:scale(1); }
+}
+#s3.active .nano-bubble.n1 { animation-delay:.85s; }
+#s3.active .nano-bubble.n2 { animation-delay:.95s; }
+#s3.active .nano-bubble.n3 { animation-delay:1.05s; }
+#s3.active .nano-bubble.n4 { animation-delay:1.15s; }
+#s3.active .nano-bubble.n5 { animation-delay:1.25s; }
+#s3.active .nano-bubble.n6 { animation-delay:1.35s; }
+#s3.active .nano-bubble.n7 { animation-delay:1.45s; }
+#s3.active .nano-bubble.n8 { animation-delay:1.55s; }
+#s3.active .nano-bubble.n9 { animation-delay:1.65s; }
+.nano-bubble .bubble-seg { font-size: 10px; font-weight: 700; color: var(--teal); }
+.nano-bubble.n1 { width:42px;height:42px; }
+.nano-bubble.n2 { width:32px;height:32px; }
+.nano-bubble.n3 { width:48px;height:48px; }
+.nano-bubble.n4 { width:29px;height:29px; }
+.nano-bubble.n5 { width:51px;height:51px; }
+.nano-bubble.n6 { width:35px;height:35px; }
+.nano-bubble.n7 { width:30px;height:30px; }
+.nano-bubble.n8 { width:40px;height:40px; }
+.nano-bubble.n9 { width:27px;height:27px; }
+.bubble-caption {
+  font-size: 12px; color: var(--text3); text-align: center; line-height: 1.4;
+}
+.bubble-caption strong { color: var(--teal); }
+.bubble-stat-row {
+  display: flex; justify-content: center; gap: 12px; margin-top: 20px;
+}
+.bstat {
+  border-radius: 10px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.bstat {
+  background: rgba(212,95,160,.08); border: 1px solid rgba(212,95,160,.25);
+}
+.bstat-num { font-size: 24px; font-weight: 900; color: var(--pink); letter-spacing:-.02em; flex-shrink:0; }
+.bstat-num.teal { color: var(--warn); }
+.bstat-label { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+/* ── S4 Problema ── */
+#s4 { background:var(--navy); }
+#s4 .bg1 { width:400px;height:400px;background:var(--warn);opacity:.10;bottom:-120px;right:-80px; }
+
+.challenge-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 36px;
+}
+.challenge-card {
+  border-radius: 20px; padding: 32px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+  opacity: 0; transform: translateY(20px);
+}
+#s4.active .challenge-card { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s4.active .cc1 { animation-delay: .1s; }
+#s4.active .cc2 { animation-delay: .25s; }
+#s4.active .cc3 { animation-delay: .4s; }
+#s4.active .cc4 { animation-delay: .55s; }
+.challenge-mult { opacity: 0; transform: translateY(10px); }
+#s4.active .challenge-mult { animation: card-rise .4s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .8s; }
+.cc1 { background: rgba(0,196,180,.08);  border: 1px solid rgba(0,196,180,.2); }
+.cc2 { background: rgba(155,114,230,.08); border: 1px solid rgba(155,114,230,.2); }
+.cc3 { background: rgba(212,95,160,.08);  border: 1px solid rgba(212,95,160,.2); }
+.cc4 { background: rgba(240,122,82,.08);  border: 1px solid rgba(240,122,82,.2); }
+.challenge-icon { font-size: 36px; line-height: 1; }
+.challenge-name {
+  font-size: 18px; font-weight: 800; letter-spacing: -.01em;
+}
+.cc1 .challenge-name { color: var(--teal); }
+.cc2 .challenge-name { color: var(--purple); }
+.cc3 .challenge-name { color: var(--pink); }
+.cc4 .challenge-name { color: var(--warn); }
+.challenge-mult {
+  margin-top: 32px; text-align: center;
+  font-size: clamp(20px, 2.8vw, 36px); font-weight: 900;
+  color: var(--text2); letter-spacing: -.02em;
+}
+.problem-split {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: center; margin-top: 32px;
+}
+.problem-left h2 { font-size: clamp(18px, 2.4vw, 30px); }
+.problem-right { display: flex; flex-direction: column; gap: 24px; }
+.friction-big {
+  display: grid; grid-template-columns: auto auto; gap: 10px; justify-content: start;
+}
+.friction-word {
+  font-size: clamp(12px, 1.4vw, 17px); font-weight: 900;
+  color: var(--teal); letter-spacing: -.01em; line-height: 1;
+  padding: 7px 16px; border-radius: 100px;
+  border: 2px solid rgba(0,196,180,.35); background: rgba(0,196,180,.07);
+}
+.friction-grid { display:flex; gap:10px; flex-wrap:wrap; margin-top:32px; }
+.friction-pill {
+  padding:10px 18px; border-radius:100px;
+  border:1px solid rgba(240,122,82,.35); background:rgba(240,122,82,.08);
+  font-size:14px; font-weight:600; color:var(--warn);
+}
+.friction-mult { display:flex; align-items:center; justify-content:flex-start; margin-top:16px; gap:12px; }
+.friction-mult .times { font-size:clamp(16px,2vw,24px); font-weight:900; color:var(--purple); }
+.friction-mult .explain { font-size:15px; color:var(--text2); line-height:1.4; }
+.quote-box {
+  margin-top:28px; padding:16px 20px;
+  border-left:3px solid var(--teal); background:rgba(0,196,180,.06);
+  border-radius:0 8px 8px 0; font-size:14px; font-style:italic;
+  color:var(--text2); line-height:1.6;
+}
+.quote-box cite { display:block; font-style:normal; font-size:12px; font-weight:600; color:var(--teal); margin-top:8px; }
+
+/* ── S3-ce stats ── */
+.ce-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-top: 36px;
+}
+.ce-stat {
+  border-radius: 16px; padding: 28px 24px;
+  display: flex; flex-direction: column; gap: 10px;
+  border-top: 4px solid;
+  opacity: 0; transform: translateY(20px);
+}
+#s3-ce.active .ce-stat {
+  animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes card-rise {
+  to { opacity: 1; transform: translateY(0); }
+}
+#s3-ce.active .ce-stat:nth-child(1) { animation-delay: .1s; }
+#s3-ce.active .ce-stat:nth-child(2) { animation-delay: .3s; }
+#s3-ce.active .ce-stat:nth-child(3) { animation-delay: .5s; }
+#s3-ce.active .ce-stat:nth-child(4) { animation-delay: .7s; }
+.ce-stat.teal  { background: rgba(0,196,180,.08);  border-color: var(--teal);   }
+.ce-stat.purple{ background: rgba(155,114,230,.08); border-color: var(--purple); }
+.ce-stat.pink  { background: rgba(212,95,160,.08);  border-color: var(--pink);   }
+.ce-stat.warn  { background: rgba(240,122,82,.08);  border-color: var(--warn);   }
+.ce-num {
+  font-size: clamp(32px,5vw,52px); font-weight: 900; letter-spacing: -.03em; line-height: 1;
+}
+.ce-stat.teal   .ce-num { color: var(--teal); }
+.ce-stat.purple .ce-num { color: var(--purple); }
+.ce-stat.pink   .ce-num { color: var(--pink); }
+.ce-stat.warn   .ce-num { color: var(--warn); }
+.ce-label  { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.ce-source { font-size: 11px; color: var(--text3); margin-top: auto; }
+
+/* ── S-fontes ── */
+.fontes-grid {
+  display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); grid-auto-rows: 1fr;
+  gap: 8px; margin-top: 12px;
+}
+.fonte-item {
+  background: rgba(255,255,255,.04); border-radius: 10px;
+  padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
+  box-sizing: border-box;
+}
+.fonte-label {
+  font-size: 9px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+}
+.fonte-label.teal   { color: var(--teal); }
+.fonte-label.purple { color: var(--purple); }
+.fonte-label.pink   { color: var(--pink); }
+.fonte-label.ok     { color: var(--ok); }
+.fonte-dado {
+  font-size: 11.5px; font-weight: 700; color: var(--text); line-height: 1.35;
+  flex: 1;
+}
+.fonte-ref {
+  font-size: 10px; color: var(--text3); line-height: 1.4;
+  overflow-wrap: break-word; word-break: break-all;
+  margin-top: auto; padding-top: 5px; border-top: 1px solid rgba(255,255,255,.06);
+}
+.fonte-ref em { color: var(--text); font-style: normal; font-weight: 600; }
+.fontes-nota {
+  margin-top: 8px; font-size: 10px; color: var(--warn); text-align: center;
+}
+
+/* ── S-statement ── */
+#s-statement { background: var(--navy); }
+.statement-phrase { line-height: 1.2; }
+.stmt-sparkle {
+  width: clamp(28px, 4vw, 52px); height: clamp(28px, 4vw, 52px);
+  display: block; margin: 20px auto 0;
+}
+.st-aurora {
+  font-size: clamp(40px, 7vw, 80px); font-weight: 900;
+  letter-spacing: -.03em;
+  background: linear-gradient(135deg, var(--teal2), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  opacity: 0; display: inline-block; transform: translateY(24px);
+}
+.st-mid {
+  font-size: clamp(32px, 5.5vw, 64px); font-weight: 800;
+  color: var(--text); letter-spacing: -.02em;
+  opacity: 0; display: inline-block; transform: translateY(24px);
+}
+.st-end {
+  font-size: clamp(22px, 3.5vw, 42px); font-weight: 500;
+  color: var(--text2); letter-spacing: -.01em;
+  opacity: 0; display: inline-block; transform: translateY(24px);
+}
+#s-statement.active .st-aurora { animation: card-rise .6s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .1s; }
+#s-statement.active .st-mid    { animation: card-rise .6s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .4s; }
+#s-statement.active .st-end    { animation: card-rise .6s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .7s; }
+
+/* ── S5 Pilares pesquisa ── */
+#s5 { background: var(--navy); }
+#s5 .bg1 { width:350px;height:350px;background:var(--warn);opacity:.12;bottom:0;right:0; }
+.pillars-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+.pillar { border-radius:16px; padding:26px 22px; display:flex; flex-direction:column; gap:14px; opacity:0; transform:translateY(20px); }
+#s5.active .pillar, #s9.active .pillar { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s5.active .p1, #s9.active .p1 { animation-delay: .1s; }
+#s5.active .p2, #s9.active .p2 { animation-delay: .3s; }
+#s5.active .p3, #s9.active .p3 { animation-delay: .5s; }
+.pillar.p1 { background:rgba(0,196,180,.08);  border:1px solid rgba(0,196,180,.2); }
+.pillar.p2 { background:rgba(155,114,230,.08); border:1px solid rgba(155,114,230,.2); }
+.pillar.p3 { background:rgba(212,95,160,.08);  border:1px solid rgba(212,95,160,.2); }
+.pillar-icon  { font-size:30px; line-height:1; }
+.pillar-num   { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; }
+.pillar.p1 .pillar-num { color:var(--teal); }
+.pillar.p2 .pillar-num { color:var(--purple); }
+.pillar.p3 .pillar-num { color:var(--pink); }
+.pillar-title { font-size:17px; font-weight:800; color:var(--text); line-height:1.2; }
+.pillar-desc  { font-size:13px; color:var(--text2); line-height:1.55; flex:1; }
+.pillar-evidence { font-size:11px; font-weight:600; letter-spacing:.06em; padding:5px 10px; border-radius:20px; align-self:flex-start; }
+.pillar.p1 .pillar-evidence { background:rgba(0,196,180,.15);  color:var(--teal); }
+.pillar.p2 .pillar-evidence { background:rgba(155,114,230,.15); color:var(--purple); }
+.pillar.p3 .pillar-evidence { background:rgba(212,95,160,.15);  color:var(--pink); }
+.pillars-source { margin-top:16px; padding:12px 18px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px; font-size:12px; color:var(--text3); line-height:1.5; }
+.pillars-source strong { color:var(--text2); }
+
+/* ── S6 Personas ── */
+#s6 { background: var(--navy); }
+#s6 .bg1 { width:450px;height:450px;background:var(--purple);bottom:-150px;left:-100px;opacity:.10; }
+.persona-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+.persona { border-radius:16px; padding:24px 20px; display:flex; flex-direction:column; gap:12px; opacity:0; transform:translateY(20px); }
+#s6.active .persona, #s8.active .persona { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s6.active .persona.m, #s8.active .persona.m { animation-delay: .1s; }
+#s6.active .persona.d, #s8.active .persona.d { animation-delay: .3s; }
+#s6.active .persona.r, #s8.active .persona.r { animation-delay: .5s; }
+.persona.m { background:rgba(0,196,180,.07);  border:1px solid rgba(0,196,180,.18); }
+.persona.d { background:rgba(212,95,160,.07);  border:1px solid rgba(212,95,160,.18); }
+.persona.r { background:rgba(155,114,230,.07); border:1px solid rgba(155,114,230,.18); }
+.persona-avatar { font-size:36px; line-height:1; }
+.persona-emoji  { font-size:32px; line-height:1; }
+.persona-name   { font-size:18px; font-weight:800; }
+.persona.m .persona-name { color:var(--teal); }
+.persona.d .persona-name { color:var(--pink); }
+.persona.r .persona-name { color:var(--purple); }
+.persona-role   { font-size:12px; color:var(--text3); font-weight:600; letter-spacing:.05em; margin-top:-8px; }
+.persona-pain   { font-size:13px; color:var(--text2); line-height:1.5; flex:1; }
+.persona-gain   { font-size:12px; font-weight:600; padding:8px 12px; border-radius:10px; }
+.persona.m .persona-gain { background:rgba(0,196,180,.12);  color:var(--teal); }
+.persona.d .persona-gain { background:rgba(212,95,160,.12);  color:var(--pink); }
+.persona.r .persona-gain { background:rgba(155,114,230,.12); color:var(--purple); }
+
+/* ── S7 Solução ── */
+#s7 {
+  background: radial-gradient(ellipse at 10% 20%, rgba(0,196,180,.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 90% 80%, rgba(155,114,230,.15) 0%, transparent 50%),
+              var(--navy);
+}
+#s7 .bg1 { width:500px;height:500px;background:var(--teal);top:-180px;left:-150px;opacity:.10; }
+#s7 .bg2 { width:400px;height:400px;background:var(--purple);bottom:-150px;right:-100px;opacity:.10; }
+
+.sol-flow {
+  display: grid; grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center; gap: 10px; margin-top: 44px;
+}
+.sol-arrow {
+  font-size: 22px; color: var(--text3); text-align: center; padding: 0 4px;
+}
+.sol-node {
+  border-radius: 18px; padding: 28px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+  text-align: center;
+  opacity: 0; transform: translateY(20px);
+}
+.sol-arrow { opacity: 0; }
+#s7.active .sol-node  { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s7.active .sol-arrow { animation: card-rise .4s cubic-bezier(.22,1,.36,1) forwards; }
+#s7.active .n1 { animation-delay: .1s; }
+#s7.active .sol-flow .sol-arrow:nth-child(2) { animation-delay: .3s; }
+#s7.active .n2 { animation-delay: .4s; }
+#s7.active .sol-flow .sol-arrow:nth-child(4) { animation-delay: .6s; }
+#s7.active .n3 { animation-delay: .7s; }
+#s7.active .sol-flow .sol-arrow:nth-child(6) { animation-delay: .9s; }
+#s7.active .n4 { animation-delay: 1.0s; }
+.sol-node.n1 { background: rgba(0,196,180,.10);  border: 1px solid rgba(0,196,180,.25); }
+.sol-node.n2 { background: rgba(155,114,230,.10); border: 1px solid rgba(155,114,230,.25); }
+.sol-node.n3 { background: rgba(212,95,160,.10);  border: 1px solid rgba(212,95,160,.25); }
+.sol-node.n4 { background: rgba(240,195,80,.10);  border: 1px solid rgba(240,195,80,.25); }
+.sol-node-num {
+  font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+}
+.sol-node.n1 .sol-node-num { color: var(--teal); }
+.sol-node.n2 .sol-node-num { color: var(--purple); }
+.sol-node.n3 .sol-node-num { color: var(--pink); }
+.sol-node.n4 .sol-node-num { color: #f0c350; }
+.sol-node-title {
+  font-size: 20px; font-weight: 900; color: var(--text); letter-spacing: -.02em;
+}
+.sol-node-desc {
+  font-size: 12px; color: var(--text2); line-height: 1.5;
+}
+.sol-tagline {
+  margin-top: 36px; text-align: center;
+  font-size: 15px; font-weight: 600; color: var(--text2);
+  padding: 14px 28px; border-radius: 100px;
+  background: rgba(255,255,255,.05); border: 1px solid var(--border);
+  display: inline-block; align-self: center;
+}
+
+/* ── S-tese ── */
+#s-tese {
+  background: radial-gradient(ellipse at 30% 40%, rgba(155,114,230,.22) 0%, transparent 55%),
+              radial-gradient(ellipse at 70% 60%, rgba(0,196,180,.18) 0%, transparent 50%),
+              var(--navy);
+}
+.tese-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 0; text-align: center;
+}
+.tese-line {
+  font-size: clamp(24px, 3.6vw, 42px); font-weight: 800;
+  line-height: 1.45; opacity: 0; transform: translateY(28px);
+  animation: card-rise .6s ease forwards;
+  display: block;
+}
+.tese-line { color: var(--text); }
+.tese-line.tl1 { animation-delay: .1s; }
+.tese-line.tl2 { animation-delay: .3s; }
+.tese-line.tl3 { animation-delay: .5s; }
+.tese-line.tl4 { animation-delay: .7s; }
+.tese-line .tk { font-style: normal; }
+.tese-sparkle {
+  display: block; margin: 28px auto 0;
+  opacity: 0; transform: scale(.6);
+  animation: sparkle-pop .5s ease forwards;
+  animation-delay: 1s;
+}
+@keyframes sparkle-pop {
+  to { opacity: 1; transform: scale(1); }
+}
+#s-tese.active .tese-line,
+#s-tese.active .tese-sparkle { animation-play-state: running; }
+.tese-line, .tese-sparkle { animation-play-state: paused; }
+
+/* ── S8 Pool curado ── */
+#s8 { background: var(--navy); }
+#s8 .bg1 { width:450px;height:450px;background:var(--teal);bottom:-150px;right:-100px;opacity:.10; }
+.pool-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+.pool-card { border-radius:16px; padding:24px 20px; display:flex; flex-direction:column; gap:14px; opacity:0; transform:translateY(20px); }
+#s10.active .pool-card { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s10.active .pool-card.m { animation-delay: .1s; }
+#s10.active .pool-card.d { animation-delay: .3s; }
+#s10.active .pool-card.r { animation-delay: .5s; }
+.pool-card.m { background:rgba(0,196,180,.07);  border:1px solid rgba(0,196,180,.2); }
+.pool-card.d { background:rgba(212,95,160,.07);  border:1px solid rgba(212,95,160,.2); }
+.pool-card.r { background:rgba(155,114,230,.07); border:1px solid rgba(155,114,230,.2); }
+.pool-who { display:flex; align-items:center; gap:10px; }
+.pool-emoji { font-size:24px; }
+.pool-name { font-size:16px; font-weight:800; }
+.pool-card.m .pool-name { color:var(--teal); }
+.pool-card.d .pool-name { color:var(--pink); }
+.pool-card.r .pool-name { color:var(--purple); }
+.pool-role { font-size:11px; color:var(--text3); font-weight:600; letter-spacing:.05em; }
+.pool-results { list-style:none; display:flex; flex-direction:column; gap:8px; flex:1; }
+.pool-results li { font-size:13px; color:var(--text2); display:flex; gap:8px; align-items:flex-start; line-height:1.4; }
+.pool-card.m .pool-results li::before { content:"✓"; color:var(--teal);   flex-shrink:0; font-weight:700; }
+.pool-card.d .pool-results li::before { content:"✓"; color:var(--pink);   flex-shrink:0; font-weight:700; }
+.pool-card.r .pool-results li::before { content:"✓"; color:var(--purple); flex-shrink:0; font-weight:700; }
+.pool-headline { font-size:14px; font-weight:700; padding:10px 14px; border-radius:10px; }
+.pool-card.m .pool-headline { background:rgba(0,196,180,.12);  color:var(--teal); }
+.pool-card.d .pool-headline { background:rgba(212,95,160,.12);  color:var(--pink); }
+.pool-card.r .pool-headline { background:rgba(155,114,230,.12); color:var(--purple); }
+.pool-bottom {
+  margin-top:16px; padding:14px 20px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px;
+  display:flex; align-items:center; gap:14px;
+}
+.pool-bottom-icon { font-size:18px; flex-shrink:0; }
+.pool-bottom-text { font-size:13px; color:var(--text2); line-height:1.5; }
+.pool-bottom-text strong { color:var(--text); }
+
+/* ── S9 IA ── */
+#s9 {
+  background: radial-gradient(ellipse at 10% 90%, rgba(155,114,230,.2) 0%, transparent 55%),
+              radial-gradient(ellipse at 90% 10%, rgba(0,196,180,.15) 0%, transparent 55%),
+              var(--navy2);
+}
+.ai-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+.ai-card { border-radius:16px; padding:24px 20px; display:flex; flex-direction:column; gap:12px; }
+.ai-card.fit   { background:rgba(0,196,180,.08);  border:1px solid rgba(0,196,180,.2); }
+.ai-card.brand { background:rgba(155,114,230,.08); border:1px solid rgba(155,114,230,.2); }
+.ai-card.auth  { background:rgba(212,95,160,.08);  border:1px solid rgba(212,95,160,.2); }
+.ai-icon  { font-size:28px; line-height:1; }
+.ai-title { font-size:17px; font-weight:800; }
+.ai-card.fit   .ai-title { color:var(--teal); }
+.ai-card.brand .ai-title { color:var(--purple); }
+.ai-card.auth  .ai-title { color:var(--pink); }
+.ai-desc { font-size:13px; color:var(--text2); line-height:1.55; flex:1; }
+.ai-who { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:5px 10px; border-radius:20px; align-self:flex-start; }
+.ai-card.fit   .ai-who { background:rgba(0,196,180,.15);  color:var(--teal); }
+.ai-card.brand .ai-who { background:rgba(155,114,230,.15); color:var(--purple); }
+.ai-card.auth  .ai-who { background:rgba(212,95,160,.15);  color:var(--pink); }
+.ai-bottom { margin-top:20px; padding:14px 20px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; display:flex; align-items:center; gap:16px; }
+.ai-bottom-icon { font-size:20px; flex-shrink:0; }
+.ai-bottom-text { font-size:14px; color:var(--text2); line-height:1.5; }
+.ai-bottom-text strong { color:var(--text); }
+
+/* ── S10 MVP → Hoje ── */
+#s10 {
+  background: radial-gradient(ellipse at 80% 20%, rgba(155,114,230,.18) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 80%, rgba(0,196,180,.12) 0%, transparent 50%),
+              var(--navy2);
+}
+.mvp-grid { display:grid; grid-template-columns:1fr auto 1fr; gap:20px; align-items:start; margin-top:28px; }
+.mvp-col { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:20px; }
+.mvp-col.now { border-color:rgba(0,196,180,.3); background:rgba(0,196,180,.06); }
+.mvp-head { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:14px; color:var(--text3); }
+.mvp-col.now .mvp-head { color:var(--teal); }
+.mvp-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.mvp-list li { font-size:13px; color:var(--text2); display:flex; gap:8px; align-items:flex-start; line-height:1.4; }
+.mvp-list li::before { content:"—"; color:var(--text3); flex-shrink:0; }
+.mvp-col.now .mvp-list li::before { content:"✓"; color:var(--teal); }
+.mvp-arrow { font-size:28px; color:var(--text3); display:flex; align-items:center; padding-top:60px; }
+
+/* ── S11 Demo ── */
+#s11 {
+  background: radial-gradient(ellipse at 30% 50%, rgba(0,196,180,.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 50%, rgba(155,114,230,.15) 0%, transparent 60%),
+              var(--navy);
+}
+.demo-steps { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:32px; }
+.demo-step { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:12px; padding:18px 14px; text-align:center; }
+.demo-step-num   { font-size:11px; font-weight:700; color:var(--teal); letter-spacing:.08em; margin-bottom:8px; }
+.demo-step-title { font-size:14px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.demo-step-time  { font-size:12px; color:var(--text3); font-variant-numeric:tabular-nums; }
+.demo-url { margin-top:24px; padding:14px 20px; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; gap:12px; }
+.demo-url-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); white-space:nowrap; }
+.demo-url-val   { font-size:14px; font-weight:600; color:var(--teal); }
+.demo-backup    { font-size:12px; color:var(--text3); margin-top:8px; font-style:italic; }
+
+/* ── S12 Mercado ── */
+#s12 { background:var(--navy); }
+#s12 .bg1 { width:400px;height:400px;background:var(--teal);bottom:-100px;right:-100px;opacity:.12; }
+.tsm-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px; }
+.tsm-col { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:14px; padding:20px 18px; }
+.tsm-label { font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+.tsm-title { font-size:13px; font-weight:700; color:var(--text2); margin-bottom:12px; }
+.tsm-def { font-size:11px; font-weight:600; color:var(--text3); letter-spacing:.04em; text-transform:uppercase; margin-bottom:10px; }
+.tsm-sub { font-size:11px; color:var(--text3); line-height:1.5; border-top:1px solid var(--border); padding-top:10px; margin-top:10px; }
+.tsm-num { font-size:clamp(22px,3.2vw,34px); font-weight:900; letter-spacing:-.02em; line-height:1; margin-bottom:8px; }
+.tsm-num.t { color:var(--text2); }
+.tsm-num.s { color:var(--teal); }
+.tsm-num.o { color:var(--purple); }
+.tsm-premissa { font-size:11px; color:var(--text3); line-height:1.5; border-top:1px solid var(--border); padding-top:10px; margin-top:10px; }
+.mid-market-box {
+  margin-top:16px; padding:14px 18px;
+  background:linear-gradient(135deg, rgba(0,196,180,.1), rgba(155,114,230,.08));
+  border:1px solid rgba(0,196,180,.25); border-radius:12px;
+  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
+}
+.mid-market-num { font-size:clamp(28px,4vw,44px); font-weight:900; color:var(--teal); letter-spacing:-.02em; white-space:nowrap; }
+.mid-market-desc { font-size:13px; color:var(--text2); line-height:1.5; }
+.mid-market-desc strong { color:var(--text); }
+
+/* ── S12b Mid-market ── */
+#s12b { background: var(--navy); }
+.mm-stat-block {
+  margin-top: 36px; display: flex; align-items: center; gap: 32px;
+  padding: 32px 36px; border-radius: 20px;
+  background: rgba(240,122,82,.07); border: 1px solid rgba(240,122,82,.2);
+}
+.mm-big {
+  font-size: clamp(64px, 10vw, 100px); font-weight: 900; letter-spacing: -.04em;
+  color: var(--warn); line-height: 1; flex-shrink: 0;
+}
+.mm-desc { font-size: clamp(15px, 1.8vw, 18px); color: var(--text2); line-height: 1.6; }
+.mm-bottom { margin-top: 24px; display: flex; flex-direction: column; gap: 4px; }
+.mm-chip {
+  display: inline-block; padding: 10px 18px; border-radius: 12px;
+  background: rgba(155,114,230,.08); border: 1px solid rgba(155,114,230,.2);
+  font-size: 14px; font-weight: 600; color: var(--purple); line-height: 1.5;
+}
+.mm-stat-block { opacity: 0; transform: translateY(20px); }
+.mm-chip       { opacity: 0; transform: translateY(10px); }
+#s12b.active .mm-stat-block { animation: card-rise .6s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .1s; }
+#s12b.active .mm-chip       { animation: card-rise .5s cubic-bezier(.22,1,.36,1) forwards; animation-delay: .5s; }
+
+/* ── S13 Modelo ── */
+#s13 {
+  background: radial-gradient(ellipse at 80% 10%, rgba(0,196,180,.15) 0%, transparent 50%),
+              radial-gradient(ellipse at 20% 90%, rgba(155,114,230,.12) 0%, transparent 50%),
+              var(--navy2);
+}
+
+/* biz model grid */
+.biz-model-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:32px; }
+.biz-model-card {
+  border-radius:16px; padding:28px 24px;
+  display:flex; flex-direction:column; gap:12px;
+  opacity:0; transform:translateY(20px);
+}
+.bmc-teal { background:rgba(0,196,180,.08); border:1px solid rgba(0,196,180,.2); }
+.bmc-pink  { background:rgba(212,95,160,.08); border:1px solid rgba(212,95,160,.2); }
+.bmc-icon  { font-size:28px; line-height:1; }
+.bmc-title { font-size:16px; font-weight:800; }
+.bmc-teal .bmc-title { color:var(--teal); }
+.bmc-pink  .bmc-title { color:var(--pink); }
+.bmc-desc  { font-size:13px; color:var(--text2); line-height:1.6; }
+.biz-tension {
+  margin-top:20px; padding:12px 18px; border-radius:10px;
+  background:rgba(240,122,82,.07); border:1px solid rgba(240,122,82,.2);
+  font-size:13px; color:var(--text2); line-height:1.5;
+  display:flex; gap:10px; align-items:flex-start;
+  opacity:0; transform:translateY(10px);
+}
+.biz-tension-icon { flex-shrink:0; color:var(--warn); font-size:16px; }
+#s13.active .biz-model-card { animation:card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s13.active .biz-model-card:nth-child(1) { animation-delay:.1s; }
+#s13.active .biz-model-card:nth-child(2) { animation-delay:.3s; }
+#s13.active .biz-tension { animation:card-rise .5s cubic-bezier(.22,1,.36,1) forwards; animation-delay:.55s; }
+
+/* num cards */
+.biz-nums { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:28px; }
+.biz-num-card {
+  border-radius:16px; padding:28px 24px;
+  background:rgba(255,255,255,.04); border:1px solid var(--border);
+  display:flex; flex-direction:column; gap:8px;
+  opacity:0; transform:translateY(20px);
+}
+#s13.active .biz-num-card { animation:card-rise .5s cubic-bezier(.22,1,.36,1) forwards; }
+#s13.active .biz-num-card:nth-child(1) { animation-delay:.2s; }
+#s13.active .biz-num-card:nth-child(2) { animation-delay:.45s; }
+.biz-num-label { font-size:13px; color:var(--text2); line-height:1.4; }
+.biz-num-val { font-size:clamp(36px,5vw,56px); font-weight:900; letter-spacing:-.03em; line-height:1; }
+.biz-num-val.teal   { color:var(--teal); }
+.biz-num-val.purple { color:var(--purple); }
+.biz-num-sub { font-size:12px; color:var(--text3); line-height:1.4; }
+
+/* streams */
+.biz-streams { display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
+.biz-stream {
+  font-size:12px; font-weight:700; padding:7px 16px; border-radius:100px;
+  display:flex; align-items:center; gap:8px;
+}
+.biz-stream span { font-weight:400; opacity:.75; }
+.s-teal   { background:rgba(0,196,180,.1);  border:1px solid rgba(0,196,180,.3);  color:var(--teal); }
+.s-purple { background:rgba(155,114,230,.1); border:1px solid rgba(155,114,230,.3); color:var(--purple); }
+.s-pink   { background:rgba(212,95,160,.1);  border:1px solid rgba(212,95,160,.3);  color:var(--pink); }
+
+/* flow */
+.biz-flow {
+  display:flex; align-items:center; gap:0; margin-top:28px;
+}
+.biz-node {
+  background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:16px;
+  padding:20px 18px; text-align:center; flex:1;
+  display:flex; flex-direction:column; gap:6px;
+  opacity:0; transform:translateY(16px);
+}
+.biz-node-label { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); }
+.biz-node-val   { font-size:clamp(18px,2.5vw,28px); font-weight:900; color:var(--text); letter-spacing:-.02em; }
+.biz-node-val.teal   { color:var(--teal); }
+.biz-node-val.purple { color:var(--purple); }
+.biz-node-val.ok     { color:var(--ok); }
+.biz-node-sub  { font-size:11px; color:var(--text3); }
+
+.biz-arrow {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  color:var(--text3); font-size:18px; padding:0 8px; flex-shrink:0;
+  opacity:0;
+}
+.biz-arrow span { font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--teal); white-space:nowrap; }
+
+/* animation */
+#s13.active .biz-node, #s13.active .biz-arrow,
+#s13b.active .biz-node, #s13b.active .biz-arrow { animation: card-rise .45s cubic-bezier(.22,1,.36,1) forwards; }
+#s13.active .bn1,  #s13b.active .bn1  { animation-delay:.1s; }
+#s13.active .biz-flow .biz-arrow:nth-child(2), #s13b.active .biz-flow .biz-arrow:nth-child(2) { animation-delay:.35s; }
+#s13.active .bn2,  #s13b.active .bn2  { animation-delay:.6s; }
+#s13.active .biz-flow .biz-arrow:nth-child(4), #s13b.active .biz-flow .biz-arrow:nth-child(4) { animation-delay:.85s; }
+#s13.active .bn3,  #s13b.active .bn3  { animation-delay:1.1s; }
+#s13.active .biz-flow .biz-arrow:nth-child(6), #s13b.active .biz-flow .biz-arrow:nth-child(6) { animation-delay:1.35s; }
+#s13.active .bn4,  #s13b.active .bn4  { animation-delay:1.6s; }
+
+/* streams animate */
+.biz-stream { opacity:0; transform:translateY(10px); }
+#s13.active .biz-stream { animation: card-rise .4s cubic-bezier(.22,1,.36,1) forwards; }
+#s13.active .biz-streams .biz-stream:nth-child(1) { animation-delay:.05s; }
+#s13.active .biz-streams .biz-stream:nth-child(2) { animation-delay:.15s; }
+#s13.active .biz-streams .biz-stream:nth-child(3) { animation-delay:.25s; }
+.unit-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:24px; }
+.unit-box { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:18px; }
+.unit-box.accent { border-color:rgba(0,196,180,.25); background:rgba(0,196,180,.06); }
+.unit-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--text3); margin-bottom:8px; }
+.unit-box.accent .unit-label { color:var(--teal); }
+.unit-val  { font-size:clamp(20px,3vw,32px); font-weight:900; color:var(--text); letter-spacing:-.02em; margin-bottom:4px; }
+.unit-desc { font-size:12px; color:var(--text2); line-height:1.4; }
+.tiers { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+.tier { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:10px; padding:14px; }
+.tier-name  { font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.tier-price { font-size:15px; font-weight:800; color:var(--teal); margin-bottom:4px; }
+.tier-price.p { color:var(--purple); }
+.tier-desc  { font-size:11px; color:var(--text3); line-height:1.4; }
+.caveat { margin-top:14px; padding:10px 14px; background:rgba(240,122,82,.08); border:1px solid rgba(240,122,82,.2); border-radius:8px; font-size:12px; color:var(--warn); line-height:1.4; }
+
+/* ── S14 Concorrência ── */
+#s14 { background:var(--navy); }
+.comp-grid { width:100%; margin-top:20px; border-collapse:collapse; }
+.comp-grid th { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--text3); padding:8px 16px; border-bottom:1px solid var(--border); text-align:left; }
+.comp-grid th:not(:first-child) { text-align:center; }
+.comp-grid td { padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.04); font-size:14px; color:var(--text2); vertical-align:middle; }
+.comp-grid td:not(:first-child) { text-align:center; }
+.comp-grid td:first-child { font-weight:700; color:var(--text); font-size:15px; }
+.comp-grid tr.aurora-row td { background:rgba(0,196,180,.07); color:var(--text); }
+.comp-grid tr.aurora-row td:first-child { color:var(--teal); }
+.ci-yes  { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(61,200,130,.15); color:var(--ok); font-size:16px; font-weight:700; }
+.ci-no   { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(240,122,82,.12); color:var(--warn); font-size:16px; }
+.ci-part { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,.07); color:var(--text3); font-size:14px; }
+.comp-insight { margin-top:16px; padding:12px 18px; border-left:3px solid var(--teal); background:rgba(0,196,180,.06); border-radius:0 8px 8px 0; font-size:14px; color:var(--text2); line-height:1.5; }
+.comp-insight strong { color:var(--text); font-weight:700; }
+/* legacy chip (other slides) */
+.chip { display:inline-flex; align-items:center; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+.chip.ok   { background:rgba(61,200,130,.15);  color:var(--ok); }
+.chip.warn { background:rgba(240,122,82,.15);   color:var(--warn); }
+.chip.mid  { background:rgba(255,255,255,.08);  color:var(--text3); }
+.chip.teal { background:rgba(0,196,180,.15);    color:var(--teal); }
+.diff-box { margin-top:16px; padding:14px 18px; background:linear-gradient(135deg,rgba(0,196,180,.1),rgba(155,114,230,.1)); border:1px solid rgba(0,196,180,.2); border-radius:10px; font-size:13.5px; color:var(--text); line-height:1.5; font-weight:500; }
+.diff-box strong { color:var(--teal); }
+
+/* ── S15 Tração + Próximos Passos ── */
+#s15 { background:var(--navy2); }
+#s15 .bg1 { width:400px;height:400px;background:var(--ok);bottom:-100px;right:-100px;opacity:.08; }
+.traction-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:20px; }
+.tract-box { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; opacity:0; transform:translateY(20px); }
+#s15.active .tract-box:nth-child(1) { animation: card-rise .5s ease forwards; animation-delay:.1s; }
+#s15.active .tract-box:nth-child(2) { animation: card-rise .5s ease forwards; animation-delay:.25s; }
+#s15.active .tract-box:nth-child(3) { animation: card-rise .5s ease forwards; animation-delay:.4s; }
+#s15.active .tract-box:nth-child(4) { animation: card-rise .5s ease forwards; animation-delay:.55s; }
+.roadmap-col { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 14px; opacity:0; transform:translateY(20px); }
+#s15.active .roadmap-col:nth-child(1) { animation: card-rise .5s ease forwards; animation-delay:.7s; }
+#s15.active .roadmap-col:nth-child(2) { animation: card-rise .5s ease forwards; animation-delay:.85s; }
+#s15.active .roadmap-col:nth-child(3) { animation: card-rise .5s ease forwards; animation-delay:1s; }
+#s15.active .roadmap-col:nth-child(4) { animation: card-rise .5s ease forwards; animation-delay:1.15s; }
+.tract-num   { font-size:clamp(24px,3.5vw,38px); font-weight:900; color:var(--teal); letter-spacing:-.02em; line-height:1; }
+.tract-label { font-size:11px; color:var(--text2); margin-top:5px; line-height:1.4; }
+.roadmap { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px; }
+.roadmap-col { background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 14px; }
+.roadmap-head { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.roadmap-head.dev   { color:var(--teal); }
+.roadmap-head.launch{ color:var(--purple); }
+.roadmap-head.mkt   { color:var(--pink); }
+.roadmap-head.biz   { color:var(--ok); }
+.roadmap-list { list-style:none; display:flex; flex-direction:column; gap:7px; }
+.roadmap-list li { font-size:11.5px; color:var(--text2); display:flex; gap:7px; line-height:1.4; }
+.roadmap-col:nth-child(1) .roadmap-list li::before { content:"→"; color:var(--teal);   flex-shrink:0; }
+.roadmap-col:nth-child(2) .roadmap-list li::before { content:"→"; color:var(--purple); flex-shrink:0; }
+.roadmap-col:nth-child(3) .roadmap-list li::before { content:"→"; color:var(--pink);   flex-shrink:0; }
+.roadmap-col:nth-child(4) .roadmap-list li::before { content:"→"; color:var(--ok);     flex-shrink:0; }
+
+/* ── S16 Fechamento ── */
+#s16 {
+  background: radial-gradient(ellipse at 20% 80%, rgba(0,196,180,.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 20%, rgba(155,114,230,.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, rgba(212,95,160,.12) 0%, transparent 60%),
+              var(--navy);
+}
+#s16 .logo-sm {
+  font-size:28px; font-weight:900; letter-spacing:-.02em;
+  background:linear-gradient(135deg, var(--teal2), var(--purple), var(--pink));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:12px;
+}
+.closing-tese { font-size:clamp(18px,2.8vw,30px); font-weight:800; line-height:1.25; text-wrap:balance; max-width:640px; margin-bottom:32px; }
+.closing-tese .hl { color:var(--teal); }
+.pedido-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+.pedido { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:12px; padding:18px 16px; }
+.pedido-label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--purple); margin-bottom:8px; }
+.pedido-text  { font-size:13px; color:var(--text2); line-height:1.5; }
+
+@media (max-width:700px) {
+  .slide { padding:40px 24px; }
+  .creator-split, .stat-row, .tsm-grid, .solution-steps, .ai-grid, .pillars-grid, .persona-grid, .pool-grid { grid-template-columns:1fr 1fr; }
+  .demo-steps, .traction-row, .roadmap { grid-template-columns:repeat(2,1fr); }
+  .mvp-grid { grid-template-columns:1fr; }
+  .mvp-arrow { display:none; }
+  .unit-grid { grid-template-columns:1fr; }
+  .tiers, .pedido-grid { grid-template-columns:1fr; }
+  .mid-market-box { grid-template-columns:1fr; }
+  #arrow-prev, #arrow-next { display:none; }
+}
+@media (max-width:500px) {
+  .creator-split, .solution-steps, .tsm-grid, .ai-grid, .pillars-grid, .persona-grid, .pool-grid { grid-template-columns:1fr; }
+}
+</style>
+
+<div id="progress-bar"></div>
+<div id="counter">1 / 16</div>
+<div class="arrow" id="arrow-prev">‹</div>
+<div class="arrow" id="arrow-next">›</div>
+<div id="nav-dots"></div>
+
+<div id="deck">
+
+  <!-- S1 Capa -->
+  <div class="slide active" id="s1">
+    <div class="blob bg1"></div><div class="blob bg2"></div>
+
+    <div class="slide-content">
+      <div class="capa-pergunta">Como a tecnologia está transformando o mercado de publicidade?</div>
+      <div class="capa-tag">Aurora<svg class="capa-sparkle" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="sparkle-capa" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="50%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="url(#sparkle-capa)"/></svg></div>
+      <div class="badges">
+        <div class="badge">Engenharia de Software · Kaiane Souza Cordeiro</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S2 Contexto -->
+  <div class="slide" id="s2">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow">Contexto</div>
+      <h2>A publicidade sempre migrou<br>para onde a atenção está</h2>
+      <p class="sub">Cada virada tecnológica mudou como marcas compram mídia.</p>
+      <div class="timeline-h">
+        <div class="tstep"><div class="tstep-dot"></div><div class="tstep-label">Jornal</div></div>
+        <div class="tstep"><div class="tstep-dot"></div><div class="tstep-label">Rádio</div></div>
+        <div class="tstep"><div class="tstep-dot"></div><div class="tstep-label">TV</div></div>
+        <div class="tstep"><div class="tstep-dot"></div><div class="tstep-label">Internet</div></div>
+        <div class="tstep"><div class="tstep-dot"></div><div class="tstep-label">Redes Sociais</div></div>
+        <div class="tstep current"><div class="tstep-dot"></div><div class="tstep-label">Creators</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 O que é a Creator Economy -->
+  <div class="slide" id="s3-ce">
+    <div class="blob" style="width:500px;height:500px;background:var(--teal);top:-150px;right:-100px;opacity:.12;"></div>
+    <div class="blob" style="width:400px;height:400px;background:var(--purple);bottom:-100px;left:-80px;opacity:.10;"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow">Creator Economy</div>
+      <h2>Uma nova economia em torno<br>de quem cria conteúdo digital</h2>
+      <p class="sub">Criadores monetizam diretamente sua audiência. Com ou sem agência por trás.</p>
+      <div class="ce-stats">
+        <div class="ce-stat teal">
+          <div class="ce-num">200 M+</div>
+          <div class="ce-label">criadores profissionais no mundo</div>
+          <div class="ce-source">Linktree Creator Report, 2023</div>
+        </div>
+        <div class="ce-stat purple">
+          <div class="ce-num">R$1,6 bi</div>
+          <div class="ce-label">do orçamento de mídia BR direcionado a creators</div>
+          <div class="ce-source">Kantar IBOPE, 2025</div>
+        </div>
+        <div class="ce-stat pink">
+          <div class="ce-num">+23%</div>
+          <div class="ce-label">crescimento anual da creator economy</div>
+          <div class="ce-source">Grand View Research, 2026</div>
+        </div>
+        <div class="ce-stat warn">
+          <div class="ce-num">81%</div>
+          <div class="ce-label">dos brasileiros já compraram algo recomendado por um influenciador</div>
+          <div class="ce-source">YouPix + Nielsen, 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S3 A mudança: macro → nano/micro -->
+  <div class="slide" id="s3">
+    <div class="blob" style="width:500px;height:500px;background:var(--purple);top:-200px;left:-100px;opacity:.10;"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow pink">A Mudança</div>
+      <h2>A creator economy mudou: de poucos<br>creators gigantes para milhares de nano e micro</h2>
+      <div class="bubble-compare">
+        <div class="bubble-side">
+          <div class="bubble-label-top">Antes</div>
+          <div class="bubble-stage macro-stage">
+            <div class="bubble macro-bubble b1">
+              <span class="bubble-seg">5M+ seg.</span>
+              <span class="bubble-eng">1,5% eng.</span>
+            </div>
+            <div class="bubble macro-bubble b2">
+              <span class="bubble-seg">3M+ seg.</span>
+              <span class="bubble-eng">1,2% eng.</span>
+            </div>
+          </div>
+          <div class="bubble-caption">Poucos · alto custo · baixo engajamento</div>
+        </div>
+        <div class="bubble-divider">→</div>
+        <div class="bubble-side">
+          <div class="bubble-label-top" style="color:var(--teal)">Hoje</div>
+          <div class="bubble-stage nano-stage">
+            <div class="bubble nano-bubble n1"><span class="bubble-seg">15k</span></div>
+            <div class="bubble nano-bubble n2"><span class="bubble-seg">8k</span></div>
+            <div class="bubble nano-bubble n3"><span class="bubble-seg">22k</span></div>
+            <div class="bubble nano-bubble n4"><span class="bubble-seg">5k</span></div>
+            <div class="bubble nano-bubble n5"><span class="bubble-seg">30k</span></div>
+            <div class="bubble nano-bubble n6"><span class="bubble-seg">12k</span></div>
+            <div class="bubble nano-bubble n7"><span class="bubble-seg">9k</span></div>
+            <div class="bubble nano-bubble n8"><span class="bubble-seg">18k</span></div>
+            <div class="bubble nano-bubble n9"><span class="bubble-seg">7k</span></div>
+          </div>
+          <div class="bubble-caption" style="color:var(--teal)">Milhares · custo acessível · <strong>8,7% eng.</strong></div>
+        </div>
+      </div>
+      <div class="bubble-stat-row">
+        <div class="bstat"><span class="bstat-num" style="color:var(--pink)">45,5%</span><span class="bstat-label">do gasto em influencer marketing vai para nano/micro em 2026 · EMARKETER</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 Problema -->
+  <div class="slide" id="s4">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow warn">O Desafio</div>
+      <h2>Cada criador exige quatro operações.<br>Multiplique por centenas.</h2>
+      <div class="challenge-grid">
+        <div class="challenge-card cc1">
+          <div class="challenge-icon">📋</div>
+          <div class="challenge-name">Briefings</div>
+        </div>
+        <div class="challenge-card cc2">
+          <div class="challenge-icon">⏰</div>
+          <div class="challenge-name">Prazos</div>
+        </div>
+        <div class="challenge-card cc3">
+          <div class="challenge-icon">💸</div>
+          <div class="challenge-name">Pagamentos</div>
+        </div>
+        <div class="challenge-card cc4">
+          <div class="challenge-icon">🛡️</div>
+          <div class="challenge-name">Brand safety</div>
+        </div>
+      </div>
+      <div class="challenge-mult">× centenas ou milhares de criadores</div>
+    </div>
+  </div>
+
+  <!-- S5 3 Pilares da pesquisa -->
+  <div class="slide" id="s5">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow ok">Validação de Mercado</div>
+      <h2>Pesquisa com profissionais da Creator Ads e da PlayNest<br>indica 3 oportunidades</h2>
+      <p class="sub">Duas empresas do setor, ouvidas de forma independente, revelaram três gaps ainda não resolvidos, cada um uma oportunidade concreta para Aurora.</p>
+      <div class="pillars-grid" style="margin-top:28px;">
+        <div class="pillar p1">
+          <div class="pillar-icon">🔒</div>
+          <div class="pillar-title">Confiança e segurança</div>
+          <div class="pillar-desc">IA como suporte, humano sempre decide</div>
+          <div class="pillar-evidence">Creator Ads · PlayNest, 2026</div>
+        </div>
+        <div class="pillar p2">
+          <div class="pillar-icon">🏪</div>
+          <div class="pillar-title">Mid-market desatendido</div>
+          <div class="pillar-desc">Ticket mínimo atual: R$50k. PMEs excluídas</div>
+          <div class="pillar-evidence">Creator Ads, 2026</div>
+        </div>
+        <div class="pillar p3">
+          <div class="pillar-icon">🤝</div>
+          <div class="pillar-title">Creator como parceiro</div>
+          <div class="pillar-desc">Onboarding até pagamento digno retém o ecossistema</div>
+          <div class="pillar-evidence">PlayNest · Squid Census, 2024</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S-statement -->
+  <div class="slide" id="s-statement">
+    <div class="blob" style="width:700px;height:700px;background:var(--teal);top:-300px;right:-200px;opacity:.12;"></div>
+    <div class="blob" style="width:600px;height:600px;background:var(--purple);bottom:-250px;left:-200px;opacity:.10;"></div>
+
+    <div class="slide-content" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;">
+      <div class="statement-phrase">
+        <span class="st-aurora">Aurora,</span><br>
+        <span class="st-mid">centenas de creators,</span><br>
+        <span class="st-end">com tecnologia e inteligência artificial</span><br>
+        <svg class="stmt-sparkle" viewBox="0 0 24 24" aria-hidden="true"><defs><linearGradient id="sparkle-stmt" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="50%" stop-color="#38BDF8"/><stop offset="100%" stop-color="#34D399"/></linearGradient></defs><path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="url(#sparkle-stmt)"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- S6 Personas -->
+  <div class="slide" id="s6">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow pink">Para Quem</div>
+      <h2>Três personas, um ecossistema</h2>
+      <div class="persona-grid" style="margin-top:32px;">
+        <div class="persona m">
+          <div class="persona-emoji">📣</div>
+          <div class="persona-name">Marina</div>
+          <div class="persona-role">Marca</div>
+          <div class="persona-gain">✓ Orçamento previsível. Resultado mensurável.</div>
+        </div>
+        <div class="persona d">
+          <div class="persona-emoji">📱</div>
+          <div class="persona-name">Duda</div>
+          <div class="persona-role">Creator · 15k seguidores</div>
+          <div class="persona-gain">✓ Briefing claro. Pagamento no prazo.</div>
+        </div>
+        <div class="persona r">
+          <div class="persona-emoji">🤝</div>
+          <div class="persona-name">Renata</div>
+          <div class="persona-role">Agência</div>
+          <div class="persona-gain">✓ White-label. Escala sem headcount.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S7 Solução -->
+  <div class="slide" id="s7">
+    <div class="blob bg1"></div>
+    <div class="blob bg2"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow teal">A Solução</div>
+      <h2>Uma unidade de mídia que<br>a marca compra inteira</h2>
+      <div class="sol-flow">
+        <div class="sol-node n1">
+          <div class="sol-node-num">01</div>
+          <div class="sol-node-title">Define</div>
+          <div class="sol-node-desc">Orçamento, público e mensagem</div>
+        </div>
+        <div class="sol-arrow">→</div>
+        <div class="sol-node n2">
+          <div class="sol-node-num">02</div>
+          <div class="sol-node-title">Combina</div>
+          <div class="sol-node-desc">IA ranqueia · humano decide</div>
+        </div>
+        <div class="sol-arrow">→</div>
+        <div class="sol-node n3">
+          <div class="sol-node-num">03</div>
+          <div class="sol-node-title">Opera</div>
+          <div class="sol-node-desc">Briefing, aprovação, brand safety</div>
+        </div>
+        <div class="sol-arrow">→</div>
+        <div class="sol-node n4">
+          <div class="sol-node-num">04</div>
+          <div class="sol-node-title">Paga</div>
+          <div class="sol-node-desc">Invoice única, todos os creators</div>
+        </div>
+      </div>
+      <div class="sol-tagline">O criador é tratado como parceiro. A marca compra resultado. A agência atende mais clientes sem contratar mais pessoas.</div>
+    </div>
+  </div>
+
+
+  <!-- S9 IA -->
+  <div class="slide" id="s9">
+    <div class="slide-content">
+      <div class="eyebrow purple">Diferencial Tecnológico · Human on the Loop</div>
+      <h2>IA não é detalhe: é o que torna<br>possível operar centenas de creators</h2>
+      <div class="pillars-grid" style="margin-top:32px;">
+        <div class="pillar p1">
+          <div class="pillar-icon">🎯</div>
+          <div class="pillar-title">Fit Score</div>
+          <div class="pillar-desc">Matching por IA em 4 dimensões. Lista de criadores indicados em minutos, não dias</div>
+          <div class="pillar-evidence">Humano sempre decide</div>
+        </div>
+        <div class="pillar p2">
+          <div class="pillar-icon">🛡️</div>
+          <div class="pillar-title">Brand Safety</div>
+          <div class="pillar-desc">Claude checa cada conteúdo antes da publicação. Zero exposição acidental</div>
+          <div class="pillar-evidence">Revisão humana no limite</div>
+        </div>
+        <div class="pillar p3">
+          <div class="pillar-icon">🔍</div>
+          <div class="pillar-title">Autenticidade</div>
+          <div class="pillar-desc">Detecta fraude de seguidores no onboarding. Único no mid-market</div>
+          <div class="pillar-evidence">IA sinaliza · humano bloqueia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S10 MVP → Hoje -->
+  <div class="slide" id="s10">
+
+    <div class="slide-content">
+      <div class="eyebrow">Produto</div>
+      <h2>MVP validado: 9 épicos entregues,<br>cada um nasceu de uma dor real</h2>
+      <div class="pool-grid">
+
+        <div class="pool-card m">
+          <div class="pool-who">
+            <div class="pool-emoji">🤖</div>
+            <div><div class="pool-name">Inteligência</div><div class="pool-role">Matching · Brand Safety</div></div>
+          </div>
+          <ul class="pool-results">
+            <li>Fit score em 4 dimensões via IA</li>
+            <li>Brand safety automático (Claude)</li>
+            <li>Shortlist curado em minutos, não dias</li>
+          </ul>
+          <div class="pool-headline">IA torna possível operar em escala</div>
+        </div>
+
+        <div class="pool-card d">
+          <div class="pool-who">
+            <div class="pool-emoji">📋</div>
+            <div><div class="pool-name">Operação</div><div class="pool-role">Briefing · Aprovação · Portal</div></div>
+          </div>
+          <ul class="pool-results">
+            <li>Briefing estruturado com aprovação por etapa</li>
+            <li>Portal do creator com aceite em 1 clique</li>
+            <li>Histórico e reputação acumulada</li>
+          </ul>
+          <div class="pool-headline">Sem e-mail, sem planilha, sem ruído</div>
+        </div>
+
+        <div class="pool-card r">
+          <div class="pool-who">
+            <div class="pool-emoji">💰</div>
+            <div><div class="pool-name">Financeiro</div><div class="pool-role">Invoice · Analytics · White-label</div></div>
+          </div>
+          <ul class="pool-results">
+            <li>Invoice consolidada de todo o pool</li>
+            <li>Analytics e relatórios exportáveis</li>
+            <li>White-label para agências</li>
+          </ul>
+          <div class="pool-headline">Resultado mensurável, pagamento digno</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- S11 Demo -->
+  <div class="slide" id="s11">
+
+    <div class="slide-content">
+      <div class="eyebrow">Demo ao Vivo</div>
+      <h2>Em 3 minutos: da meta da marca<br>até a compra do pool</h2>
+      <div class="demo-steps">
+        <div class="demo-step"><div class="demo-step-num">01</div><div class="demo-step-title">Login e perfil</div><div class="demo-step-time">0:30</div></div>
+        <div class="demo-step"><div class="demo-step-num">02</div><div class="demo-step-title">Campanha e cotação</div><div class="demo-step-time">0:50</div></div>
+        <div class="demo-step"><div class="demo-step-num">03</div><div class="demo-step-title">Confirmação de compra</div><div class="demo-step-time">0:30</div></div>
+        <div class="demo-step"><div class="demo-step-num">04</div><div class="demo-step-title">Shortlist com fit score</div><div class="demo-step-time">0:50</div></div>
+        <div class="demo-step"><div class="demo-step-num">05</div><div class="demo-step-title">Exclusão e override</div><div class="demo-step-time">0:20</div></div>
+      </div>
+      <div class="demo-url">
+        <div class="demo-url-label">URL ao vivo</div>
+        <div class="demo-url-val">aurora-kaiane.vercel.app</div>
+      </div>
+      <div class="demo-backup">Plano B: vídeo curto salvo localmente</div>
+    </div>
+  </div>
+
+  <!-- S8 Resultados por persona (após demos) -->
+  <div class="slide" id="s8">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow pink">Resultados</div>
+      <h2>Uma operação, três vitórias</h2>
+      <div class="persona-grid" style="margin-top:32px;">
+        <div class="persona m">
+          <div class="persona-avatar">👩‍💼</div>
+          <div class="persona-name">Marina</div>
+          <div class="persona-role">Marca mid-market</div>
+          <div class="persona-gain">✓ Campanha aprovada em horas. Resultado mensurável.</div>
+        </div>
+        <div class="persona d">
+          <div class="persona-avatar">📱</div>
+          <div class="persona-name">Duda</div>
+          <div class="persona-role">Creator · 15k seguidores</div>
+          <div class="persona-gain">✓ Briefing claro. Pagamento confirmado antes de publicar.</div>
+        </div>
+        <div class="persona r">
+          <div class="persona-avatar">🏢</div>
+          <div class="persona-name">Renata</div>
+          <div class="persona-role">Agência mid-size</div>
+          <div class="persona-gain">✓ White-label. Mais clientes, sem contratar mais pessoas.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12 Mercado TAM/SAM/SOM + mid-market -->
+  <div class="slide" id="s12">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow">Mercado</div>
+      <h2>Mercado grande e com evidência de crescimento</h2>
+      <div class="tsm-grid">
+        <div class="tsm-col">
+          <div class="tsm-label">TAM</div>
+          <div class="tsm-def">Mercado total disponível</div>
+          <div class="tsm-num t">R$1,6 bi</div>
+          <div class="tsm-sub">Mercado de influencer marketing no Brasil<br><span class="source">Kantar IBOPE, 2025</span></div>
+        </div>
+        <div class="tsm-col">
+          <div class="tsm-label">SAM</div>
+          <div class="tsm-def">Mercado que conseguimos servir</div>
+          <div class="tsm-num s">~R$728 M</div>
+          <div class="tsm-sub">Fatia nano/micro no Brasil (45,5% do creator spend)<br><span class="source">EMARKETER, 2026</span></div>
+        </div>
+        <div class="tsm-col">
+          <div class="tsm-label">SOM</div>
+          <div class="tsm-def">Captura realista em 24 meses</div>
+          <div class="tsm-num o">~R$450 k/ano</div>
+          <div class="tsm-sub">receita recorrente anual estimada · ~50 marcas ativas × R$9k<br><span class="source">Premissa interna</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S12b Mid-market -->
+
+  <!-- S13 Modelo -->
+  <div class="slide" id="s13">
+    <div class="slide-content">
+      <div class="eyebrow">Modelo de Negócios</div>
+      <h2>A marca compra um pool de creators<br>como se fosse uma unidade de mídia</h2>
+      <div class="biz-model-grid">
+        <div class="biz-model-card bmc-teal">
+          <div class="bmc-icon">🏷️</div>
+          <div class="bmc-title">Take rate · Marcas</div>
+          <div class="bmc-desc">Aurora fica com uma margem sobre o valor investido na campanha.<br><br>Ex: marca investe R$15k, Aurora retém 20%, ou seja, R$3k por campanha.</div>
+        </div>
+        <div class="biz-model-card bmc-pink">
+          <div class="bmc-icon">🏢</div>
+          <div class="bmc-title">White-label · Agências</div>
+          <div class="bmc-desc">A marca contrata a agência, a agência contrata a Aurora.<br><br>Aurora retém 20% do orçamento da campanha, e a agência entrega tudo com a própria marca.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S14 Concorrência -->
+  <div class="slide" id="s14">
+    <div class="slide-content">
+      <div class="eyebrow">Concorrência</div>
+      <h2>Todos os players focam em enterprise.<br>Mid-market ainda sem solução.</h2>
+      <table class="comp-grid">
+        <thead>
+          <tr>
+            <th>Player</th>
+            <th>Foco de mercado</th>
+            <th>Acessa mid-market?</th>
+            <th>Criador como parceiro?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Creator Ads</td>
+            <td>Top 20 anunciantes · R$50k mínimo</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-part">~</span></td>
+          </tr>
+          <tr>
+            <td>Squid / Wake</td>
+            <td>Enterprise · produto mid congelado (2022)</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>CreatorIQ</td>
+            <td>Enterprise global · US$35k/ano</td>
+            <td><span class="ci-no">✗</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Sandwiche</td>
+            <td>Performance por comissão/venda</td>
+            <td><span class="ci-part">~</span></td>
+            <td><span class="ci-no">✗</span></td>
+          </tr>
+          <tr class="aurora-row">
+            <td>Aurora</td>
+            <td>Mid-market + agências</td>
+            <td><span class="ci-yes">✓</span></td>
+            <td><span class="ci-yes">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="comp-insight">Aurora é a única plataforma que combina <strong>fit score por IA</strong>, <strong>brand safety automático</strong> e <strong>pool curado como produto</strong> para o mid-market brasileiro.</div>
+    </div>
+  </div>
+
+  <!-- S15 Tração + Roadmap -->
+  <div class="slide" id="s15">
+    <div class="blob bg1"></div>
+
+    <div class="slide-content">
+      <div class="eyebrow ok">Tração e Próximos Passos</div>
+      <h2>Solução funcional hoje, plano claro<br>para lançamento e crescimento</h2>
+      <div class="traction-row">
+        <div class="tract-box"><div class="tract-num">9</div><div class="tract-label">módulos de produto implementados</div></div>
+        <div class="tract-box"><div class="tract-num">726</div><div class="tract-label">testes automatizados passando</div></div>
+        <div class="tract-box"><div class="tract-num">64</div><div class="tract-label">decisões arquiteturais documentadas</div></div>
+        <div class="tract-box"><div class="tract-num">Deploy</div><div class="tract-label">Railway + Vercel em produção real</div></div>
+      </div>
+      <div class="roadmap">
+        <div class="roadmap-col">
+          <div class="roadmap-head dev">Produto (meses 1–3)</div>
+          <ul class="roadmap-list">
+            <li>Integrar pagamento real (Pix/PSP)</li>
+            <li>Conectar APIs das redes sociais</li>
+            <li>Testar os módulos com usuários reais</li>
+            <li>Corrigir bugs documentados</li>
+          </ul>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-head launch">Lançamento (meses 3–6)</div>
+          <ul class="roadmap-list">
+            <li>Piloto fechado com 3–5 marcas</li>
+            <li>Pool de 50 creators curados</li>
+            <li>1 agência parceira white-label</li>
+            <li>Medir satisfação e retenção</li>
+          </ul>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-head mkt">Penetração (meses 6–12)</div>
+          <ul class="roadmap-list">
+            <li>2 vendedores foco em mid-market</li>
+            <li>Meta: 20 marcas ativas</li>
+            <li>Marketing via creators parceiros</li>
+            <li>Parceria com associações de PMEs</li>
+          </ul>
+        </div>
+        <div class="roadmap-col">
+          <div class="roadmap-head biz">Viabilidade (mês 12+)</div>
+          <ul class="roadmap-list">
+            <li>Validar margem com dados reais</li>
+            <li>50 marcas ativas → R$450k/ano</li>
+            <li>Receita cobre os custos operacionais</li>
+            <li>Captação se modelo validado</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S-fontes -->
+  <div class="slide" id="s-fontes">
+    <div class="blob" style="width:400px;height:400px;background:var(--teal);bottom:-150px;right:-100px;opacity:.08;"></div>
+    <div class="slide-content">
+      <div class="eyebrow">Referências</div>
+      <h2>Fontes</h2>
+      <div class="fontes-grid">
+
+        <div class="fonte-item">
+          <div class="fonte-label teal">Creator Economy · Slide 3</div>
+          <div class="fonte-dado">200M+ criadores globais</div>
+          <div class="fonte-ref">Linktree. <em>Creator Report 2023.</em> linktr.ee/creator-report-23</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label teal">Mídia BR · Slides 3, 12</div>
+          <div class="fonte-dado">2% do orçamento total de mídia vai para creators · mercado de R$80bi</div>
+          <div class="fonte-ref">Kantar IBOPE Media. <em>Investimento publicitário cresce dois dígitos no Brasil.</em> kantaribopemedia.com/conteudo/investimento-publicitario-cresce-dois-digitos-no-brasil-pela-primeira-vez-em-tres-anos</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label purple">Crescimento · Slide 3</div>
+          <div class="fonte-dado">+23% CAGR da creator economy (2026–2033)</div>
+          <div class="fonte-ref">Grand View Research. <em>Creator Economy Market Report, 2026–2033.</em> grandviewresearch.com/industry-analysis/creator-economy-market-report</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label teal">Engajamento · Slide 5</div>
+          <div class="fonte-dado">Nano creators: 8,7% de engajamento médio vs. 1,5% de macro</div>
+          <div class="fonte-ref">Bettoni; Squid. <em>Creator Census Brazil 2024.</em> squid.tv/creator-census</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label purple">Nano/micro share · Slides 5, 12</div>
+          <div class="fonte-dado">45,5% do gasto em influencer marketing vai para nano/micro em 2026</div>
+          <div class="fonte-ref">EMARKETER. <em>Influencer Marketing 2026 Forecast.</em> emarketer.com/chart/c/361073</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label pink">Descoberta de produtos · Slide 5</div>
+          <div class="fonte-dado">81% dos brasileiros já compraram algo recomendado por um influenciador</div>
+          <div class="fonte-ref">YouPix + Nielsen. <em>Consumo e Influência 2026.</em> youpix.com.br/consumo-e-influencia-nova-pesquisa-da-youpix-nielsen</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label ok">PMEs ativas · Slide 12</div>
+          <div class="fonte-dado">10,9 milhões de MPEs no Brasil sem acesso a creator marketing profissional</div>
+          <div class="fonte-ref">SEBRAE. <em>Painel de Empresas.</em> datasebrae.com.br/empresas</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label ok">Ticket mínimo · Slides 6, 14</div>
+          <div class="fonte-dado">R$50k investimento mínimo para mid-market na Creator Ads</div>
+          <div class="fonte-ref">Nascimento, L. Pesquisa primária, entrevista set. 2026. creatorads.com.br</div>
+        </div>
+
+        <div class="fonte-item">
+          <div class="fonte-label ok">Gaps qualitativos · Slide 6</div>
+          <div class="fonte-dado">3 gaps não resolvidos confirmados por empresas do setor</div>
+          <div class="fonte-ref">Paes Leme, G. (PlayNest). Pesquisa primária, entrevista set. 2026. playnest.com.br</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- S16 Fechamento -->
+  <div class="slide" id="s16">
+    <div class="slide-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:24px;">
+      <div style="font-size:clamp(52px,8vw,96px);font-weight:800;color:var(--text);letter-spacing:-.02em;">Obrigada</div>
+      <svg width="48" height="48" viewBox="0 0 24 24" aria-hidden="true">
+        <defs>
+          <linearGradient id="sparkle-fin" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#A78BFA"/>
+            <stop offset="50%" stop-color="#38BDF8"/>
+            <stop offset="100%" stop-color="#34D399"/>
+          </linearGradient>
+        </defs>
+        <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" fill="url(#sparkle-fin)"/>
+      </svg>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total  = slides.length;
+let cur = 0;
+
+const bar     = document.getElementById('progress-bar');
+const counter = document.getElementById('counter');
+const dotsEl  = document.getElementById('nav-dots');
+const prevBtn = document.getElementById('arrow-prev');
+const nextBtn = document.getElementById('arrow-next');
+
+const dots = Array.from({length: total}, (_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+  return d;
+});
+
+function goTo(n) {
+  if (n === cur) return;
+  const prev = slides[cur];
+  prev.classList.remove('active');
+  prev.classList.add('exit');
+  setTimeout(() => prev.classList.remove('exit'), 400);
+  cur = n;
+  slides[cur].classList.add('active');
+  update();
+}
+
+function update() {
+  bar.style.width = ((cur + 1) / total * 100) + '%';
+  counter.textContent = `${cur + 1} / ${total}`;
+  dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+  prevBtn.style.opacity = cur === 0 ? '.25' : '1';
+  prevBtn.style.pointerEvents = cur === 0 ? 'none' : 'all';
+  nextBtn.style.opacity = cur === total - 1 ? '.25' : '1';
+  nextBtn.style.pointerEvents = cur === total - 1 ? 'none' : 'all';
+}
+
+prevBtn.addEventListener('click', () => cur > 0 && goTo(cur - 1));
+nextBtn.addEventListener('click', () => cur < total - 1 && goTo(cur + 1));
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); cur < total-1 && goTo(cur+1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')                    { e.preventDefault(); cur > 0      && goTo(cur-1); }
+});
+
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) dx < 0 ? (cur < total-1 && goTo(cur+1)) : (cur > 0 && goTo(cur-1));
+}, {passive:true});
+
+update();
+</script>
