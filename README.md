@@ -73,7 +73,6 @@ Cada summary cobre: o que foi construído, contagem de testes, desvios do design
 | [Pitch deck](docs/pitch/pitch-deck.html) | Deck interativo — mercado, solução, demo, próximos passos |
 | [Pesquisa de campo](docs/field-research/) | Análises das entrevistas com Creator Ads e PlayNest |
 | [Implantação](docs/deployment.md) | Passo a passo Railway + Vercel, variáveis, seed |
-| [Isolamento de tenant](docs/remediation/tenant-isolation-rls-and-roles-guard/summary.md) | Revisão da remediação cross-cutting de RLS/BYPASSRLS |
 
 ---
 
