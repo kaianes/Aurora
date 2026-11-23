@@ -19,6 +19,7 @@ import {
 const mockRepo = () => ({
   findOne: vi.fn(),
   find: vi.fn().mockResolvedValue([]),
+  findBy: vi.fn().mockResolvedValue([]),
   create: vi.fn((data: any) => ({ ...data })),
   save: vi.fn((entity: any) =>
     Array.isArray(entity)
