@@ -65,7 +65,6 @@ Cada summary cobre: o que foi construído, contagem de testes, desvios do design
 
 | Documento | Conteúdo |
 |---|---|
-| [Relatório do módulo](docs/module-2a-2026-report.md) | Relatório completo do projeto: contexto, pipeline, épicos, issues conhecidos, implantação |
 | [Pipeline de implementação](docs/implementation.md) | Como o pipeline de agentes funciona, como rodar localmente, como testar |
 | [Análise de negócios](docs/business-analysis.md) | Creator economy, Porter, SWOT, Gap Analysis, Personas, modelo de receita |
 | [Requisitos de produto](docs/product-requirements.md) | 47 user stories, 60 RFs, 36 RNFs |
