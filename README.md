@@ -2,7 +2,6 @@
 
 **Creator media infrastructure for the mid-market:** Aurora treats a curated pool of nano and micro creators as one media unit that a brand can plan and buy, with an advantage built on the supply side by treating creators as customers instead of anonymous supply.
 
-> This is the **internal repository**. It includes the full source code (`backend/`, `frontend/`), field-research interview analyses (`docs/field-research/` — internal only by request of the interviewees), and all documentation. The public GitHub mirror contains documentation only.
 
 <p align="center">
   <img src="./docs/images/aurora-what-it-is.png" alt="What Aurora is" width="680" />
