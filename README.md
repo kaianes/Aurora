@@ -38,7 +38,7 @@ O repositório público (espelho no GitHub) não inclui o código-fonte nem a pe
 | Frontend | [aurora-kaiane.vercel.app](https://aurora-kaiane.vercel.app) |
 | API (Swagger) | [aurora-production-b051.up.railway.app/api/docs](https://aurora-production-b051.up.railway.app/api/docs) |
 
-Credenciais de demo e instruções de seed estão em [`docs/deployment.md`](docs/deployment.md).
+Credenciais de demo e instruções de seed estão em [`docs/implementation.md`](docs/implementation.md).
 
 ---
 
@@ -72,7 +72,7 @@ Cada summary cobre: o que foi construído, contagem de testes, desvios do design
 | [ADRs](docs/adr/) | 68 Architecture Decision Records (ADR-0001 a ADR-0068) |
 | [Pitch deck](docs/pitch/pitch-deck.html) | Deck interativo — mercado, solução, demo, próximos passos |
 | [Pesquisa de campo](docs/field-research/) | Análises das entrevistas com Creator Ads e PlayNest |
-| [Implantação](docs/deployment.md) | Passo a passo Railway + Vercel, variáveis, seed |
+
 
 ---
 
