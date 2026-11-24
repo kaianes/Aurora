@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Job } from 'bull';
 import { Resend } from 'resend';
 
-const EMAIL_FROM = 'Aurora <no-reply@aurora.app>';
+const EMAIL_FROM = 'Aurora <onboarding@resend.dev>';
 
 @Processor('email')
 export class EmailProcessor {
