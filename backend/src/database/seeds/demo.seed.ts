@@ -319,8 +319,8 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM invoice_line_item WHERE id IN ('${D.invLineQ4}','${D.invLineNovaBF}')`);
   await dataSource.query(`DELETE FROM invoice WHERE id IN ('${D.invBellaQ4}','${D.invNovaBF}')`);
 
-  // Briefings
-  await dataSource.query(`DELETE FROM briefing WHERE id IN ('${D.briefingBella}','${D.briefingQ4}','${D.briefingNovaBF}')`);
+  // Briefings — delete by campaign_id to cover any unlisted briefings
+  await dataSource.query(`DELETE FROM briefing WHERE campaign_id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
 
   // Pool members
   await dataSource.query(`DELETE FROM campaign_pool_member WHERE id IN ('${D.poolBellaDuda}','${D.poolBellaCarolina}','${D.poolBellaNaty}','${D.poolBellaMarina}','${D.poolNovaPedro}','${D.poolNovaBruno}','${D.poolNovaThiago}','${D.poolQ4Duda}','${D.poolQ4Naty}','${D.poolQ4Marina}','${D.poolBFPedro}','${D.poolBFBruno}','${D.poolBFThiago}')`);
