@@ -636,6 +636,62 @@ export const briefingApi = {
         data,
       )
       .then((r) => r.data),
+
+  // POST-based SSE: EventSource is GET-only so we use fetch + ReadableStream.
+  aiAnswerQaFetch: async (
+    campaignId: string,
+    threadId: string,
+    callbacks: {
+      onToken: (delta: string) => void;
+      onDone: (msg: { body: string; senderType: string; createdAt: string } | null) => void;
+      onError: () => void;
+    },
+    signal?: AbortSignal,
+  ): Promise<void> => {
+    const token = getAccessToken();
+    const accountId = getCurrentAccountId();
+    const res = await fetch(
+      `${API_BASE_URL}/campaigns/${campaignId}/briefing/qa/${threadId}/messages/ai-answer`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-account-id': accountId ?? '',
+          'Content-Type': 'application/json',
+        },
+        signal,
+      },
+    );
+
+    if (!res.ok || !res.body) {
+      callbacks.onError();
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    let storedMsg: { body: string; senderType: string; createdAt: string } | null = null;
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop() ?? '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const event = JSON.parse(line.slice(6));
+          if (event.type === 'token') callbacks.onToken(event.delta ?? '');
+          else if (event.type === 'answer_stored') {
+            storedMsg = { body: event.body, senderType: event.senderType, createdAt: event.createdAt };
+          } else if (event.type === 'error') callbacks.onError();
+          else if (event.type === 'done') callbacks.onDone(storedMsg);
+        } catch {}
+      }
+    }
+  },
 };
 
 // E5 -- Marina's review queue and decision (US-19), per section 4.4-4.5.

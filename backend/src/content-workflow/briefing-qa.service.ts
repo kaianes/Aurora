@@ -264,6 +264,21 @@ export class BriefingQaService {
     };
   }
 
+  async getBriefingForBrand(campaignId: string, accountId: string): Promise<Briefing> {
+    await this.findCampaignOrFail(campaignId, accountId);
+    const briefing = await this.briefingRepo.findOne({ where: { campaignId } });
+    if (!briefing) {
+      throw new NotFoundException({
+        error: { code: 'BRIEFING_NOT_FOUND', message: 'Briefing nao encontrado para esta campanha.', details: {} },
+      });
+    }
+    return briefing;
+  }
+
+  async getThreadOrFail(campaignId: string, threadId: string): Promise<BriefingQaThread> {
+    return this.findThreadOrFail(campaignId, threadId);
+  }
+
   async answerQuestion(campaignId: string, threadId: string, accountId: string, body: string, actor: ActorContext) {
     await this.findCampaignOrFail(campaignId, accountId);
     const thread = await this.findThreadOrFail(campaignId, threadId);
