@@ -115,7 +115,14 @@ export function CampaignReportPage() {
       {report?.status === 'ready' && (
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-text-primary">Relatorio #{report.id}</h3>
+            <h3 className="text-sm font-semibold text-text-primary">
+              Relatorio de Performance
+              {report.resolved_at && (
+                <span className="ml-1 font-normal text-text-secondary">
+                  · {new Date(report.resolved_at).toLocaleDateString('pt-BR')}
+                </span>
+              )}
+            </h3>
             <Badge variant={report.campaign_progress_label === 'final' ? 'success' : 'default'}>
               {report.campaign_progress_label === 'final' ? 'Campanha finalizada' : 'Campanha em andamento'}
             </Badge>
