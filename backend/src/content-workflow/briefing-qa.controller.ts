@@ -62,7 +62,7 @@ export class BriefingQaController {
     const accountId = (req as any).currentAccountId;
     const correlationId: string =
       (req as any).correlationId || (req.headers['x-correlation-id'] as string) || 'unknown';
-    const model = this.configService.get<string>('ANTHROPIC_MODEL_QA', 'claude-sonnet-4-5');
+    const model = this.configService.get<string>('ANTHROPIC_MODEL_QA', 'claude-sonnet-5');
     const timeoutMs = parseInt(this.configService.get<string>('AI_QA_TIMEOUT_MS', '30000'), 10);
 
     const briefing = await this.briefingQaService.getBriefingForBrand(id, accountId);

@@ -138,7 +138,7 @@ export class RealContentSafetyAdapter implements ContentSafetyAdapter {
       return { outcome: 'pass', tierReached: 'tier2' };
     }
 
-    const model = this.configService.get<string>('ANTHROPIC_MODEL_SAFETY', 'claude-sonnet-4-5');
+    const model = this.configService.get<string>('ANTHROPIC_MODEL_SAFETY', 'claude-sonnet-5');
     const timeoutMs = parseInt(
       this.configService.get<string>('AI_SAFETY_TIMEOUT_MS', '60000'),
       10,

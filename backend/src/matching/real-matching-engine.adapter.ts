@@ -159,7 +159,7 @@ export class RealMatchingEngineAdapter implements MatchingEngineAdapter {
     }>,
     input: GenerateShortlistInput,
   ): Promise<Array<{ fitReason: string | null; fitReasonUnavailable: boolean }>> {
-    const model = this.configService.get<string>('ANTHROPIC_MODEL_FIT_REASON', 'claude-sonnet-4-5');
+    const model = this.configService.get<string>('ANTHROPIC_MODEL_FIT_REASON', 'claude-sonnet-5');
     const batchSize = parseInt(
       this.configService.get<string>('AI_FIT_REASON_BATCH_SIZE', '10'),
       10,
