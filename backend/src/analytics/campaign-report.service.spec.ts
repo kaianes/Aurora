@@ -20,7 +20,7 @@ describe('CampaignReportService - US-22 / FR-53', () => {
     reportRepo = mockRepo();
     analyticsQueue = { add: vi.fn() };
 
-    service = new CampaignReportService(campaignRepo as any, reportRepo as any, analyticsQueue as any);
+    service = new CampaignReportService(campaignRepo as any, reportRepo as any, {} as any, {} as any, analyticsQueue as any);
   });
 
   // ---- US-22 scenario 1: requesting an export creates a pending report

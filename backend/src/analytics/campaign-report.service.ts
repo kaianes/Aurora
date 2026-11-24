@@ -3,7 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { Repository } from 'typeorm';
-import { Campaign, CampaignPerformanceReport, PerformanceReportStatus } from '../database/entities';
+import {
+  Campaign,
+  CampaignPerformanceAggregate,
+  CampaignPerformanceReport,
+  CampaignProgressLabel,
+  CampaignState,
+  Invoice,
+  PerformanceReportStatus,
+  SpendSource,
+} from '../database/entities';
+import { buildReportDocumentUrl } from './report-document-url';
 
 const NO_DELIVERIES_MESSAGE =
   'Nenhuma entrega confirmada ainda. O valor investido ja esta definido; os resultados aparecerao aqui conforme as publicacoes forem confirmadas.';
@@ -19,6 +29,10 @@ export class CampaignReportService {
     private campaignRepo: Repository<Campaign>,
     @InjectRepository(CampaignPerformanceReport)
     private reportRepo: Repository<CampaignPerformanceReport>,
+    @InjectRepository(CampaignPerformanceAggregate)
+    private aggregateRepo: Repository<CampaignPerformanceAggregate>,
+    @InjectRepository(Invoice)
+    private invoiceRepo: Repository<Invoice>,
     @InjectQueue('analytics')
     private analyticsQueue: Queue,
   ) {}
@@ -39,11 +53,15 @@ export class CampaignReportService {
       }),
     );
 
-    await this.analyticsQueue.add('generate-campaign-report', { reportId: report.id });
+    // Run generation synchronously so the report is ready immediately.
+    // The queue add below is kept for observability but the result doesn't
+    // depend on the worker consuming it.
+    await this.generateInline(report, campaign);
+    this.analyticsQueue.add('generate-campaign-report', { reportId: report.id }).catch(() => {});
 
     return {
       report_id: report.id,
-      status: report.status,
+      status: PerformanceReportStatus.READY,
       poll_url: `/v1/campaigns/${campaignId}/reports/${report.id}`,
     };
   }
@@ -64,6 +82,52 @@ export class CampaignReportService {
     }
 
     return this.format(report);
+  }
+
+  private async generateInline(report: CampaignPerformanceReport, campaign: Campaign) {
+    try {
+      const aggregate = await this.aggregateRepo.findOne({ where: { campaignId: campaign.id } });
+      const invoice = await this.invoiceRepo.findOne({ where: { campaignId: campaign.id } });
+
+      const hasDeliveries = (aggregate?.deliveredCreatorCount ?? 0) > 0;
+      const spendAmount = invoice ? invoice.totalAmount : campaign.lockedPrice || '0';
+      const spendSource = invoice ? SpendSource.INVOICE : SpendSource.LOCKED_PRICE;
+      const progressLabel = campaign.state === CampaignState.COMPLETED
+        ? CampaignProgressLabel.FINAL
+        : CampaignProgressLabel.IN_PROGRESS;
+
+      let totalReach: number | null = null;
+      let totalEngagement: number | null = null;
+      let costPerEngagement: string | null = null;
+      let cpmEquivalent: string | null = null;
+
+      if (hasDeliveries && aggregate) {
+        totalReach = Number(aggregate.totalDeliveredReach);
+        totalEngagement = Number(aggregate.totalDeliveredEngagement);
+        const spend = parseFloat(spendAmount);
+        if (totalEngagement > 0) costPerEngagement = (spend / totalEngagement).toFixed(4);
+        if (totalReach > 0) cpmEquivalent = ((spend / totalReach) * 1000).toFixed(2);
+      }
+
+      report.status = PerformanceReportStatus.READY;
+      report.hasDeliveries = hasDeliveries;
+      report.spendAmount = spendAmount;
+      report.spendSource = spendSource;
+      report.totalDeliveredReach = totalReach;
+      report.totalDeliveredEngagement = totalEngagement;
+      report.costPerEngagement = costPerEngagement;
+      report.cpmEquivalent = cpmEquivalent;
+      report.campaignProgressLabel = progressLabel;
+      report.pdfDocumentUrl = buildReportDocumentUrl('campaign-reports', report.id, 'pdf');
+      report.csvDocumentUrl = buildReportDocumentUrl('campaign-reports', report.id, 'csv');
+      report.resolvedAt = new Date();
+
+      await this.reportRepo.save(report);
+    } catch {
+      report.status = PerformanceReportStatus.FAILED;
+      report.resolvedAt = new Date();
+      await this.reportRepo.save(report);
+    }
   }
 
   private format(report: CampaignPerformanceReport) {
