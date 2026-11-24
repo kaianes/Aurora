@@ -18,7 +18,7 @@ describe('CampaignReportService - US-22 / FR-53', () => {
   beforeEach(() => {
     campaignRepo = mockRepo();
     reportRepo = mockRepo();
-    analyticsQueue = { add: vi.fn() };
+    analyticsQueue = { add: vi.fn().mockResolvedValue(undefined) };
 
     service = new CampaignReportService(campaignRepo as any, reportRepo as any, {} as any, {} as any, analyticsQueue as any);
   });
