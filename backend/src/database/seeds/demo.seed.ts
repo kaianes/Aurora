@@ -292,8 +292,8 @@ async function teardown(): Promise<void> {
   console.log('[seed:demo] Removendo dados de seed existentes...');
   const D = IDS;
 
-  // Q&A
-  await dataSource.query(`DELETE FROM briefing_qa_message WHERE id IN ('${D.qaMsg1}','${D.qaMsg2}','${D.qaMsg3}','${D.qaMsg4}','${D.qaMsg5}')`);
+  // Q&A — delete all messages for seeded threads (covers AI-generated messages too)
+  await dataSource.query(`DELETE FROM briefing_qa_message WHERE thread_id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
   await dataSource.query(`DELETE FROM briefing_qa_thread WHERE id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
 
   // Safety — delete dependents by safety_check_id to cover any system-created rows
