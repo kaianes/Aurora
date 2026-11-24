@@ -291,54 +291,47 @@ async function checkAlreadySeeded(): Promise<boolean> {
 async function teardown(): Promise<void> {
   console.log('[seed:demo] Removendo dados de seed existentes...');
   const D = IDS;
+  const campIds = `'${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}'`;
 
-  // Q&A — delete all messages for seeded threads (covers AI-generated messages too)
-  await dataSource.query(`DELETE FROM briefing_qa_message WHERE thread_id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
-  await dataSource.query(`DELETE FROM briefing_qa_thread WHERE id IN ('${D.qaThread}','${D.qaThreadDuda}','${D.qaThreadPedro}')`);
+  // Delete everything that references campaign by campaign_id, deepest dependents first.
+  // Using campaign_id scope catches runtime-created rows (reports, AI messages, extra safety
+  // checks) that were not in the original fixed-ID lists.
 
-  // Safety — delete dependents by safety_check_id to cover any system-created rows
-  const allCheckIds = `'${D.checkDuda}','${D.checkNaty}','${D.checkCarolina}','${D.checkQ4Duda}','${D.checkQ4Naty}','${D.checkQ4Marina}','${D.checkBFPedro}','${D.checkBFBruno}','${D.checkBFThiago}','${D.checkNovaPedro}'`;
-  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE safety_check_id IN (${allCheckIds})`);
-  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN (${allCheckIds})`);
-  await dataSource.query(`DELETE FROM safety_check WHERE id IN (${allCheckIds})`);
+  // Q&A (briefing_qa_message → briefing_qa_thread → briefing → campaign)
+  await dataSource.query(`DELETE FROM briefing_qa_message WHERE campaign_id IN (${campIds})`);
+  await dataSource.query(`DELETE FROM briefing_qa_thread WHERE campaign_id IN (${campIds})`);
+
+  // Safety checks and their dependents
+  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE safety_check_id IN (SELECT id FROM safety_check WHERE campaign_id IN (${campIds}))`);
+  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN (SELECT id FROM safety_check WHERE campaign_id IN (${campIds}))`);
+  await dataSource.query(`DELETE FROM safety_check WHERE campaign_id IN (${campIds})`);
 
   // Payouts
-  await dataSource.query(`DELETE FROM payout_obligation WHERE id IN ('${D.payoutQ4Duda}','${D.payoutQ4Naty}','${D.payoutQ4Marina}','${D.payoutBFPedro}','${D.payoutBFBruno}','${D.payoutBFThiago}','${D.payoutActiveDuda}','${D.payoutActiveCarolina}')`);
+  await dataSource.query(`DELETE FROM payout_obligation WHERE campaign_id IN (${campIds})`);
 
-  // Metric snapshots
-  await dataSource.query(`DELETE FROM content_submission_metric_snapshot WHERE id IN ('${D.snapQ4Duda}','${D.snapQ4Naty}','${D.snapQ4Marina}','${D.snapBFPedro}','${D.snapBFBruno}','${D.snapBFThiago}')`);
-
-  // Submissions
-  await dataSource.query(`DELETE FROM content_submission WHERE id IN ('${D.subDuda}','${D.subNaty}','${D.subCarolina}','${D.subQ4Duda}','${D.subQ4Naty}','${D.subQ4Marina}','${D.subBFPedro}','${D.subBFBruno}','${D.subBFThiago}','${D.subNovaPedro}')`);
+  // Metric snapshots & submissions (snapshot references submission)
+  await dataSource.query(`DELETE FROM content_submission_metric_snapshot WHERE campaign_id IN (${campIds})`);
+  await dataSource.query(`DELETE FROM content_submission WHERE campaign_id IN (${campIds})`);
 
   // Performance reports & aggregates
-  await dataSource.query(`DELETE FROM campaign_performance_report WHERE id IN ('${D.reportBellaQ4}','${D.reportNovaBF}')`);
-  await dataSource.query(`DELETE FROM campaign_performance_aggregate WHERE campaign_id IN ('${D.campBellaQ4}','${D.campNovaBF}')`);
+  await dataSource.query(`DELETE FROM campaign_performance_report WHERE campaign_id IN (${campIds})`);
+  await dataSource.query(`DELETE FROM campaign_performance_aggregate WHERE campaign_id IN (${campIds})`);
 
   // Invoice line items & invoices
-  await dataSource.query(`DELETE FROM invoice_line_item WHERE id IN ('${D.invLineQ4}','${D.invLineNovaBF}')`);
-  await dataSource.query(`DELETE FROM invoice WHERE id IN ('${D.invBellaQ4}','${D.invNovaBF}')`);
+  await dataSource.query(`DELETE FROM invoice_line_item WHERE invoice_id IN (SELECT id FROM invoice WHERE campaign_id IN (${campIds}))`);
+  await dataSource.query(`DELETE FROM invoice WHERE campaign_id IN (${campIds})`);
 
-  // Briefings — delete by campaign_id to cover any unlisted briefings
-  await dataSource.query(`DELETE FROM briefing WHERE campaign_id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
+  // Briefings
+  await dataSource.query(`DELETE FROM briefing WHERE campaign_id IN (${campIds})`);
 
-  // Pool members
-  await dataSource.query(`DELETE FROM campaign_pool_member WHERE id IN ('${D.poolBellaDuda}','${D.poolBellaCarolina}','${D.poolBellaNaty}','${D.poolBellaMarina}','${D.poolNovaPedro}','${D.poolNovaBruno}','${D.poolNovaThiago}','${D.poolQ4Duda}','${D.poolQ4Naty}','${D.poolQ4Marina}','${D.poolBFPedro}','${D.poolBFBruno}','${D.poolBFThiago}')`);
-
-  // Opportunities
-  await dataSource.query(`DELETE FROM campaign_opportunity WHERE id IN ('${D.oppBellaDuda}','${D.oppBellaCarolina}','${D.oppBellaNaty}','${D.oppBellaMarina}','${D.oppNovaPedro}','${D.oppNovaBruno}','${D.oppNovaThiago}','${D.oppQ4Duda}','${D.oppQ4Naty}','${D.oppQ4Marina}','${D.oppBFPedro}','${D.oppBFBruno}','${D.oppBFThiago}')`);
-
-  // Shortlist entries
-  await dataSource.query(`DELETE FROM campaign_shortlist_entry WHERE id IN ('${D.sleBella1}','${D.sleBella2}','${D.sleBella3}','${D.sleBella4}','${D.sleNova1}','${D.sleNova2}','${D.sleNova3}','${D.sleBellaQ4a}','${D.sleBellaQ4b}','${D.sleBellaQ4c}','${D.sleNovaBF1}','${D.sleNovaBF2}','${D.sleNovaBF3}')`);
-
-  // Shortlists
-  await dataSource.query(`DELETE FROM campaign_shortlist WHERE id IN ('${D.slBella}','${D.slNovatech}','${D.slBellaQ4}','${D.slNovaBF}')`);
-
-  // Performance reports (created by requestReport — must precede campaign delete)
-  await dataSource.query(`DELETE FROM campaign_performance_report WHERE campaign_id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
+  // Pool members, opportunities, shortlist entries, shortlists
+  await dataSource.query(`DELETE FROM campaign_pool_member WHERE campaign_id IN (${campIds})`);
+  await dataSource.query(`DELETE FROM campaign_opportunity WHERE campaign_id IN (${campIds})`);
+  await dataSource.query(`DELETE FROM campaign_shortlist_entry WHERE shortlist_id IN (SELECT id FROM campaign_shortlist WHERE campaign_id IN (${campIds}))`);
+  await dataSource.query(`DELETE FROM campaign_shortlist WHERE campaign_id IN (${campIds})`);
 
   // Campaigns
-  await dataSource.query(`DELETE FROM campaign WHERE id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
+  await dataSource.query(`DELETE FROM campaign WHERE id IN (${campIds})`);
 
   // Safety rules / rulesets
   await dataSource.query(`DELETE FROM safety_rule WHERE id IN ('${D.ruleBella1}','${D.ruleBella2}','${D.ruleBella3}','${D.ruleNova1}','${D.ruleNova2}','${D.ruleNova3}')`);
