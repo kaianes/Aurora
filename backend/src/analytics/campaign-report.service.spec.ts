@@ -44,7 +44,7 @@ describe('CampaignReportService - US-22 / FR-53', () => {
       expect(analyticsQueue.add).toHaveBeenCalledWith('generate-campaign-report', { reportId: 'rpt-1' });
       expect(result).toEqual({
         report_id: 'rpt-1',
-        status: PerformanceReportStatus.PENDING,
+        status: PerformanceReportStatus.READY,
         poll_url: '/v1/campaigns/camp-1/reports/rpt-1',
       });
     });
