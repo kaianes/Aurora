@@ -91,6 +91,16 @@ Instrucoes:
       !items || items.length === 0 ? '(nao informado)' : items.map((i) => `- ${sanitize(i)}`).join('\n');
 
     const spec = briefing.deliverableSpec as any;
+
+    const historyLines = thread.messages
+      .map((m) => {
+        const role = m.senderType === 'creator' ? 'CRIADOR' : 'MARCA';
+        return `[${role}]: ${sanitize(m.body)}`;
+      })
+      .join('\n');
+
+    const lastCreatorMsg = [...thread.messages].reverse().find((m) => m.senderType === 'creator');
+
     const userPrompt = `BRIEFING DA CAMPANHA:
 Dos (o que o criador deve fazer):
 ${listOrNone(briefing.dos)}
@@ -105,7 +115,11 @@ Hashtags obrigatorias: ${listOrNone(spec?.mandatory_hashtags)}
 Exemplos de referencia:
 ${listOrNone(briefing.referenceExamples)}
 
-Ultima pergunta do criador nesta thread: (veja o contexto da thread e responda de forma apropriada)`;
+HISTORICO DA CONVERSA:
+${historyLines || '(sem mensagens anteriores)'}
+
+PERGUNTA A RESPONDER:
+${lastCreatorMsg ? sanitize(lastCreatorMsg.body) : '(nenhuma pergunta encontrada)'}`;
 
     let accumulatedText = '';
     try {

@@ -275,8 +275,10 @@ export class BriefingQaService {
     return briefing;
   }
 
-  async getThreadOrFail(campaignId: string, threadId: string): Promise<BriefingQaThread> {
-    return this.findThreadOrFail(campaignId, threadId);
+  async getThreadOrFail(campaignId: string, threadId: string): Promise<BriefingQaThread & { messages: BriefingQaMessage[] }> {
+    const thread = await this.findThreadOrFail(campaignId, threadId);
+    const messages = await this.messageRepo.find({ where: { threadId: thread.id }, order: { createdAt: 'ASC' } });
+    return Object.assign(thread, { messages });
   }
 
   async answerQuestion(campaignId: string, threadId: string, accountId: string, body: string, actor: ActorContext) {
