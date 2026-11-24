@@ -76,7 +76,7 @@ describe('BriefingQaPage - US-31', () => {
     expect(await screen.findByText('O video precisa ter audio?')).toBeInTheDocument();
     expect(screen.getByText('Aguardando resposta')).toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText('Responder'), 'Funciona com legenda, audio e opcional.');
+    await userEvent.type(screen.getByLabelText('Responder manualmente'), 'Funciona com legenda, audio e opcional.');
     await userEvent.click(screen.getByRole('button', { name: 'Enviar resposta' }));
 
     await waitFor(() =>
