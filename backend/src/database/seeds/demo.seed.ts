@@ -334,6 +334,9 @@ async function teardown(): Promise<void> {
   // Shortlists
   await dataSource.query(`DELETE FROM campaign_shortlist WHERE id IN ('${D.slBella}','${D.slNovatech}','${D.slBellaQ4}','${D.slNovaBF}')`);
 
+  // Performance reports (created by requestReport — must precede campaign delete)
+  await dataSource.query(`DELETE FROM campaign_performance_report WHERE campaign_id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
+
   // Campaigns
   await dataSource.query(`DELETE FROM campaign WHERE id IN ('${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}')`);
 
