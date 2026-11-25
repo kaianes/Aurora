@@ -18,6 +18,7 @@ describe('OpportunityService - US-28', () => {
   let accountRepo: ReturnType<typeof mockRepo>;
   let poolMemberRepo: ReturnType<typeof mockRepo>;
   let auditService: { log: ReturnType<typeof vi.fn> };
+  let dataSource: { query: ReturnType<typeof vi.fn> };
   const actor = { ipAddress: '127.0.0.1', userAgent: 'vitest' };
 
   beforeEach(() => {
@@ -27,6 +28,7 @@ describe('OpportunityService - US-28', () => {
     accountRepo = mockRepo();
     poolMemberRepo = mockRepo();
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
+    dataSource = { query: vi.fn().mockResolvedValue([]) };
 
     service = new OpportunityService(
       opportunityRepo as any,
@@ -34,6 +36,7 @@ describe('OpportunityService - US-28', () => {
       campaignRepo as any,
       accountRepo as any,
       poolMemberRepo as any,
+      dataSource as any,
       auditService as any,
     );
   });
@@ -99,18 +102,17 @@ describe('OpportunityService - US-28', () => {
   // to the existing list and accept responses. ----
   describe('US-29 -- expected_payment_date projection', () => {
     it('list() projects from campaign.timeline_end when present', async () => {
-      opportunityRepo.find.mockResolvedValue([
+      dataSource.query.mockResolvedValue([
         {
-          id: 'opp-1', campaignId: 'camp-1', creatorId: 'creator-1',
-          expiresAt: new Date('2026-11-01T00:00:00Z'),
-          payoutGross: '800.00', payoutCommission: '120.00', payoutNet: '680.00',
-          deliverable: {}, status: OpportunityStatus.PENDING, respondedAt: null,
+          id: 'opp-1', campaign_id: 'camp-1', creator_id: 'creator-1',
+          shortlist_entry_id: 'entry-1',
+          expires_at: new Date('2026-11-01T00:00:00Z'),
+          payout_gross: '800.00', payout_commission: '120.00', payout_net: '680.00',
+          deliverable: {}, status: OpportunityStatus.PENDING, responded_at: null,
+          created_at: new Date(), brand_name: 'Acme',
+          timeline_end: new Date('2026-11-30T00:00:00Z'),
         },
       ]);
-      campaignRepo.findOne.mockResolvedValue({
-        id: 'camp-1', accountId: 'acct-1', timelineEnd: new Date('2026-11-30T00:00:00Z'),
-      });
-      accountRepo.findOne.mockResolvedValue({ id: 'acct-1', name: 'Acme' });
 
       const { data } = await service.listForCreator('creator-1');
 
@@ -119,16 +121,17 @@ describe('OpportunityService - US-28', () => {
     });
 
     it('list() falls back to opportunity.expires_at when campaign.timeline_end is null', async () => {
-      opportunityRepo.find.mockResolvedValue([
+      dataSource.query.mockResolvedValue([
         {
-          id: 'opp-1', campaignId: 'camp-1', creatorId: 'creator-1',
-          expiresAt: new Date('2026-11-01T00:00:00Z'),
-          payoutGross: '800.00', payoutCommission: '120.00', payoutNet: '680.00',
-          deliverable: {}, status: OpportunityStatus.PENDING, respondedAt: null,
+          id: 'opp-1', campaign_id: 'camp-1', creator_id: 'creator-1',
+          shortlist_entry_id: 'entry-1',
+          expires_at: new Date('2026-11-01T00:00:00Z'),
+          payout_gross: '800.00', payout_commission: '120.00', payout_net: '680.00',
+          deliverable: {}, status: OpportunityStatus.PENDING, responded_at: null,
+          created_at: new Date(), brand_name: null,
+          timeline_end: null,
         },
       ]);
-      campaignRepo.findOne.mockResolvedValue({ id: 'camp-1', accountId: 'acct-1', timelineEnd: null });
-      accountRepo.findOne.mockResolvedValue(null);
 
       const { data } = await service.listForCreator('creator-1');
 

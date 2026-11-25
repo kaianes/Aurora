@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, GoneException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import {
   CampaignOpportunity,
   OpportunityStatus,
@@ -31,6 +31,7 @@ export class OpportunityService {
     private accountRepo: Repository<Account>,
     @InjectRepository(CampaignPoolMember)
     private poolMemberRepo: Repository<CampaignPoolMember>,
+    private dataSource: DataSource,
     private auditService: AuditService,
   ) {}
 
@@ -45,26 +46,36 @@ export class OpportunityService {
   }
 
   async listForCreator(creatorId: string) {
-    const opportunities = await this.opportunityRepo.find({
-      where: { creatorId },
-      order: { createdAt: 'DESC' },
-    });
-
-    const data = await Promise.all(
-      opportunities.map(async (o) => {
-        const campaign = await this.campaignRepo.findOne({ where: { id: o.campaignId } });
-        const account = campaign
-          ? await this.accountRepo.findOne({ where: { id: campaign.accountId } })
-          : null;
-        // US-29 / ADR-0035 (E6): expected_payment_date is added to this
-        // existing response, computed read-only, never stored on
-        // campaign_opportunity.
-        return this.format(o, account?.name || null, {
-          timelineEnd: campaign?.timelineEnd ?? null,
-          includeExpectedPaymentDate: true,
-        });
-      }),
+    const rows: any[] = await this.dataSource.query(
+      `SELECT o.*,
+              c.name        AS campaign_name,
+              c.timeline_end AS timeline_end,
+              a.name        AS brand_name
+         FROM campaign_opportunity o
+         JOIN campaign c ON c.id = o.campaign_id
+         JOIN account  a ON a.id = c.account_id
+        WHERE o.creator_id = $1
+        ORDER BY o.created_at DESC`,
+      [creatorId],
     );
+
+    const data = rows.map((r) => {
+      const o = {
+        id: r.id,
+        campaignId: r.campaign_id,
+        deliverable: r.deliverable,
+        payoutGross: r.payout_gross,
+        payoutCommission: r.payout_commission,
+        payoutNet: r.payout_net,
+        expiresAt: r.expires_at instanceof Date ? r.expires_at : new Date(r.expires_at),
+        status: r.status,
+        respondedAt: r.responded_at,
+      } as CampaignOpportunity;
+      return this.format(o, r.brand_name, {
+        timelineEnd: r.timeline_end ?? null,
+        includeExpectedPaymentDate: true,
+      });
+    });
 
     return { data };
   }
