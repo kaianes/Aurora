@@ -92,12 +92,24 @@ export function NewDraftPage() {
     },
   });
 
-  const { data: check } = useQuery({
-    queryKey: ['safety-check', submissionId],
-    queryFn: () => creatorPortalApi.getSafetyCheck(submissionId!),
-    enabled: !!submissionId,
-    refetchInterval: (query) => (query.state.data?.status === 'pending' ? 2000 : false),
-  });
+  // Demo mock: show a flagged result after a brief animation delay,
+  // regardless of the real backend check status.
+  const [demoCheck, setDemoCheck] = useState<any>(null);
+  useEffect(() => {
+    if (!submissionId) { setDemoCheck(null); return; }
+    const t = setTimeout(() => {
+      setDemoCheck({
+        status: 'flagged',
+        tier_reached: 'tier1',
+        triggered_rules: [
+          { rule_type: 'prohibited_topic', channel: 'caption', matched_excerpt: 'parabenos' },
+          { rule_type: 'prohibited_topic', channel: 'caption', matched_excerpt: 'testes em animais' },
+        ],
+      });
+    }, 6500);
+    return () => clearTimeout(t);
+  }, [submissionId]);
+  const check = demoCheck;
 
   useEffect(() => {
     if (!submissionId || (check && check.status !== 'pending')) return;
