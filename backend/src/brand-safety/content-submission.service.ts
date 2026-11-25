@@ -188,10 +188,15 @@ export class ContentSubmissionService {
     // language / competitor mentions synchronously so the result is available
     // on the first poll.  Falls back to the async queue when no rules match
     // (tier-2 / extraction scenarios).
-    const inlineResolved = await this.tryInlineTier1Check(
-      submission, check, rulesetId, campaign.accountId,
-    );
-    this.logger.log(`[inline-t1] inlineResolved=${inlineResolved} for submission ${submission.id}`);
+    let inlineResolved = false;
+    try {
+      inlineResolved = await this.tryInlineTier1Check(
+        submission, check, rulesetId, campaign.accountId,
+      );
+      this.logger.log(`[inline-t1] inlineResolved=${inlineResolved} for submission ${submission.id}`);
+    } catch (err) {
+      this.logger.error(`[inline-t1] failed, falling back to queue: ${err}`);
+    }
     if (!inlineResolved) {
       if (extractionNeeded) {
         await this.brandSafetyQueue.add('extract-content-channels', {
