@@ -200,7 +200,7 @@ export function NewDraftPage() {
               <div>
                 <p className="text-xs font-semibold text-text-secondary uppercase mb-1">Regras acionadas</p>
                 <ul className="space-y-1">
-                  {(check.triggered_rules ?? []).map((rule, i) => (
+                  {(check.triggered_rules ?? []).map((rule: any, i: number) => (
                     <li key={i} className="font-mono text-xs text-text-primary bg-bg-surface rounded px-2 py-1">
                       {CHANNEL_LABEL[rule.channel] ?? rule.channel}
                       {rule.rule_type && ` · ${rule.rule_type}`}
