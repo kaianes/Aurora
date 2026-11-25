@@ -75,15 +75,18 @@ export function NewDraftPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
+  // Demo mock: skip real backend call entirely
   const submitMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       setAnalysisStep(0);
-      return creatorPortalApi.submitContent({
-        campaign_id: campaignId,
-        opportunity_id: opportunityId || undefined,
-        caption_text: captionText,
-        media_asset_url: videoFile ? `local://${videoFile.name}` : undefined,
-      });
+      return {
+        content_submission_id: 'demo-' + Date.now(),
+        version_number: 1,
+        review_deadline_at: null,
+        safety_check_id: 'demo-check',
+        status: 'pending',
+        poll_url: '',
+      };
     },
     onSuccess: (data) => {
       setSubmissionId(data.content_submission_id);
