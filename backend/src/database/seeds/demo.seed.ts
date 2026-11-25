@@ -272,6 +272,9 @@ const IDS = {
 
   // ── Agency client access ───────────────────────────────────────────────
   operatorAccess:  dId('operator-access:agencia-novatech'),
+
+  // ── Content review decisions ──────────────────────────────────────────
+  reviewDecDuda:   dId('review-dec:bella-duda'),
 };
 
 // ---------------------------------------------------------------------------
@@ -310,6 +313,7 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM payout_obligation WHERE campaign_id IN (${campIds})`);
 
   // Metric snapshots & submissions (snapshot references submission)
+  await dataSource.query(`DELETE FROM content_review_decision WHERE campaign_id IN (${campIds})`);
   await dataSource.query(`DELETE FROM content_submission_metric_snapshot WHERE campaign_id IN (${campIds})`);
   await dataSource.query(`DELETE FROM content_submission WHERE campaign_id IN (${campIds})`);
 
@@ -898,6 +902,21 @@ async function seed(): Promise<void> {
     ) VALUES (
       '${D.queueNaty}','${D.checkNaty}','${D.campBella}','${D.subNaty}',
       'rule_violation','pending',null,null,null,null,now(),now()
+    )
+    ON CONFLICT (id) DO NOTHING
+  `);
+
+  // ── 28b. Review decision — Duda's Bella submission approved ──────────────
+  // Approving Duda's first submission so she can submit a second one during
+  // the demo (the resubmission rule requires a decision on the latest version).
+  await dataSource.query(`
+    INSERT INTO content_review_decision (
+      id, content_submission_id, campaign_id, decision, decision_reason,
+      decided_by_user_id, decided_at, created_at
+    ) VALUES (
+      '${D.reviewDecDuda}','${D.subDuda}','${D.campBella}','approved',
+      'Conteudo aprovado, alinhado com o briefing.',
+      '${D.userBella}',now(),now()
     )
     ON CONFLICT (id) DO NOTHING
   `);
