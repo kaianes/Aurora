@@ -10,6 +10,7 @@ const mockRepo = () => ({
   save: vi.fn((entity: any) =>
     Promise.resolve({ id: entity.id || 'id-' + Math.random(), createdAt: new Date(), requestedAt: new Date(), ...entity }),
   ),
+  query: vi.fn().mockResolvedValue([]),
 });
 
 const actor = { ipAddress: '127.0.0.1', userAgent: 'vitest' };
