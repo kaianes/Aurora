@@ -271,7 +271,8 @@ const IDS = {
   templateNovatech: dId('template:novatech-lancamento'),
 
   // ── Agency client access ───────────────────────────────────────────────
-  operatorAccess:  dId('operator-access:agencia-novatech'),
+  operatorAccess:      dId('operator-access:agencia-novatech'),
+  operatorAccessBella: dId('operator-access:agencia-bella'),
 
   // ── Content review decisions ──────────────────────────────────────────
   reviewDecDuda:   dId('review-dec:bella-duda'),
@@ -352,7 +353,7 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM campaign_template WHERE id IN ('${D.templateBella}','${D.templateNovatech}')`);
 
   // Operator client access
-  await dataSource.query(`DELETE FROM operator_client_access WHERE id = '${D.operatorAccess}'`);
+  await dataSource.query(`DELETE FROM operator_client_access WHERE id IN ('${D.operatorAccess}','${D.operatorAccessBella}')`);
 
   // Memberships / accounts / workspaces / users
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
@@ -803,9 +804,6 @@ async function seed(): Promise<void> {
       extraction_status, root_submission_id, version_number,
       created_at, updated_at
     ) VALUES
-    ('${D.subDuda}','${D.campBella}','${D.crDuda}','${D.oppBellaDuda}',
-     'Amei esse protetor solar da @BellaNatural! Leve, vegano e cheiroso. #BellaNatural #VeganBeauty',
-     null,null,'not_required','${D.subDuda}',1,now(),now()),
     ('${D.subNaty}','${D.campBella}','${D.crNaty}','${D.oppBellaNaty}',
      'Teste em animais? Nunca mais! Essa linha da Bella Natural e 100% vegana #BellaNatural',
      null,null,'not_required','${D.subNaty}',1,now(),now()),
@@ -882,7 +880,6 @@ async function seed(): Promise<void> {
   await dataSource.query(`
     INSERT INTO safety_check (id, content_submission_id, campaign_id, ruleset_id, status, tier_reached, timeout_at, resolved_at, created_at)
     VALUES
-    ('${D.checkDuda}',    '${D.subDuda}',    '${D.campBella}','${D.rulesetBella}','passed','tier2',now(),now(),now()),
     ('${D.checkNaty}',    '${D.subNaty}',    '${D.campBella}','${D.rulesetBella}','flagged','tier1',now(),now(),now()),
     ('${D.checkCarolina}','${D.subCarolina}','${D.campBella}','${D.rulesetBella}','pending',null,'${safetyTimeout}',null,now())
     ON CONFLICT (id) DO NOTHING
@@ -902,21 +899,6 @@ async function seed(): Promise<void> {
     ) VALUES (
       '${D.queueNaty}','${D.checkNaty}','${D.campBella}','${D.subNaty}',
       'rule_violation','pending',null,null,null,null,now(),now()
-    )
-    ON CONFLICT (id) DO NOTHING
-  `);
-
-  // ── 28b. Review decision — Duda's Bella submission approved ──────────────
-  // Approving Duda's first submission so she can submit a second one during
-  // the demo (the resubmission rule requires a decision on the latest version).
-  await dataSource.query(`
-    INSERT INTO content_review_decision (
-      id, content_submission_id, campaign_id, decision, decision_reason,
-      decided_by_user_id, decided_at, created_at
-    ) VALUES (
-      '${D.reviewDecDuda}','${D.subDuda}','${D.campBella}','approved',
-      'Conteudo aprovado, alinhado com o briefing.',
-      '${D.userBella}',now(),now()
     )
     ON CONFLICT (id) DO NOTHING
   `);
@@ -1056,7 +1038,7 @@ async function seed(): Promise<void> {
   `);
 
   // ── 37. Payout obligations — campanha ativa (owed, Duda e Carolina) ───────
-  // Submissões existem (Duda passou safety, Carolina pending safety)
+  // Submissão Carolina pending safety — Duda ainda sem submission para demo ao vivo
   const payoutDueDate = new Date(Date.now() + 25 * 24 * 60 * 60 * 1000).toISOString();
 
   await dataSource.query(`
@@ -1065,7 +1047,6 @@ async function seed(): Promise<void> {
       payout_gross, payout_commission, payout_net,
       committed_deadline_at, status, settled_at, created_at, updated_at
     ) VALUES
-    ('${D.payoutActiveDuda}',    '${D.subDuda}',    '${D.campBella}','${D.crDuda}',    '${D.oppBellaDuda}',    5000,750,4250,'${payoutDueDate}','owed',null,now(),now()),
     ('${D.payoutActiveCarolina}','${D.subCarolina}','${D.campBella}','${D.crCarolina}','${D.oppBellaCarolina}',5000,750,4250,'${payoutDueDate}','owed',null,now(),now())
     ON CONFLICT (id) DO NOTHING
   `);
@@ -1149,7 +1130,8 @@ async function seed(): Promise<void> {
   // ── 39. Agency client access — Pulso Digital gerencia NovaTech ───────────
   await dataSource.query(`
     INSERT INTO operator_client_access (id, membership_id, account_id, created_at) VALUES
-    ('${D.operatorAccess}','${D.memAgency}','${D.acctNovatech}',now())
+    ('${D.operatorAccess}','${D.memAgency}','${D.acctNovatech}',now()),
+    ('${D.operatorAccessBella}','${D.memAgency}','${D.acctBella}',now())
     ON CONFLICT (id) DO NOTHING
   `);
 
@@ -1164,7 +1146,7 @@ async function seed(): Promise<void> {
   console.log('    demo-carolina@aurora.internal Demo@2026 → Creator @carolinafit');
   console.log('');
   console.log('  10 creators | 9 social accounts | 9 rate preferences');
-  console.log('  2 rulesets + 6 regras | 2 agency client access');
+  console.log('  2 rulesets + 6 regras | 2 agency client access (Bella + NovaTech)');
   console.log('  2 campanhas ativas  (Bella Verao 2027, NovaTech Pro)');
   console.log('  2 campanhas encerradas (Bella Q4 2026, BF NovaTech 2026)');
   console.log('  2 campaign templates');
