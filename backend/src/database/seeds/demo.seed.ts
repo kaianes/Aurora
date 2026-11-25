@@ -75,6 +75,8 @@ const IDS = {
   acctBella:        dId('account:bella'),
   acctNovatech:     dId('account:novatech'),
   acctAgency:       dId('account:agencia-pulso'),
+  acctAgencyBella:  dId('account:agencia-bella-client'),
+  acctAgencyNova:   dId('account:agencia-novatech-client'),
 
   memBella:         dId('membership:bella'),
   memNovatech:      dId('membership:novatech'),
@@ -357,7 +359,7 @@ async function teardown(): Promise<void> {
 
   // Memberships / accounts / workspaces / users
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
-  await dataSource.query(`DELETE FROM account WHERE id IN ('${D.acctBella}','${D.acctNovatech}','${D.acctAgency}')`);
+  await dataSource.query(`DELETE FROM account WHERE id IN ('${D.acctBella}','${D.acctNovatech}','${D.acctAgency}','${D.acctAgencyBella}','${D.acctAgencyNova}')`);
   await dataSource.query(`DELETE FROM workspace WHERE id IN ('${D.wsBella}','${D.wsNovatech}','${D.wsAgency}')`);
   // Unlink creator.user_id before deleting users (handles manually-created users with different UUIDs)
   await dataSource.query(`UPDATE creator SET user_id = NULL WHERE user_id IN (SELECT id FROM "user" WHERE email IN ('demo-duda@aurora.internal','demo-carolina@aurora.internal'))`);
@@ -407,7 +409,9 @@ async function seed(): Promise<void> {
     INSERT INTO account (id, workspace_id, name, status, created_at, updated_at) VALUES
     ('${D.acctBella}',    '${D.wsBella}',    'Bella Natural Cosmeticos', 'active', now(), now()),
     ('${D.acctNovatech}', '${D.wsNovatech}', 'NovaTech Eletronicos',     'active', now(), now()),
-    ('${D.acctAgency}',   '${D.wsAgency}',   'Agencia Pulso Digital',    'active', now(), now())
+    ('${D.acctAgency}',   '${D.wsAgency}',   'Agencia Pulso Digital',    'active', now(), now()),
+    ('${D.acctAgencyBella}','${D.wsAgency}',  'Bella Natural Cosmeticos', 'active', now(), now()),
+    ('${D.acctAgencyNova}', '${D.wsAgency}',  'NovaTech Eletronicos',     'active', now(), now())
     ON CONFLICT (id) DO NOTHING
   `);
 
@@ -1130,8 +1134,8 @@ async function seed(): Promise<void> {
   // ── 39. Agency client access — Pulso Digital gerencia NovaTech ───────────
   await dataSource.query(`
     INSERT INTO operator_client_access (id, membership_id, account_id, created_at) VALUES
-    ('${D.operatorAccess}','${D.memAgency}','${D.acctNovatech}',now()),
-    ('${D.operatorAccessBella}','${D.memAgency}','${D.acctBella}',now())
+    ('${D.operatorAccess}','${D.memAgency}','${D.acctAgencyNova}',now()),
+    ('${D.operatorAccessBella}','${D.memAgency}','${D.acctAgencyBella}',now())
     ON CONFLICT (id) DO NOTHING
   `);
 
@@ -1151,11 +1155,11 @@ async function seed(): Promise<void> {
   console.log('  2 campanhas encerradas (Bella Q4 2026, BF NovaTech 2026)');
   console.log('  2 campaign templates');
   console.log('  13 pool members | 13 oportunidades | 4 briefings');
-  console.log('  10 submissoes | 3 Q&A threads (5 perguntas sem resposta AI)');
+  console.log('  9 submissoes | 3 Q&A threads (5 perguntas sem resposta AI)');
   console.log('  Safety: 2 flagged (fila), 1 pending, 7 passed');
   console.log('  2 performance aggregates + 2 reports (ready, ROI completo)');
   console.log('  2 invoices + 2 line items');
-  console.log('  8 payout obligations (6 settled + 2 owed para Duda e Carolina)');
+  console.log('  7 payout obligations (6 settled + 1 owed para Carolina)');
 }
 
 // ---------------------------------------------------------------------------
