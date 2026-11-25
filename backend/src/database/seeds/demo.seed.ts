@@ -600,14 +600,14 @@ async function seed(): Promise<void> {
     ('${D.sleBella1}','${D.slBella}','${D.campBella}','${D.crDuda}',    1, 0.8300,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
      'A taxa de engajamento de 8,3% de @dudamartins e seu nicho dedicado a beleza sustentavel estao diretamente alinhados com o publico-alvo de mulheres de 18 a 30 anos desta campanha de lancamento vegano.',
      false,now(),now()),
-    ('${D.sleBella2}','${D.slBella}','${D.campBella}','${D.crCarolina}',2, 0.6900,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
-     'O publico feminino e ativo de @carolinafit (24.100 seguidores, 6,1% de engajamento) representa uma oportunidade de ampliar o alcance da campanha para mulheres que valorizam produtos saudaveis e sustentaveis.',
-     false,now(),now()),
-    ('${D.sleBella3}','${D.slBella}','${D.campBella}','${D.crNaty}',    3, 0.7500,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
+    ('${D.sleBella2}','${D.slBella}','${D.campBella}','${D.crNaty}',    2, 0.7500,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
      'A especializacao de @natybeauty em beleza e skincare, com pontuacao de autenticidade de 83, oferece credibilidade natural para a recomendacao de um novo protetor solar vegano.',
      false,now(),now()),
-    ('${D.sleBella4}','${D.slBella}','${D.campBella}','${D.crMarina}',  4, 0.7100,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
+    ('${D.sleBella3}','${D.slBella}','${D.campBella}','${D.crMarina}',  3, 0.7100,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
      'A combinacao de saude e nutricao no conteudo de @marinasaude (10,1% de engajamento) ressoa com consumidoras que buscam produtos alinhados a um estilo de vida saudavel e consciente.',
+     false,now(),now()),
+    ('${D.sleBella4}','${D.slBella}','${D.campBella}','${D.crCarolina}',4, 0.6900,'["interests:beleza"]','system_ranked','approved','${D.userBella}',now(),true,
+     'O publico feminino e ativo de @carolinafit (24.100 seguidores, 6,1% de engajamento) representa uma oportunidade de ampliar o alcance da campanha para mulheres que valorizam produtos saudaveis e sustentaveis.',
      false,now(),now())
     ON CONFLICT (id) DO NOTHING
   `);
