@@ -244,28 +244,29 @@ export class ContentSubmissionService {
     this.logger.log(`[inline-t1] rulesetId=${rulesetId} accountId=${accountId} captionText=${!!submission.captionText} caption="${submission.captionText?.substring(0, 60)}"`);
     if (!submission.captionText) return false;
 
+    // Read rules bypassing RLS: the creator session has no account context,
+    // so we set it on a dedicated query runner before reading.
     let rules: SafetyRule[] = [];
-    if (rulesetId) {
-      rules = await this.ruleRepo.find({ where: { rulesetId } });
-    }
-    // Fallback: RLS may hide the ruleset from the creator's session context.
-    // Use a fresh connection with the account's context to read the rules.
-    if (!rules.length && accountId) {
-      const qr = this.dataSource.createQueryRunner();
-      try {
-        await qr.connect();
-        await qr.query(`SELECT set_config('app.current_account_id', $1, true)`, [accountId]);
-        const rows = await qr.query(
+    const qr = this.dataSource.createQueryRunner();
+    try {
+      await qr.connect();
+      await qr.query(`SELECT set_config('app.current_account_id', $1, false)`, [accountId]);
+      if (rulesetId) {
+        rules = await qr.query(
+          `SELECT * FROM safety_rule WHERE ruleset_id = $1`, [rulesetId],
+        );
+      }
+      if (!rules.length) {
+        rules = await qr.query(
           `SELECT r.* FROM safety_rule r
            JOIN safety_ruleset rs ON rs.id = r.ruleset_id
            WHERE rs.account_id = $1 AND rs.scope = 'brand'`,
           [accountId],
         );
-        rules = rows;
-        this.logger.log(`[inline-t1] fallback query found ${rules.length} rules for account ${accountId}`);
-      } finally {
-        await qr.release();
       }
+      this.logger.log(`[inline-t1] found ${rules.length} rules`);
+    } finally {
+      await qr.release();
     }
     if (!rules.length) return false;
 
@@ -278,13 +279,13 @@ export class ContentSubmissionService {
       .join(' ')
       .toLowerCase();
 
-    const triggers: { rule: SafetyRule; excerpt: string; channel: SafetyTriggerChannel }[] = [];
+    const triggers: { rule: any; excerpt: string; channel: SafetyTriggerChannel }[] = [];
     for (const rule of rules) {
       const def = typeof rule.definition === 'string' ? JSON.parse(rule.definition) : rule.definition;
       const keyword = (
         def.topic || def.pattern || def.competitor_name || ''
       ).toLowerCase();
-      this.logger.log(`[inline-t1] rule ${rule.id} type=${rule.ruleType} keyword="${keyword}" match=${keyword ? text.includes(keyword) : 'no-keyword'}`);
+      this.logger.log(`[inline-t1] rule ${rule.id} keyword="${keyword}" match=${keyword ? text.includes(keyword) : 'skip'}`);
       if (!keyword) continue;
       if (text.includes(keyword)) {
         triggers.push({ rule, excerpt: keyword, channel: SafetyTriggerChannel.CAPTION });
