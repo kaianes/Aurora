@@ -189,6 +189,7 @@ export class ContentSubmissionService {
     const inlineResolved = await this.tryInlineTier1Check(
       submission, check, rulesetId, campaign.accountId,
     );
+    this.logger.log(`[inline-t1] inlineResolved=${inlineResolved} for submission ${submission.id}`);
     if (!inlineResolved) {
       if (extractionNeeded) {
         await this.brandSafetyQueue.add('extract-content-channels', {
@@ -230,15 +231,19 @@ export class ContentSubmissionService {
 
   // ================= Inline tier-1 keyword fallback =================
 
+  private readonly logger = new (require('@nestjs/common').Logger)(ContentSubmissionService.name);
+
   private async tryInlineTier1Check(
     submission: ContentSubmission,
     check: SafetyCheck,
     rulesetId: string | null,
     accountId: string,
   ): Promise<boolean> {
+    this.logger.log(`[inline-t1] rulesetId=${rulesetId} captionText=${!!submission.captionText} caption="${submission.captionText?.substring(0, 60)}"`);
     if (!rulesetId || !submission.captionText) return false;
 
     const rules = await this.ruleRepo.find({ where: { rulesetId } });
+    this.logger.log(`[inline-t1] found ${rules.length} rules for ruleset ${rulesetId}`);
     if (!rules.length) return false;
 
     const text = [
@@ -256,6 +261,7 @@ export class ContentSubmissionService {
       const keyword = (
         def.topic || def.pattern || def.competitor_name || ''
       ).toLowerCase();
+      this.logger.log(`[inline-t1] rule ${rule.id} type=${rule.ruleType} keyword="${keyword}" match=${keyword ? text.includes(keyword) : 'no-keyword'}`);
       if (!keyword) continue;
       if (text.includes(keyword)) {
         triggers.push({ rule, excerpt: keyword, channel: SafetyTriggerChannel.CAPTION });
