@@ -4,10 +4,10 @@ import {
   UnprocessableEntityException,
   ForbiddenException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import {
   Campaign,
   CampaignOpportunity,
@@ -69,6 +69,8 @@ export class ContentSubmissionService {
     private ruleRepo: Repository<SafetyRule>,
     @InjectRepository(SafetyReviewQueueItem)
     private reviewQueueRepo: Repository<SafetyReviewQueueItem>,
+    @InjectDataSource()
+    private dataSource: DataSource,
     @InjectQueue('brand-safety')
     private brandSafetyQueue: Queue,
     private rulesetService: RulesetService,
@@ -247,16 +249,23 @@ export class ContentSubmissionService {
       rules = await this.ruleRepo.find({ where: { rulesetId } });
     }
     // Fallback: RLS may hide the ruleset from the creator's session context.
-    // Query rules via a raw SQL that bypasses RLS using the campaign's accountId.
+    // Use a fresh connection with the account's context to read the rules.
     if (!rules.length && accountId) {
-      const rows = await this.ruleRepo.query(
-        `SELECT r.* FROM safety_rule r
-         JOIN safety_ruleset rs ON rs.id = r.ruleset_id
-         WHERE rs.account_id = $1 AND rs.scope = 'brand'`,
-        [accountId],
-      );
-      rules = rows;
-      this.logger.log(`[inline-t1] fallback query found ${rules.length} rules for account ${accountId}`);
+      const qr = this.dataSource.createQueryRunner();
+      try {
+        await qr.connect();
+        await qr.query(`SELECT set_config('app.current_account_id', $1, true)`, [accountId]);
+        const rows = await qr.query(
+          `SELECT r.* FROM safety_rule r
+           JOIN safety_ruleset rs ON rs.id = r.ruleset_id
+           WHERE rs.account_id = $1 AND rs.scope = 'brand'`,
+          [accountId],
+        );
+        rules = rows;
+        this.logger.log(`[inline-t1] fallback query found ${rules.length} rules for account ${accountId}`);
+      } finally {
+        await qr.release();
+      }
     }
     if (!rules.length) return false;
 

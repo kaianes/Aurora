@@ -24,6 +24,7 @@ describe('ContentSubmissionService - US-16', () => {
   let triggerRepo: ReturnType<typeof mockRepo>;
   let ruleRepo: ReturnType<typeof mockRepo>;
   let reviewQueueRepo: ReturnType<typeof mockRepo>;
+  let mockDataSource: any;
   let queue: { add: ReturnType<typeof vi.fn> };
   let rulesetService: { resolveGoverningRulesetId: ReturnType<typeof vi.fn> };
   let auditService: { log: ReturnType<typeof vi.fn> };
@@ -36,6 +37,13 @@ describe('ContentSubmissionService - US-16', () => {
     triggerRepo = mockRepo();
     ruleRepo = mockRepo();
     reviewQueueRepo = mockRepo();
+    mockDataSource = {
+      createQueryRunner: vi.fn().mockReturnValue({
+        connect: vi.fn().mockResolvedValue(undefined),
+        query: vi.fn().mockResolvedValue([]),
+        release: vi.fn().mockResolvedValue(undefined),
+      }),
+    };
     queue = { add: vi.fn().mockResolvedValue(undefined) };
     rulesetService = { resolveGoverningRulesetId: vi.fn().mockResolvedValue('ruleset-1') };
     auditService = { log: vi.fn().mockResolvedValue(undefined) };
@@ -48,6 +56,7 @@ describe('ContentSubmissionService - US-16', () => {
       triggerRepo as any,
       ruleRepo as any,
       reviewQueueRepo as any,
+      mockDataSource as any,
       queue as any,
       rulesetService as any,
       auditService as any,
