@@ -16,8 +16,13 @@ import {
   ExtractionStatus,
   SafetyCheck,
   SafetyCheckStatus,
+  SafetyCheckTier,
   SafetyRuleTrigger,
+  SafetyTriggerChannel,
   SafetyRule,
+  SafetyReviewQueueItem,
+  ReviewReasonCategory,
+  ReviewItemStatus,
 } from '../database/entities';
 import { AuditService } from '../audit/audit.service';
 import { RulesetService } from './ruleset.service';
@@ -62,6 +67,8 @@ export class ContentSubmissionService {
     private triggerRepo: Repository<SafetyRuleTrigger>,
     @InjectRepository(SafetyRule)
     private ruleRepo: Repository<SafetyRule>,
+    @InjectRepository(SafetyReviewQueueItem)
+    private reviewQueueRepo: Repository<SafetyReviewQueueItem>,
     @InjectQueue('brand-safety')
     private brandSafetyQueue: Queue,
     private rulesetService: RulesetService,
@@ -175,16 +182,25 @@ export class ContentSubmissionService {
       }),
     );
 
-    if (extractionNeeded) {
-      await this.brandSafetyQueue.add('extract-content-channels', {
-        contentSubmissionId: submission.id,
-        safetyCheckId: check.id,
-      });
-    } else {
-      await this.brandSafetyQueue.add('run-safety-check', {
-        contentSubmissionId: submission.id,
-        safetyCheckId: check.id,
-      });
+    // Inline tier-1 keyword check: catch prohibited topics / restricted
+    // language / competitor mentions synchronously so the result is available
+    // on the first poll.  Falls back to the async queue when no rules match
+    // (tier-2 / extraction scenarios).
+    const inlineResolved = await this.tryInlineTier1Check(
+      submission, check, rulesetId, campaign.accountId,
+    );
+    if (!inlineResolved) {
+      if (extractionNeeded) {
+        await this.brandSafetyQueue.add('extract-content-channels', {
+          contentSubmissionId: submission.id,
+          safetyCheckId: check.id,
+        });
+      } else {
+        await this.brandSafetyQueue.add('run-safety-check', {
+          contentSubmissionId: submission.id,
+          safetyCheckId: check.id,
+        });
+      }
     }
 
     await this.auditService.log({
@@ -210,6 +226,77 @@ export class ContentSubmissionService {
       review_deadline_at: submission.reviewDeadlineAt ? submission.reviewDeadlineAt.toISOString() : null,
       poll_url: `/v1/safety/submissions/${submission.id}/check`,
     };
+  }
+
+  // ================= Inline tier-1 keyword fallback =================
+
+  private async tryInlineTier1Check(
+    submission: ContentSubmission,
+    check: SafetyCheck,
+    rulesetId: string | null,
+    accountId: string,
+  ): Promise<boolean> {
+    if (!rulesetId || !submission.captionText) return false;
+
+    const rules = await this.ruleRepo.find({ where: { rulesetId } });
+    if (!rules.length) return false;
+
+    const text = [
+      submission.captionText,
+      submission.onScreenText,
+      submission.audioTranscript,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    const triggers: { rule: SafetyRule; excerpt: string; channel: SafetyTriggerChannel }[] = [];
+    for (const rule of rules) {
+      const def = typeof rule.definition === 'string' ? JSON.parse(rule.definition) : rule.definition;
+      const keyword = (
+        def.topic || def.pattern || def.competitor_name || ''
+      ).toLowerCase();
+      if (!keyword) continue;
+      if (text.includes(keyword)) {
+        triggers.push({ rule, excerpt: keyword, channel: SafetyTriggerChannel.CAPTION });
+      }
+    }
+
+    if (!triggers.length) {
+      check.status = SafetyCheckStatus.PASSED;
+      check.tierReached = SafetyCheckTier.TIER1;
+      check.resolvedAt = new Date();
+      await this.checkRepo.save(check);
+      return true;
+    }
+
+    check.status = SafetyCheckStatus.FLAGGED;
+    check.tierReached = SafetyCheckTier.TIER1;
+    check.resolvedAt = new Date();
+    await this.checkRepo.save(check);
+
+    const triggerRows = triggers.map((t) =>
+      this.triggerRepo.create({
+        safetyCheckId: check.id,
+        ruleId: t.rule.id,
+        channel: t.channel,
+        matchedExcerpt: t.excerpt,
+        tier: SafetyCheckTier.TIER1,
+      }),
+    );
+    await this.triggerRepo.save(triggerRows);
+
+    await this.reviewQueueRepo.save(
+      this.reviewQueueRepo.create({
+        safetyCheckId: check.id,
+        campaignId: submission.campaignId,
+        contentSubmissionId: submission.id,
+        reasonCategory: ReviewReasonCategory.RULE_VIOLATION,
+        status: ReviewItemStatus.PENDING,
+      }),
+    );
+
+    return true;
   }
 
   // ================= US-16 scenario 2 / ADR-0022: check-status polling =================
