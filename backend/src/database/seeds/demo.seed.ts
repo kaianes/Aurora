@@ -296,6 +296,7 @@ async function checkAlreadySeeded(): Promise<boolean> {
 // ---------------------------------------------------------------------------
 async function teardown(): Promise<void> {
   console.log('[seed:demo] Removendo dados de seed existentes...');
+  await dataSource.query(`SET session_replication_role = 'replica'`);
   const D = IDS;
   const campIds = `'${D.campBella}','${D.campNovatech}','${D.campBellaQ4}','${D.campNovaBF}'`;
 
@@ -380,6 +381,7 @@ async function teardown(): Promise<void> {
   // Delete by email to cover any UUID mismatch from manually-created accounts
   await dataSource.query(`DELETE FROM "user" WHERE email IN ('demo-bella@aurora.internal','demo-novatech@aurora.internal','demo-agencia@aurora.internal','demo-duda@aurora.internal','demo-carolina@aurora.internal')`);
 
+  await dataSource.query(`SET session_replication_role = 'origin'`);
   console.log('[seed:demo] Teardown concluido.');
 }
 
