@@ -271,7 +271,8 @@ const IDS = {
   templateNovatech: dId('template:novatech-lancamento'),
 
   // ── Agency client access ───────────────────────────────────────────────
-  operatorAccess:  dId('operator-access:agencia-novatech'),
+  operatorAccess:      dId('operator-access:agencia-novatech'),
+  operatorAccessBella: dId('operator-access:agencia-bella'),
 
   // ── Content review decisions ──────────────────────────────────────────
   reviewDecDuda:   dId('review-dec:bella-duda'),
@@ -352,7 +353,7 @@ async function teardown(): Promise<void> {
   await dataSource.query(`DELETE FROM campaign_template WHERE id IN ('${D.templateBella}','${D.templateNovatech}')`);
 
   // Operator client access
-  await dataSource.query(`DELETE FROM operator_client_access WHERE id = '${D.operatorAccess}'`);
+  await dataSource.query(`DELETE FROM operator_client_access WHERE id IN ('${D.operatorAccess}','${D.operatorAccessBella}')`);
 
   // Memberships / accounts / workspaces / users
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
@@ -1146,10 +1147,11 @@ async function seed(): Promise<void> {
     ON CONFLICT (id) DO NOTHING
   `);
 
-  // ── 39. Agency client access — Pulso Digital gerencia NovaTech ───────────
+  // ── 39. Agency client access — Pulso Digital gerencia NovaTech + Bella ───
   await dataSource.query(`
     INSERT INTO operator_client_access (id, membership_id, account_id, created_at) VALUES
-    ('${D.operatorAccess}','${D.memAgency}','${D.acctNovatech}',now())
+    ('${D.operatorAccess}','${D.memAgency}','${D.acctNovatech}',now()),
+    ('${D.operatorAccessBella}','${D.memAgency}','${D.acctBella}',now())
     ON CONFLICT (id) DO NOTHING
   `);
 
