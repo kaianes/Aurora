@@ -30,9 +30,28 @@ export function ClientsPage() {
 
   const isAdmin = currentRole ? canManageClients(currentRole) : false;
 
+  // Demo mock: hardcoded client list for TCC presentation
   const { data, isLoading, error: fetchError } = useQuery({
     queryKey: ['agency-clients'],
-    queryFn: () => agencyApi.listClients(),
+    queryFn: async () => ({
+      data: [
+        {
+          id: 'demo-bella',
+          name: 'Bella Cosméticos',
+          status: 'active',
+          brand_profile_status: 'complete',
+          created_at: '2026-09-15T10:00:00Z',
+        },
+        {
+          id: 'demo-novatech',
+          name: 'NovaTech',
+          status: 'active',
+          brand_profile_status: 'draft',
+          created_at: '2026-10-02T14:30:00Z',
+        },
+      ],
+      limits: { used: 2, max: 10 },
+    }),
   });
 
   const {
