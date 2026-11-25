@@ -357,9 +357,23 @@ async function teardown(): Promise<void> {
   // Operator client access
   await dataSource.query(`DELETE FROM operator_client_access WHERE id IN ('${D.operatorAccess}','${D.operatorAccessBella}')`);
 
+  // Clean up any extra campaigns referencing demo accounts (created outside seed)
+  const demoAcctIds = `'${D.acctBella}','${D.acctNovatech}','${D.acctAgency}','${D.acctAgencyBella}','${D.acctAgencyNova}'`;
+  const extraCampSub = `(SELECT id FROM campaign WHERE account_id IN (${demoAcctIds}) AND id NOT IN (${campIds}))`;
+  await dataSource.query(`DELETE FROM safety_review_queue_item WHERE safety_check_id IN (SELECT id FROM safety_check WHERE campaign_id IN ${extraCampSub})`);
+  await dataSource.query(`DELETE FROM safety_rule_trigger WHERE safety_check_id IN (SELECT id FROM safety_check WHERE campaign_id IN ${extraCampSub})`);
+  await dataSource.query(`DELETE FROM safety_check WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM payout_obligation WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM content_review_decision WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM content_submission_metric_snapshot WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM content_submission WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM campaign_opportunity WHERE campaign_id IN ${extraCampSub}`);
+  await dataSource.query(`DELETE FROM campaign WHERE account_id IN (${demoAcctIds}) AND id NOT IN (${campIds})`);
+
   // Memberships / accounts / workspaces / users
   await dataSource.query(`DELETE FROM membership WHERE id IN ('${D.memBella}','${D.memNovatech}','${D.memAgency}')`);
-  await dataSource.query(`DELETE FROM account WHERE id IN ('${D.acctBella}','${D.acctNovatech}','${D.acctAgency}','${D.acctAgencyBella}','${D.acctAgencyNova}')`);
+  await dataSource.query(`DELETE FROM account WHERE id IN (${demoAcctIds})`);
+
   await dataSource.query(`DELETE FROM workspace WHERE id IN ('${D.wsBella}','${D.wsNovatech}','${D.wsAgency}')`);
   // Unlink creator.user_id before deleting users (handles manually-created users with different UUIDs)
   await dataSource.query(`UPDATE creator SET user_id = NULL WHERE user_id IN (SELECT id FROM "user" WHERE email IN ('demo-duda@aurora.internal','demo-carolina@aurora.internal'))`);
